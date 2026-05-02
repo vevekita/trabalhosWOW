@@ -7,20 +7,21 @@ from copy import deepcopy
 @dataclass
 class chave:
     valor: int
+
 class no:
     def __init__(self, x:chave):
         self.dado: chave = x
         self.prox: no | None = None
-
-    def vazia(self):
-        '''Verifica se a lista está vazia.
-        False'''
-        return self.primeiro == None
     
 class lista:
     def __init__(self):
         self.primeiro: no | None = None
         self.ultimo: no | None = None
+
+    def vazia(self):
+        '''Verifica se a lista está vazia.
+        False'''
+        return self.primeiro == None
     
     def busca(self, chave:int) -> no:
         '''Busca um número na lista pela chave. Se ele não estiver na lista,
@@ -60,8 +61,8 @@ def cria_ind(nome_arq_entrada: str):
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
     list_chave_prim = [] #lista da chave primária
-    list_chave_gen = [tuple[str, lista()]]  #lista da chave secundária: gênero
-    list_chave_pub = [tuple[str, lista()]] #lista da chave secundária: publicadora
+    list_chave_gen = []  #lista da chave secundária: gênero
+    list_chave_pub = [] #lista da chave secundária: publicadora
     with open(nome_arq_entrada, 'rb') as entrada:
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
@@ -71,17 +72,35 @@ def cria_ind(nome_arq_entrada: str):
             reg_str = reg.decode()
             campos = reg_str.split(sep='|')
             id = campos[0]
-            list_chave_prim.append(int(id), offset)
-            encontrado = False
+            genero = campos[3]
+            publicadora = campos[4]
+            list_chave_prim.append((int(id), offset))
+            
+            #parte da criação dos índices do gênero
+            genero_encontrado = False
             n = 0
-            while n < len(list_chave_gen) and encontrado == False:
-                if campos[3] == list_chave_gen[n][0]:
-                    list_chave_gen[n][1].insere_fim(chave(int(id)))
-                    encontrado = True
+            while n < len(list_chave_gen) and genero_encontrado == False:
+                if genero == list_chave_gen[n][0]:
+                    list_chave_gen[n][1].insere_fim(int(id))
+                    genero_encontrado = True
                 n += 1
-            if encontrado == False:
-                list_chave_gen[]
-                list_chave_gen[n][1].insere_fim(chave(int(id)))
+            if genero_encontrado == False:
+                nova_lista = lista()
+                nova_lista.insere_fim(chave(int(id)))
+                list_chave_gen.append([genero, nova_lista])
+
+            #parte da criação dos índices de publicadora
+            publicadora_encontrada = False
+            m = 0
+            while m < len(list_chave_pub) and publicadora_encontrada == False:
+                if publicadora == list_chave_pub[m][0]:
+                    list_chave_pub[m][1].insere_fim(int(id))
+                    publicadora_encontrada = True
+                m += 1
+            if publicadora_encontrada == False:
+                nova_lista_pub = lista()
+                nova_lista_pub.insere_fim(chave(int(id)))
+                list_chave_pub.append([publicadora, nova_lista_pub])
                 
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
