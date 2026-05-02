@@ -60,8 +60,8 @@ def cria_ind(nome_arq_entrada: str):
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
     list_chave_prim = [] #lista da chave primária
-    list_chave_gen = [] #lista da chave secundária: gênero
-    list_chave_pub = [] #lista da chave secundária: publicadora
+    list_chave_gen = [tuple[str, lista()]]  #lista da chave secundária: gênero
+    list_chave_pub = [tuple[str, lista()]] #lista da chave secundária: publicadora
     with open(nome_arq_entrada, 'rb') as entrada:
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
@@ -72,7 +72,17 @@ def cria_ind(nome_arq_entrada: str):
             campos = reg_str.split(sep='|')
             id = campos[0]
             list_chave_prim.append(int(id), offset)
-            for 
+            encontrado = False
+            n = 0
+            while n < len(list_chave_gen) and encontrado == False:
+                if campos[3] == list_chave_gen[n][0]:
+                    list_chave_gen[n][1].insere_fim(chave(int(id)))
+                    encontrado = True
+                n += 1
+            if encontrado == False:
+                list_chave_gen[]
+                list_chave_gen[n][1].insere_fim(chave(int(id)))
+                
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
         
