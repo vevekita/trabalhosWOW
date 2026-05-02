@@ -59,24 +59,23 @@ def cria_ind(nome_arq_entrada: str):
     lidos em separações diferentes dependendo a partir
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
-    registros = []
-    list_chave_gen = lista()
-    list_chave_prod = lista()
+    list_chave_prim = [] #lista da chave primária
+    list_chave_gen = lista() #lista da chave secundária: gênero
+    list_chave_pub = lista() #lista da chave secundária: publicadora
     with open(nome_arq_entrada, 'rb') as entrada:
-        offset = 0
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
+            offset = entrada.tell()
             reg = entrada.read(tam_int)
             reg_str = reg.decode()
             campos = reg_str.split(sep='|')
-            campos[0] = int(campos[0])
-            campos.pop() #elimina o último campo criado pelo split('|'), já que cada bloco termina com '|'
-            registros.append(campos)
-            offset = offset + tam_int + 2
+            id = campos[0]
+            list_chave_prim.append(int(id), offset)
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
-        print(registros)
+        
+
 def main():
     if len(argv) < 2:
         raise TypeError('Número incorreto de argumentos\nModo de uso: nome_arq_entrada nome_arq_saida')
