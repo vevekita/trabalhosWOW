@@ -55,11 +55,12 @@ class lista:
         else:
             return False
     
-def cria_ind(nome_arq_entrada: str):
+def constroi_indices():
     '''Lê o aquivo de entrada e adiciona os registros
     lidos em separações diferentes dependendo a partir
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
+    nome_arq_entrada = "games.dat" #coloquei aqui porque o arquivo vai ser fixo "games.dat", daí pra não precisar receber um arquivo por parâmetro
     list_chave_prim = [] #lista da chave primária
     list_chave_gen = []  #lista da chave secundária: gênero
     list_chave_pub = [] #lista da chave secundária: publicadora
@@ -103,15 +104,22 @@ def cria_ind(nome_arq_entrada: str):
                 list_chave_pub.append([publicadora, nova_lista_pub])
                 
             tam_bytes = entrada.read(2)
-            tam_int = int.from_bytes(tam_bytes, "little")
-        
+            tam_int = int.from_bytes(tam_bytes, 'little')
 
 def main():
     if len(argv) < 2:
-        raise TypeError('Número incorreto de argumentos\nModo de uso: nome_arq_entrada nome_arq_saida')
-    cria_ind(argv[1])
+        raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py [ -b | -e arquivo_operacoes | -c')
+    
+    flag = argv[1]
 
-
-
+    if flag == "-b":
+        constroi_indices()
+    elif flag == "-e":
+        if len(argv) < 3:
+            raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py -e arquivo_operacoes')
+        #executar_operacoes()
+    elif flag == "-c":
+        # compactar()
+        pass
 if __name__ == '__main__':
     main()
