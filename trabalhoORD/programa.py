@@ -65,6 +65,7 @@ def cria_lista(nome_arq_entrada: str):
     list #lista da chave secundária: gênero
     list_chave_pub:list[tuple[str, lista]] = [] #lista da chave secundária: publicadora
     lista_invertida:list[list] = [] #lista invertida
+    posicao_reg = 0
     with open(nome_arq_entrada, 'rb') as entrada:
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
@@ -89,7 +90,7 @@ def cria_lista(nome_arq_entrada: str):
             if genero_encontrado == False:
                 nova_lista_gen = lista()
                 nova_lista_gen.insere_fim(chave(int(id)))
-                list_chave_gen.append([genero, nova_lista_gen.primeiro.dado.valor])
+                list_chave_gen.append([genero, posicao_reg])
 
             #parte da criação dos índices de publicadora
             publicadora_encontrada = False
@@ -102,9 +103,11 @@ def cria_lista(nome_arq_entrada: str):
             if publicadora_encontrada == False:
                 nova_lista_pub = lista()
                 nova_lista_pub.insere_fim(chave(int(id)))
-                list_chave_pub.append([publicadora, nova_lista_pub.primeiro.dado.valor])
+                list_chave_pub.append([publicadora, posicao_reg])
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
+            posicao_reg += 1
+        
         #próximo passo: fazer a lista invertida
         elementos: list = []
         elem_gen = 0
