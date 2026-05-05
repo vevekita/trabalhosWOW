@@ -61,9 +61,10 @@ def cria_lista(nome_arq_entrada: str):
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
     list_chave_prim:list[tuple] = [] #lista da chave primária
-    list_chave_gen:list[tuple[str, lista]] = []  #lista da chave secundária: gênero
-    list #lista da chave secundária: gênero
-    list_chave_pub:list[tuple[str, lista]] = [] #lista da chave secundária: publicadora
+    list_chave_gen:list[tuple[str, int]] = []  #lista da chave secundária: gênero
+    list_chave_pub:list[tuple[str, int]] = [] #lista da chave secundária: publicadora
+    list_encadeadas_gen: list[tuple[str, lista]] = [] #lista contendo indentificador "genero" e lista encadeada com as posições dos jogos associados
+    list_encadeadas_pub: list[tuple[str, lista]] = [] #lista contendo indentificador "genero" e lista encadeada com as posições dos jogos associados
     lista_invertida:list[list] = [] #lista invertida
     posicao_reg = 0
     with open(nome_arq_entrada, 'rb') as entrada:
@@ -82,36 +83,48 @@ def cria_lista(nome_arq_entrada: str):
             #parte da criação dos índices do gênero
             genero_encontrado = False
             n = 0
-            while n < len(list_chave_gen) and genero_encontrado == False:
-                if genero == list_chave_gen[n][0]:
-                    nova_lista_gen.insere_fim(chave(int(id)))
+            while n < len(list_encadeadas_gen) and genero_encontrado == False:
+                if genero == list_encadeadas_gen[n][0]:
+                    list_encadeadas_gen[n][1].insere_fim(chave(posicao_reg))
                     genero_encontrado = True
                 n += 1
             if genero_encontrado == False:
                 nova_lista_gen = lista()
-                nova_lista_gen.insere_fim(chave(int(id)))
+                nova_lista_gen.insere_fim(chave(posicao_reg)) #ao invés de insere_fim(chave(int(id))). Seu eu fizer isso, a lista encadeada vira
+                list_encadeadas_gen.append([genero, nova_lista_gen])
                 list_chave_gen.append([genero, posicao_reg])
 
             #parte da criação dos índices de publicadora
             publicadora_encontrada = False
             m = 0
-            while m < len(list_chave_pub) and publicadora_encontrada == False:
-                if publicadora == list_chave_pub[m][0]:
-                    nova_lista_pub.insere_fim(chave(int(id)))
+            while m < len(list_encadeadas_pub) and publicadora_encontrada == False:
+                if publicadora == list_encadeadas_pub[m][0]:
+                    list_encadeadas_pub[m][1].insere_fim(chave(posicao_reg))
                     publicadora_encontrada = True
                 m += 1
             if publicadora_encontrada == False:
                 nova_lista_pub = lista()
-                nova_lista_pub.insere_fim(chave(int(id)))
+                nova_lista_pub.insere_fim(chave(posicao_reg))
+                list_encadeadas_pub.append([publicadora, nova_lista_pub])
                 list_chave_pub.append([publicadora, posicao_reg])
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
+            
+
+            proximo_gen = -1
+            proximo_pub = -1
+            a = 0
+            while a < len(lista_invertida):
+                no_atual_gen = list_encadeadas_gen[a][1].busca(chave(posicao_reg)) #determina o nó onde se encontra o  registro na lista encadeada de gênero
+                no_atual_pub = list_encadeadas_pub[a][1].busca(chave(posicao_reg)) #determina o nó onde se encontra o  registro na lista encadeada de publicador
+                if no_atual_gen != None:
+                    proximo_gen = no_atual_gen.prox.dado.valor
+                if no_atual_pub != None:
+                    proximo_pub = no_atual_pub.prox.dado.valor
+                lista_invertida.append([int(id), proximo_gen, proximo_pub])
+
             posicao_reg += 1
         
-        #próximo passo: fazer a lista invertida
-        elementos: list = []
-        elem_gen = 0
-        elem_pub = 0
         # for elem in list_chave_prim:
         #     id = elem[0]
         #     elementos.append(id)
@@ -134,10 +147,15 @@ def cria_lista(nome_arq_entrada: str):
             #     elem_pub += 1
             # lista_invertida.append(elementos)
         list_chave_prim.sort()
-    # print(lista_invertida)
-    # print(list_chave_prim)
+    list_chave_gen.sort()
+    #print(lista_invertida)
+    print('--------------------')
+    print(list_chave_prim)
+    print('--------------------')
     print(list_chave_pub)
-    print(list_chave_gen)                    
+    print('--------------------')
+    print(list_chave_gen)      
+           
                 
 def main():
     if len(argv) < 2:
