@@ -83,26 +83,26 @@ def cria_lista(nome_arq_entrada: str):
             n = 0
             while n < len(list_chave_gen) and genero_encontrado == False:
                 if genero == list_chave_gen[n][0]:
-                    list_chave_gen[n][1].insere_fim(chave(int(id)))
+                    nova_lista_gen.insere_fim(chave(int(id)))
                     genero_encontrado = True
                 n += 1
             if genero_encontrado == False:
-                nova_lista = lista()
-                nova_lista.insere_fim(chave(int(id)))
-                list_chave_gen.append([genero, nova_lista])
+                nova_lista_gen = lista()
+                nova_lista_gen.insere_fim(chave(int(id)))
+                list_chave_gen.append([genero, nova_lista_gen.primeiro.dado.valor])
 
             #parte da criação dos índices de publicadora
             publicadora_encontrada = False
             m = 0
             while m < len(list_chave_pub) and publicadora_encontrada == False:
                 if publicadora == list_chave_pub[m][0]:
-                    list_chave_pub[m][1].insere_fim(chave(int(id)))
+                    nova_lista_pub.insere_fim(chave(int(id)))
                     publicadora_encontrada = True
                 m += 1
             if publicadora_encontrada == False:
                 nova_lista_pub = lista()
                 nova_lista_pub.insere_fim(chave(int(id)))
-                list_chave_pub.append([publicadora, nova_lista_pub])
+                list_chave_pub.append([publicadora, nova_lista_pub.primeiro.dado.valor])
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
         #próximo passo: fazer a lista invertida
