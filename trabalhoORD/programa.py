@@ -107,48 +107,32 @@ def cria_lista(nome_arq_entrada: str):
                 nova_lista_pub.insere_fim(chave(posicao_reg))
                 list_encadeadas_pub.append([publicadora, nova_lista_pub])
                 list_chave_pub.append([publicadora, posicao_reg])
+                
+            posicao_reg += 1
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
-            
 
+        for a in range(posicao_reg): #criação da lista invertida
             proximo_gen = -1
             proximo_pub = -1
-            a = 0
-            while a < len(lista_invertida):
-                no_atual_gen = list_encadeadas_gen[a][1].busca(chave(posicao_reg)) #determina o nó onde se encontra o  registro na lista encadeada de gênero
-                no_atual_pub = list_encadeadas_pub[a][1].busca(chave(posicao_reg)) #determina o nó onde se encontra o  registro na lista encadeada de publicador
-                if no_atual_gen != None:
-                    proximo_gen = no_atual_gen.prox.dado.valor
-                if no_atual_pub != None:
+            id_atual = list_chave_prim[a][0]
+            b = 0
+            c = 0
+            while b < len(list_encadeadas_gen):
+                no_atual_gen = list_encadeadas_gen[b][1].busca(a)
+                if no_atual_gen and no_atual_gen.prox:
+                    proximo_gen = no_atual_gen.prox.dado.valor #determina o nó onde se encontra o  registro na lista encadeada de gênero
+                b += 1
+            while c < len(list_encadeadas_pub):
+                no_atual_pub = list_encadeadas_pub[c][1].busca(a) #determina o nó onde se encontra o  registro na lista encadeada de publicador
+                if no_atual_pub and no_atual_pub.prox:
                     proximo_pub = no_atual_pub.prox.dado.valor
-                lista_invertida.append([int(id), proximo_gen, proximo_pub])
+                c += 1
+            lista_invertida.append([id_atual, proximo_gen, proximo_pub])
 
-            posicao_reg += 1
-        
-        # for elem in list_chave_prim:
-        #     id = elem[0]
-        #     elementos.append(id)
-
-        #     while elem_gen < len(list_chave_gen):
-        #         id_procurado_gen = list_chave_gen[elem_gen][1].busca(chave(id))
-            #     if id_procurado_gen != None:
-            #         if id_procurado_gen.prox != None:
-            #             elementos.append(id_procurado_gen.prox.dado.valor)
-            #         else:
-            #             elementos.append(-1)
-            #     elem_gen += 1
-            # while elem_pub < len(list_chave_pub):
-            #     id_procurado_pub = list_chave_pub[elem_pub][1].busca(chave(id))
-            #     if id_procurado_pub != None:
-            #         if id_procurado_pub.prox != None:
-            #             elementos.append(id_procurado_pub.prox.dado.valor)
-            #         else:
-            #             elementos.append(-1)
-            #     elem_pub += 1
-            # lista_invertida.append(elementos)
         list_chave_prim.sort()
     list_chave_gen.sort()
-    #print(lista_invertida)
+    print(lista_invertida)
     print('--------------------')
     print(list_chave_prim)
     print('--------------------')
