@@ -140,19 +140,22 @@ def cria_lista(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: str, nom
             elem_p = pack('2i', prim[0], prim[1])
             primario.write(elem_p)
     
-    # with open(nome_arq_gen, 'wb') as genero:
-    #     for gen in list_chave_gen:
-    #         elem_g = pack('2i')
+    with open(nome_arq_gen, 'wb') as genero:
+        for gen in list_chave_gen:
+            gen_bytes = gen[0].encode()
+            elem_g = pack('50si', gen_bytes, gen[1])
+            genero.write(elem_g)
 
-  
-    print(lista_invertida)
-    print('--------------------')
-    print(list_chave_prim)
-    print('--------------------')
-    print(list_chave_pub)
-    print('--------------------')
-    print(list_chave_gen)      
-           
+    with open(nome_arq_pub, 'wb') as publicadora:
+        for pub in list_chave_pub:
+            pub_bytes = pub[0].encode()
+            elem_pb = pack('50si', pub_bytes, pub[1])
+            publicadora.write(elem_pb)
+
+    with open(nome_arq_list, 'wb') as lista_inv:
+        for lst in lista_invertida:
+            elem_lst = pack('3i', lst[0], lst[1], lst[2])
+            lista_inv.write(elem_lst)           
                 
 def main():
     if len(argv) < 2:
