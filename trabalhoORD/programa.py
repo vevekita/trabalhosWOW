@@ -55,7 +55,7 @@ class lista:
         else:
             return False
     
-def cria_lista(nome_arq_entrada: str):
+def cria_lista(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: str, nome_arq_pub: str, nome_arq_list: str):
     '''Lê o aquivo de entrada e adiciona os registros
     lidos em separações diferentes dependendo a partir
     de chaves (1 primária - id e 2 secundárias - gênero 
@@ -112,7 +112,8 @@ def cria_lista(nome_arq_entrada: str):
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
 
-        for a in range(posicao_reg): #criação da lista invertida
+        #criação da lista invertida
+        for a in range(posicao_reg):
             proximo_gen = -1
             proximo_pub = -1
             id_atual = list_chave_prim[a][0]
@@ -129,9 +130,21 @@ def cria_lista(nome_arq_entrada: str):
                     proximo_pub = no_atual_pub.prox.dado.valor
                 c += 1
             lista_invertida.append([id_atual, proximo_gen, proximo_pub])
-
-        list_chave_prim.sort()
+        
+    list_chave_prim.sort()
     list_chave_gen.sort()
+    list_chave_pub.sort()
+
+    with open(nome_arq_prim, 'wb') as primario:
+        for prim in list_chave_prim:
+            elem_p = pack('2i', prim[0], prim[1])
+            primario.write(elem_p)
+    
+    # with open(nome_arq_gen, 'wb') as genero:
+    #     for gen in list_chave_gen:
+    #         elem_g = pack('2i')
+
+  
     print(lista_invertida)
     print('--------------------')
     print(list_chave_prim)
@@ -144,7 +157,7 @@ def cria_lista(nome_arq_entrada: str):
 def main():
     if len(argv) < 2:
         raise TypeError('Número incorreto de argumentos\nModo de uso: nome_arq_entrada nome_arq_saida')
-    cria_lista(argv[1])
+    cria_lista(argv[1], 'primario.ind', 'genero.ind', 'publicadora.ind', 'listaInvertida.lst')
 
 
 
