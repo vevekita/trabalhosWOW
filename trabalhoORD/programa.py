@@ -155,7 +155,23 @@ def constroi_indices():
     with open('listaInvertida.lst', 'wb') as lista_inv:
         for lst in lista_invertida:
             elem_lst = pack('3i', lst[0], lst[1], lst[2])
-            lista_inv.write(elem_lst)           
+            lista_inv.write(elem_lst)    
+
+#busca do índice primário
+def busca_prim(nome_arq_prim: str, nome_arq: str, id: int):
+    ''' O arquivo de índices primários é aberto e é percorrido em procura de
+    determinado índice. A partir do byte-offset encontrado no índice, 
+    percoremos o arquivo *games.dat* buscando o registro do parâmetro *id*.'''
+    lista_prim: list = []
+    with open('primario.ind', 'rb') as primario:
+        id_bytes = primario.read('i')
+        byte_offset = primario.read('i')
+        while id_bytes:
+            id_int = unpack('i', id_bytes)
+            offset = unpack('i', byte_offset)
+            lista_prim.append([id_int, byte_offset])
+            #ainda não terminado
+
                 
 def main():
     if len(argv) < 2:
