@@ -55,11 +55,12 @@ class lista:
         else:
             return False
     
-def cria_lista(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: str, nome_arq_pub: str, nome_arq_list: str):
+def constroi_indices(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: str, nome_arq_pub: str, nome_arq_list: str):
     '''Lê o aquivo de entrada e adiciona os registros
     lidos em separações diferentes dependendo a partir
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
+    nome_arq_entrada = 'games.dat'
     list_chave_prim:list[tuple] = [] #lista da chave primária
     list_chave_gen:list[tuple[str, int]] = []  #lista da chave secundária: gênero
     list_chave_pub:list[tuple[str, int]] = [] #lista da chave secundária: publicadora
@@ -159,10 +160,18 @@ def cria_lista(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: str, nom
                 
 def main():
     if len(argv) < 2:
-        raise TypeError('Número incorreto de argumentos\nModo de uso: nome_arq_entrada nome_arq_saida')
-    cria_lista(argv[1], 'primario.ind', 'genero.ind', 'publicadora.ind', 'listaInvertida.lst')
+        raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py [ -b | -e arquivo_operacoes | -c')
+    
+    flag = argv[1]
 
-
-
+    if flag == "-b":
+        constroi_indices()
+    elif flag == "-e":
+        if len(argv) < 3:
+            raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py -e arquivo_operacoes')
+        #executar_operacoes()
+    elif flag == "-c":
+        # compactar()
+        pass
 if __name__ == '__main__':
     main()
