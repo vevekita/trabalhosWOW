@@ -156,6 +156,54 @@ def constroi_indices():
         for lst in lista_invertida:
             elem_lst = pack('3i', lst[0], lst[1], lst[2])
             lista_inv.write(elem_lst)    
+def carregar_indices():
+    # verifica se todos os arquivos existem
+    try:
+        open('primario.ind', 'rb').close()
+        open('genero.ind', 'rb').close()
+        open('publicadora.ind', 'rb').close()
+        open('listaInvertida.lst', 'rb').close()
+        open('games.dat', 'rb').close()
+    except FileNotFoundError as e:
+        print(f"Erro: arquivo não encontrado. Execute -b primeiro.")
+        sys.exit(1)
+
+    list_chave_prim = []
+    list_chave_gen = []
+    list_chave_pub = []
+    lista_invertida = []
+    with open('primario.ind', 'rb') as primario:
+        reg = primario.read(8)
+        while reg:
+            tupla = unpack('2i', reg)
+            list_chave_prim.append(tupla)
+            reg = primario.read(calcsize('2i'))
+
+    with open('genero.ind', 'rb') as genero:
+        reg = genero.read(calcsize('50si'))
+        while reg:
+            tupla = unpack('50si', reg)
+            chave = tupla[0].split(b'\x00')[0].decode() #retira os bytes nulos
+            list_chave_gen.append((chave, tupla[1]))
+            reg = genero.read(calcsize('50si'))
+
+    with open('publicadora.ind', 'rb') as publicadora:
+        reg = publicadora.read(calcsize('50si'))
+        while reg:
+            tupla = unpack('50si', reg)
+            chave = tupla[0].split(b'\x00')[0].decode() #retira os bytes nulos
+            list_chave_pub.append((chave, tupla[1]))
+            reg = publicadora.read(calcsize('50si'))
+    
+    with open('listaInvertida.lst', 'rb') as lista_inv:
+        reg = lista_inv.read(12)
+        while reg:
+            tupla = unpack('3i', reg)
+            lista_invertida.append(tupla)
+            reg = lista_inv.read(calcsize('3i'))
+
+    return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida
+
 
 #busca do índice primário
 def busca_prim(nome_arq_prim: str, nome_arq: str, id: int):
