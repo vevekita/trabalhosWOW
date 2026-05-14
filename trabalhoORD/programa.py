@@ -156,6 +156,8 @@ def constroi_indices():
         for lst in lista_invertida:
             elem_lst = pack('3i', lst[0], lst[1], lst[2])
             lista_inv.write(elem_lst)    
+
+
 def carregar_indices():
     # verifica se todos os arquivos existem
     try:
