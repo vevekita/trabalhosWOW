@@ -55,12 +55,11 @@ class lista:
         else:
             return False
     
-def constroi_indices(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: str, nome_arq_pub: str, nome_arq_list: str):
+def constroi_indices():
     '''Lê o aquivo de entrada e adiciona os registros
     lidos em separações diferentes dependendo a partir
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
-    nome_arq_entrada = 'games.dat'
     list_chave_prim:list[tuple] = [] #lista da chave primária
     list_chave_gen:list[tuple[str, int]] = []  #lista da chave secundária: gênero
     list_chave_pub:list[tuple[str, int]] = [] #lista da chave secundária: publicadora
@@ -68,7 +67,7 @@ def constroi_indices(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: st
     list_encadeadas_pub: list[tuple[str, lista]] = [] #lista contendo indentificador "genero" e lista encadeada com as posições dos jogos associados
     lista_invertida:list[list] = [] #lista invertida
     posicao_reg = 0
-    with open(nome_arq_entrada, 'rb') as entrada:
+    with open('games.dat', 'rb') as entrada:
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
@@ -136,24 +135,24 @@ def constroi_indices(nome_arq_entrada: str, nome_arq_prim: str, nome_arq_gen: st
     list_chave_gen.sort()
     list_chave_pub.sort()
 
-    with open(nome_arq_prim, 'wb') as primario:
+    with open('primario.ind', 'wb') as primario:
         for prim in list_chave_prim:
             elem_p = pack('2i', prim[0], prim[1])
             primario.write(elem_p)
     
-    with open(nome_arq_gen, 'wb') as genero:
+    with open('genero.ind', 'wb') as genero:
         for gen in list_chave_gen:
             gen_bytes = gen[0].encode()
             elem_g = pack('50si', gen_bytes, gen[1])
             genero.write(elem_g)
 
-    with open(nome_arq_pub, 'wb') as publicadora:
+    with open('publicadora.ind', 'wb') as publicadora:
         for pub in list_chave_pub:
             pub_bytes = pub[0].encode()
             elem_pb = pack('50si', pub_bytes, pub[1])
             publicadora.write(elem_pb)
 
-    with open(nome_arq_list, 'wb') as lista_inv:
+    with open('listaInvertida.lst', 'wb') as lista_inv:
         for lst in lista_invertida:
             elem_lst = pack('3i', lst[0], lst[1], lst[2])
             lista_inv.write(elem_lst)           
