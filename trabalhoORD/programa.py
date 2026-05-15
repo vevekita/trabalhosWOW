@@ -1,6 +1,6 @@
-from sys import argv
+from sys import argv, exit
 from struct import pack, unpack, calcsize
-import os
+import io
 from dataclasses import dataclass
 from copy import deepcopy
 
@@ -69,7 +69,7 @@ def constroi_indices():
     posicao_reg = 0
     with open('games.dat', 'rb') as entrada:
         tam_bytes = entrada.read(2)
-        tam_int = int.from_bytes(tam_bytes, 'little')
+        tam_int = unpack('h', tam_bytes)[0]
         while tam_int > 0:
             offset = entrada.tell()
             reg = entrada.read(tam_int)
@@ -157,8 +157,7 @@ def constroi_indices():
             elem_lst = pack('3i', lst[0], lst[1], lst[2])
             lista_inv.write(elem_lst)    
 
-
-def carregar_indices():
+def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], list[tuple[str,int]], list[tuple[int]]]:
     # verifica se todos os arquivos existem
     try:
         open('primario.ind', 'rb').close()
@@ -167,15 +166,14 @@ def carregar_indices():
         open('listaInvertida.lst', 'rb').close()
         open('games.dat', 'rb').close()
     except FileNotFoundError as e:
-        print(f"Erro: arquivo não encontrado. Execute -b primeiro.")
-        sys.exit(1)
+        print(f'Erro: {e}')
 
-    list_chave_prim = []
-    list_chave_gen = []
-    list_chave_pub = []
-    lista_invertida = []
+    list_chave_prim: list[tuple[int, int]] = []
+    list_chave_gen: list[tuple[str, int]] = []
+    list_chave_pub: list[tuple[str, int]] = []
+    lista_invertida: list[tuple[int]] = [] #acho que aqui tá errado rsrs
     with open('primario.ind', 'rb') as primario:
-        reg = primario.read(8)
+        reg = primario.read(calcsize('2i'))
         while reg:
             tupla = unpack('2i', reg)
             list_chave_prim.append(tupla)
@@ -185,44 +183,91 @@ def carregar_indices():
         reg = genero.read(calcsize('50si'))
         while reg:
             tupla = unpack('50si', reg)
-            chave = tupla[0].split(b'\x00')[0].decode() #retira os bytes nulos
-            list_chave_gen.append((chave, tupla[1]))
+            gen: bytes = tupla[0]
+            pos: int = tupla[1]
+            chave = gen.decode().split('\x00')[0] #retira os bytes nulos
+            list_chave_gen.append((chave, pos))
             reg = genero.read(calcsize('50si'))
 
     with open('publicadora.ind', 'rb') as publicadora:
         reg = publicadora.read(calcsize('50si'))
         while reg:
             tupla = unpack('50si', reg)
-            chave = tupla[0].split(b'\x00')[0].decode() #retira os bytes nulos
-            list_chave_pub.append((chave, tupla[1]))
+            gen: bytes = tupla[0]
+            pos: int = tupla[1]
+            chave = gen.decode().split('\x00')[0] #retira os bytes nulos
+            list_chave_pub.append((chave, pos))
             reg = publicadora.read(calcsize('50si'))
     
     with open('listaInvertida.lst', 'rb') as lista_inv:
-        reg = lista_inv.read(12)
+        reg = lista_inv.read(calcsize('3i'))
         while reg:
             tupla = unpack('3i', reg)
             lista_invertida.append(tupla)
             reg = lista_inv.read(calcsize('3i'))
 
     return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida
+        
+print(carregar_indices()) 
 
-
-#busca do índice primário
-def busca_prim(nome_arq_prim: str, nome_arq: str, id: int):
+def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str: 
     ''' O arquivo de índices primários é aberto e é percorrido em procura de
     determinado índice. A partir do byte-offset encontrado no índice, 
-    percoremos o arquivo *games.dat* buscando o registro do parâmetro *id*.'''
-    lista_prim: list = []
-    with open('primario.ind', 'rb') as primario:
-        id_bytes = primario.read('i')
-        byte_offset = primario.read('i')
-        while id_bytes:
-            id_int = unpack('i', id_bytes)
-            offset = unpack('i', byte_offset)
-            lista_prim.append([id_int, byte_offset])
-            #ainda não terminado
+    fazemos o acesso direto ao arquivo *games.dat* para o registro do *id*.'''
 
-                
+    n = 0
+    encontrado = False
+    offset = 0
+    registro = ''
+    while n < len(list_prim) and encontrado == False: #aqui não tá errado fazer assim, mas como a lista está ordenada, usando bb seria mais eficiente
+        if list_prim[n][0] == id: #Se o primeiro elemento do índice primário (posição) for igual ao id que está sendo usado de chave:
+            offset = list_prim[n][1]
+            encontrado = True #pra sair do while assim que encontrar, desse jeito ele funciona igual um for sem break
+        n += 1
+
+    if not encontrado:
+        print('Registro não encontrado!')
+        return ''
+    
+    with open('games.dat', 'rb') as arq:
+        arq.seek(offset)
+        tam_bytes = arq.read(2)
+        tam = int.from_bytes(tam_bytes, 'little')
+        reg = arq.read(tam).decode() #transforma o registro todo em string
+        registro = reg #LILI: precisamos fazer essa igualdade? siii
+
+    return registro
+
+def busca_genero(chave:str, lista_indice_genero: list[tuple[str, int]], lista_invertida: list[tuple[int, int, int]]):
+    pass
+
+def busca_publicadora(chave:str, lista_indice_pub: list[tuple[str, int]], lista_invertida: list[tuple[int, int, int]]):
+    pass
+
+def insercao(registro: str):
+    pass
+
+def remocao():
+    pass
+
+def executar_operacoes(arq_operacoes: str):
+    indices = carregar_indices()
+    list_prim = indices[0]
+    lista_indice_genero = indices[1]
+    lista_indice_pub = indices[2]
+    lista_invertida = indices[3]
+
+    # if _ == 'bp':
+    #     busca_prim(int(_), list_prim)
+    # elif _ == 'bs1':
+    #     busca_genero(_, lista_indice_genero, lista_invertida)
+    # elif _ == 'bs2':
+    #     busca_publicadora(_, lista_indice_pub, lista_invertida)
+    # elif _ == 'i':
+    #     insercao()
+    # elif _ == 'r':
+    #     remocao()
+
 def main():
     if len(argv) < 2:
         raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py [ -b | -e arquivo_operacoes | -c')
