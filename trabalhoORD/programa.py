@@ -290,7 +290,7 @@ def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_
             posicao = lista_indice_pub[n][1]  # posição inicial na lista invertida
             while posicao != -1:
                 lista_id.append(lista_invertida[posicao][0])
-                posicao = lista_invertida[posicao][1]
+                posicao = lista_invertida[posicao][2]
             encontrado = True
         n += 1
     for id in lista_id:
@@ -320,7 +320,7 @@ def executar_operacoes(arq_operacoes: str):
     lista_indice_genero = indices[1]
     lista_indice_pub = indices[2]
     lista_invertida = indices[3]
-    operacao = ''
+
     with open(arq_operacoes, 'r') as entrada:
         for linha in entrada:
             linha = linha.strip() #retira o \n no final da linha
@@ -335,8 +335,9 @@ def executar_operacoes(arq_operacoes: str):
             elif operacao == 'bs1':
                 busca_genero(argumento, lista_prim, lista_indice_genero, lista_invertida)
                 print()
-            # elif operacao == 'bs2':
-            #     busca_publicadora(argumento, lista_prim, lista_indice_pub, lista_invertida)
+            elif operacao == 'bs2':
+                busca_publicadora(argumento, lista_prim, lista_indice_pub, lista_invertida)
+                print()
             # elif operacao == 'i':
             #     insercao(argumento, lista_prim, lista_indice_gen, lista_indice_pub, lista_invertida)
             # elif operacao == 'r':
