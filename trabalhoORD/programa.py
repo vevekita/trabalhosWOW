@@ -66,72 +66,90 @@ def constroi_indices():
     list_encadeadas_gen: list[tuple[str, lista]] = [] #lista contendo indentificador "genero" e lista encadeada com as posições dos jogos associados
     list_encadeadas_pub: list[tuple[str, lista]] = [] #lista contendo indentificador "genero" e lista encadeada com as posições dos jogos associados
     lista_invertida:list[list] = [] #lista invertida
-    posicao_reg = 0
+    lista_aux_chaves:list[tuple[int, str, str]] = []
     with open('games.dat', 'rb') as entrada:
         tam_bytes = entrada.read(2)
-        tam_int = unpack('h', tam_bytes)[0]
+        tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
             offset = entrada.tell()
             reg = entrada.read(tam_int)
             reg_str = reg.decode()
             campos = reg_str.split(sep='|')
-            id = campos[0]
+            id = int(campos[0])
             genero = campos[3]
             publicadora = campos[4]
-            list_chave_prim.append((int(id), offset))
-            
-            #parte da criação dos índices do gênero
-            genero_encontrado = False
-            n = 0
-            while n < len(list_encadeadas_gen) and genero_encontrado == False:
-                if genero == list_encadeadas_gen[n][0]:
-                    list_encadeadas_gen[n][1].insere_fim(chave(posicao_reg))
-                    genero_encontrado = True
-                n += 1
-            if genero_encontrado == False:
-                nova_lista_gen = lista()
-                nova_lista_gen.insere_fim(chave(posicao_reg)) #ao invés de insere_fim(chave(int(id))). Seu eu fizer isso, a lista encadeada vira
-                list_encadeadas_gen.append([genero, nova_lista_gen])
-                list_chave_gen.append([genero, posicao_reg])
-
-            #parte da criação dos índices de publicadora
-            publicadora_encontrada = False
-            m = 0
-            while m < len(list_encadeadas_pub) and publicadora_encontrada == False:
-                if publicadora == list_encadeadas_pub[m][0]:
-                    list_encadeadas_pub[m][1].insere_fim(chave(posicao_reg))
-                    publicadora_encontrada = True
-                m += 1
-            if publicadora_encontrada == False:
-                nova_lista_pub = lista()
-                nova_lista_pub.insere_fim(chave(posicao_reg))
-                list_encadeadas_pub.append([publicadora, nova_lista_pub])
-                list_chave_pub.append([publicadora, posicao_reg])
-                
-            posicao_reg += 1
+            list_chave_prim.append((id, offset)) #adicona na lista de índeces secundários
+            gen_prox =-1
+            pub_prox =-1
+            lista_invertida.append([id, gen_prox, pub_prox]) #adiciona na da lista invertida
+            lista_aux_chaves.append([id, genero, publicadora]) #lista auxiliar para armazenar os gêneros e publicadoras de cada id de jogo
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
 
-        #criação da lista invertida
-        for a in range(posicao_reg):
-            proximo_gen = -1
-            proximo_pub = -1
-            id_atual = list_chave_prim[a][0]
-            b = 0
-            c = 0
-            while b < len(list_encadeadas_gen):
-                no_atual_gen = list_encadeadas_gen[b][1].busca(a)
-                if no_atual_gen and no_atual_gen.prox:
-                    proximo_gen = no_atual_gen.prox.dado.valor #determina o nó onde se encontra o  registro na lista encadeada de gênero
-                b += 1
-            while c < len(list_encadeadas_pub):
-                no_atual_pub = list_encadeadas_pub[c][1].busca(a) #determina o nó onde se encontra o  registro na lista encadeada de publicador
-                if no_atual_pub and no_atual_pub.prox:
-                    proximo_pub = no_atual_pub.prox.dado.valor
-                c += 1
-            lista_invertida.append([id_atual, proximo_gen, proximo_pub])
+        list_chave_prim.sort() 
+        lista_aux_chaves.sort()
         
-    list_chave_prim.sort()
+        #criação dos índices secundários
+        for n in range(len(lista_aux_chaves)):
+            genero_encontrado = False
+            publicadora_encontrada = False
+            id = lista_aux_chaves[n][0]
+            genero = lista_aux_chaves[n][1]
+            publicadora = lista_aux_chaves[n][2]
+            p = 0
+            while p < len(lista_invertida): #procura posição
+                if lista_invertida[p][0] == id:
+                    pos = p
+                p += 1
+
+            m = 0
+            while m < len(list_encadeadas_gen) and genero_encontrado == False: #parte da criação dos índices de gênero
+                chave_sec = list_encadeadas_gen[m][0]
+                if chave_sec == genero:
+                    list_encadeadas_gen[m][1].insere_fim(chave(pos))
+                    genero_encontrado = True
+                m += 1
+            if genero_encontrado == False: #se o gênero em questão ainda não existe na lista_endaceadas_gen:
+                nova_lista = lista()
+                nova_lista.insere_fim(chave(pos)) 
+                list_encadeadas_gen.append([genero, nova_lista])
+                list_chave_gen.append([genero, pos])
+                
+            m = 0
+            while m < len(list_encadeadas_pub) and publicadora_encontrada == False: #parte da criação dos índices de publicadora
+                chave_sec = list_encadeadas_pub[m][0]
+                if chave_sec == publicadora: #se a publicadora em questão ainda não existena lista_encadeadas_pub:
+                    list_encadeadas_pub[m][1].insere_fim(chave(pos))
+                    publicadora_encontrada = True
+                m += 1
+            if publicadora_encontrada == False:
+                nova_lista = lista()
+                nova_lista.insere_fim(chave(pos))
+                list_encadeadas_pub.append([publicadora, nova_lista])
+                list_chave_pub.append([publicadora, pos])
+
+        #atualização da lista invertida
+        for pos in range(len(lista_invertida)):
+            id = lista_invertida[pos][0]
+            a = 0
+            gen_prox = -1
+            
+            while a < len(list_encadeadas_gen): #acessa os gêneros com suas suas listas encadeadas
+                no_atual = list_encadeadas_gen[a][1].busca(pos)
+                if no_atual and no_atual.prox:
+                    gen_prox = no_atual.prox.dado.valor
+                a += 1
+
+            pub_prox = -1
+            b = 0
+            while b < len(list_encadeadas_pub): #acessa as publicadoras com suas listas encadeadas
+                no_atual = list_encadeadas_pub[b][1].busca(pos)
+                if no_atual and no_atual.prox:
+                    pub_prox = no_atual.prox.dado.valor
+                b += 1
+            
+            lista_invertida[pos] = [id, gen_prox, pub_prox] #atualiza os elementos da posição da lista invertida
+
     list_chave_gen.sort()
     list_chave_pub.sort()
 
