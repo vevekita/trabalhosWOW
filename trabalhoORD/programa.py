@@ -175,7 +175,7 @@ def constroi_indices():
             elem_lst = pack('3i', lst[0], lst[1], lst[2])
             lista_inv.write(elem_lst)    
 
-def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], list[tuple[str,int]], list[tuple[int, int, int]]]:
+def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], list[tuple[str,int]], list[list[int]]]:
     # verifica se todos os arquivos existem
     try:
         open('primario.ind', 'rb').close()
@@ -189,7 +189,7 @@ def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], lis
     list_chave_prim: list[tuple[int, int]] = []
     list_chave_gen: list[tuple[str, int]] = []
     list_chave_pub: list[tuple[str, int]] = []
-    lista_invertida: list[tuple[int, int, int]] = []
+    lista_invertida: list[list[int]] = []
     with open('primario.ind', 'rb') as primario:
         reg = primario.read(calcsize('2i'))
         while reg:
@@ -221,11 +221,11 @@ def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], lis
         reg = lista_inv.read(calcsize('3i'))
         while reg:
             tupla = unpack('3i', reg)
-            lista_invertida.append(tupla)
+            lista_invertida.append(list(tupla))
             reg = lista_inv.read(calcsize('3i'))
 
     return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida 
-    
+
 def busca_binaria(x: int, lista: list) -> int:
     esq = 0
     dir = len(lista) - 1
@@ -239,7 +239,7 @@ def busca_binaria(x: int, lista: list) -> int:
         else: 
             esq = meio + 1
     return -1
-    
+
 def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str: 
     ''' O arquivo de índices primários é aberto e é percorrido em procura de
     determinado índice. A partir do byte-offset encontrado no índice, 
@@ -259,7 +259,7 @@ def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str:
 
     return registro
 
-def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_invertida: list[tuple[int, int, int]]):
+def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_invertida: list[list[int]]):
     '''Procura-se o gênero (chave) necessário na lista_indice_genero. Se encontrar, guarda o ID e passa pra lista_invertida.
     Verifica na lista_invertida se existe um próximo do mesmo gênero (diferente de -1), se existir vai pra posição em que está
     o próximo e guarda o ID. Assim, vai encontrando todos os próximos do mesmo gênero até que não tenha mais.
@@ -296,7 +296,7 @@ def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_gener
     for registro in registros:
         print(registro)
 
-def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[tuple[int, int, int]]):
+def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]]):
     '''Procura-se a publicadora (chave) necessária na lista_indice_pub. Se encontrar, guarda o ID e passa pra lista_invertida.
     Verifica na lista_invertida se existe um próximo da mesma publicadora (diferente de -1), se existir vai pra posição em que está
     o próximo e guarda o ID. Assim, vai encontrando todos os próximos da mesma publicadora até que não tenha mais.
@@ -332,7 +332,7 @@ def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_
     for registro in registros:
         print(registro)
 
-def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[tuple[int, int, int]]):
+def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]]):
     campos = registro.split(sep='|')
     id = campos[0]
     genero = campos[3]
@@ -349,9 +349,73 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
             arq.write(tam_reg.to_bytes(2, 'little'))
             arq.write(reg_bytes)
 
-    pass
+    list_prim.append((int(id), offset_novo))
+    list_prim.sort()
+    
+    #atualização da lista de gênero e invertida na parte de gênero
+    posicao_id_inserido = len(lista_invertida)
+    info = [int(id), -1, -1]
+    lista_invertida.append(info)
+    
+    n = 0
+    genero_encontrado = False
+    while n < len(lista_indice_genero) and not genero_encontrado:
+        if lista_indice_genero[n][0] == genero:
+            genero_encontrado = True
+        n += 1
+    
+    if genero_encontrado:
+        posicao_id_genero = lista_indice_genero[n][1]
+        if lista_invertida[posicao_id_genero][0] > int(id):
+            posicao_id_genero = posicao_id_inserido
+            lista_invertida[posicao_id_inserido][1] = posicao_id_genero
+        else:
+            adicionado = False
+            while posicao_id_genero != -1 and not adicionado:
+                if lista_invertida[posicao_id_genero][1] < int(id):
+                    posicao_id_genero = lista_invertida[posicao_id_genero][1]
+                else:
+                    lista_invertida[posicao_id_genero - 1][1] = posicao_id_inserido
+                    lista_invertida[posicao_id_inserido][1] = posicao_id_genero
+                    adicionado = True
+            if not adicionado:
+                lista_invertida[posicao_id_inserido][1] = -1
+    else:
+        lista_indice_genero.append((genero, posicao_id_inserido))
+        info = [int(id), -1, -1]
+        lista_invertida.append(info)
 
-def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[tuple[int, int, int]]):
+    #atualização da lista de publicadora e invertida na parte de publicadora
+    m = 0
+    publicadora_encontrada = False
+    while n < len(lista_indice_pub) and not publicadora_encontrada:
+        if lista_indice_pub[m][0] == publicadora:
+            publicadora_encontrada = True
+        m += 1
+    
+    if publicadora_encontrada:
+        posicao_id = lista_indice_pub[m][1]
+        if lista_invertida[posicao_id][0] > int(id):
+            posicao_id = posicao_id_inserido
+            lista_invertida[posicao_id_inserido][2] = posicao_id
+        else:
+            adicionado = False
+            while posicao_id != -1 and not adicionado:
+                if lista_invertida[posicao_id][2] < int(id):
+                    posicao_id = lista_invertida[posicao_id][2]
+                else:
+                    lista_invertida[posicao_id - 1][2] = posicao_id_inserido
+                    lista_invertida[posicao_id_inserido][2] = posicao_id
+                    adicionado = True
+            if not adicionado:
+                lista_invertida[posicao_id_inserido][2] = -1
+    else:
+        lista_indice_pub.append((genero, posicao_id_inserido))
+    
+    print(f'Inserção do registro de chave "{id}" ({tam_reg} bytes)')
+
+
+def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[list[int]]):
     pass
 
 def executar_operacoes(arq_operacoes: str):
@@ -378,8 +442,8 @@ def executar_operacoes(arq_operacoes: str):
             elif operacao == 'bs2':
                 busca_publicadora(argumento, lista_prim, lista_indice_pub, lista_invertida)
                 print()
-            # elif operacao == 'i':
-            #     insercao(argumento, lista_prim, lista_indice_gen, lista_indice_pub, lista_invertida)
+            elif operacao == 'i':
+                insercao(argumento, lista_prim, lista_indice_genero, lista_indice_pub, lista_invertida)
             # elif operacao == 'r':
             #     remocao(int(argumento, lista_prim, lista_invertida))
 
