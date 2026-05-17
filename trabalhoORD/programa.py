@@ -382,8 +382,6 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
                 lista_invertida[posicao_id_inserido][1] = -1
     else:
         lista_indice_genero.append((genero, posicao_id_inserido))
-        info = [int(id), -1, -1]
-        lista_invertida.append(info)
 
     #atualização da lista de publicadora e invertida na parte de publicadora
     m = 0
