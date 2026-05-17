@@ -1,6 +1,6 @@
 from sys import argv, exit
 from struct import pack, unpack, calcsize
-import io
+import os
 from dataclasses import dataclass
 from copy import deepcopy
 
@@ -235,9 +235,9 @@ def busca_binaria(x: int, lista: list) -> int:
         if id == x:
             return offset
         elif id < x:
-            dir = meio - 1
-        else: 
             esq = meio + 1
+        else: 
+            dir = meio - 1
     return -1
 
 def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str: 
@@ -340,77 +340,89 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
 
     if busca_binaria(int(id), list_prim) != -1:
         print('ID duplicado!')
-        return 
+        return ''
     else:
         reg_bytes = registro.encode('utf-8')
         tam_reg = len(reg_bytes)
         with open('games.dat', 'ab') as arq:
-            offset_novo = arq.tell()
             arq.write(tam_reg.to_bytes(2, 'little'))
+            offset_novo = arq.tell()
             arq.write(reg_bytes)
 
-    list_prim.append((int(id), offset_novo))
-    list_prim.sort()
-    
-    #atualização da lista de gênero e invertida na parte de gênero
-    posicao_id_inserido = len(lista_invertida)
-    info = [int(id), -1, -1]
-    lista_invertida.append(info)
-    
-    n = 0
-    genero_encontrado = False
-    while n < len(lista_indice_genero) and not genero_encontrado:
-        if lista_indice_genero[n][0] == genero:
-            genero_encontrado = True
-        n += 1
-    
-    if genero_encontrado:
-        posicao_id_genero = lista_indice_genero[n][1]
-        if lista_invertida[posicao_id_genero][0] > int(id):
-            posicao_id_genero = posicao_id_inserido
-            lista_invertida[posicao_id_inserido][1] = posicao_id_genero
-        else:
-            adicionado = False
-            while posicao_id_genero != -1 and not adicionado:
-                if lista_invertida[posicao_id_genero][1] < int(id):
-                    posicao_id_genero = lista_invertida[posicao_id_genero][1]
-                else:
-                    lista_invertida[posicao_id_genero - 1][1] = posicao_id_inserido
-                    lista_invertida[posicao_id_inserido][1] = posicao_id_genero
-                    adicionado = True
-            if not adicionado:
-                lista_invertida[posicao_id_inserido][1] = -1
-    else:
-        lista_indice_genero.append((genero, posicao_id_inserido))
+        list_prim.append((int(id), offset_novo))
+        list_prim.sort()
 
-    #atualização da lista de publicadora e invertida na parte de publicadora
-    m = 0
-    publicadora_encontrada = False
-    while n < len(lista_indice_pub) and not publicadora_encontrada:
-        if lista_indice_pub[m][0] == publicadora:
-            publicadora_encontrada = True
-        m += 1
-    
-    if publicadora_encontrada:
-        posicao_id = lista_indice_pub[m][1]
-        if lista_invertida[posicao_id][0] > int(id):
-            posicao_id = posicao_id_inserido
-            lista_invertida[posicao_id_inserido][2] = posicao_id
-        else:
+        info = [int(id), -1, -1]
+        lista_invertida.append(info)
+        posicao_id_inserido = len(lista_invertida) - 1
+
+        #atualização da lista de gênero e invertida na parte de gênero
+        n = 0
+        genero_encontrado = False
+        while n < len(lista_indice_genero) and genero_encontrado == False:
+            if lista_indice_genero[n][0] == genero:
+                genero_encontrado = True
+            n += 1
+
+        if genero_encontrado:
+            indice_genero = n - 1
+            posicao = lista_indice_genero[indice_genero][1]
+            anterior = -1
             adicionado = False
-            while posicao_id != -1 and not adicionado:
-                if lista_invertida[posicao_id][2] < int(id):
-                    posicao_id = lista_invertida[posicao_id][2]
+            while posicao != -1 and not adicionado:
+                if lista_invertida[posicao][0] < int(id):
+                    anterior = posicao
+                    posicao = lista_invertida[posicao][1]
                 else:
-                    lista_invertida[posicao_id - 1][2] = posicao_id_inserido
-                    lista_invertida[posicao_id_inserido][2] = posicao_id
+                    if anterior == -1:
+                        lista_indice_genero[indice_genero] = (genero, posicao_id_inserido)
+                    else:
+                        lista_invertida[anterior][1] = posicao_id_inserido
+                    lista_invertida[posicao_id_inserido][1] = posicao
                     adicionado = True
             if not adicionado:
+                if anterior == -1:
+                    lista_indice_genero[indice_genero] = (genero, posicao_id_inserido)
+                else:
+                    lista_invertida[anterior][1] = posicao_id_inserido
+                lista_invertida[posicao_id_inserido][1] = -1
+        else:
+            lista_indice_genero.append((genero, posicao_id_inserido))
+
+        #atualização da lista de publicadora e invertida na parte de publicadora
+        m = 0
+        publicadora_encontrada = False
+        while m < len(lista_indice_pub) and publicadora_encontrada == False:
+            if lista_indice_pub[m][0] == publicadora:
+                publicadora_encontrada = True
+            m += 1
+
+        if publicadora_encontrada:
+            indice_publicadora = m - 1
+            posicao = lista_indice_pub[indice_publicadora][1]
+            anterior = -1
+            adicionado = False
+            while posicao != -1 and not adicionado:
+                if lista_invertida[posicao][0] < int(id):
+                    anterior = posicao
+                    posicao = lista_invertida[posicao][2]
+                else:
+                    if anterior == -1:
+                        lista_indice_pub[indice_publicadora] = (publicadora, posicao_id_inserido)
+                    else:
+                        lista_invertida[anterior][2] = posicao_id_inserido
+                    lista_invertida[posicao_id_inserido][2] = posicao
+                    adicionado = True
+            if not adicionado:
+                if anterior == -1:
+                    lista_indice_pub[indice_publicadora] = (publicadora, posicao_id_inserido)
+                else:
+                    lista_invertida[anterior][2] = posicao_id_inserido
                 lista_invertida[posicao_id_inserido][2] = -1
-    else:
-        lista_indice_pub.append((genero, posicao_id_inserido))
-    
-    print(f'Inserção do registro de chave "{id}" ({tam_reg} bytes)')
+        else:
+            lista_indice_pub.append((publicadora, posicao_id_inserido))
+
+        print(f'Inserção do registro de chave "{id}" ({tam_reg} bytes)')
 
 
 def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[list[int]]):
@@ -442,6 +454,7 @@ def executar_operacoes(arq_operacoes: str):
                 print()
             elif operacao == 'i':
                 insercao(argumento, lista_prim, lista_indice_genero, lista_indice_pub, lista_invertida)
+                print()
             # elif operacao == 'r':
             #     remocao(int(argumento, lista_prim, lista_invertida))
 
