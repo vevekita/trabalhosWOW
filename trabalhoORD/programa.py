@@ -225,23 +225,29 @@ def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], lis
             reg = lista_inv.read(calcsize('3i'))
 
     return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida 
-
+    
+def busca_binaria(x: int, lista: list) -> int:
+    esq = 0
+    dir = len(lista) - 1
+    while esq <= dir:
+        meio = (esq + dir) // 2
+        id, offset = lista[meio]
+        if id == x:
+            return offset
+        elif id < x:
+            dir = meio - 1
+        else: 
+            esq = meio + 1
+    return -1
+    
 def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str: 
     ''' O arquivo de índices primários é aberto e é percorrido em procura de
     determinado índice. A partir do byte-offset encontrado no índice, 
     fazemos o acesso direto ao arquivo *games.dat* para o registro do *id*.'''
 
-    n = 0
-    encontrado = False
-    offset = 0
-    registro = ''
-    while n < len(list_prim) and encontrado == False: #aqui não tá errado fazer assim, mas como a lista está ordenada, usando bb seria mais eficiente
-        if list_prim[n][0] == id: #Se o primeiro elemento do índice primário (posição) for igual ao id que está sendo usado de chave:
-            offset = list_prim[n][1]
-            encontrado = True #pra sair do while assim que encontrar, desse jeito ele funciona igual um for sem break
-        n += 1
+    offset = busca_binaria(id, list_prim)
 
-    if not encontrado:
+    if offset == -1:
         return 'Registro não encontrado!'
     
     with open('games.dat', 'rb') as arq:
@@ -327,6 +333,22 @@ def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_
         print(registro)
 
 def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[tuple[int, int, int]]):
+    campos = registro.split(sep='|')
+    id = campos[0]
+    genero = campos[3]
+    publicadora = campos[4]
+
+    if busca_binaria(int(id), list_prim) != -1:
+        print('ID duplicado!')
+        return 
+    else:
+        reg_bytes = registro.encode('utf-8')
+        tam_reg = len(reg_bytes)
+        with open('games.dat', 'ab') as arq:
+            offset_novo = arq.tell()
+            arq.write(tam_reg.to_bytes(2, 'little'))
+            arq.write(reg_bytes)
+
     pass
 
 def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[tuple[int, int, int]]):
