@@ -1,5 +1,6 @@
 from sys import argv, exit
 from struct import pack, unpack, calcsize
+import io
 import os
 from dataclasses import dataclass
 from copy import deepcopy
@@ -60,7 +61,7 @@ def constroi_indices():
     lidos em separações diferentes dependendo a partir
     de chaves (1 primária - id e 2 secundárias - gênero 
     e publicadora)'''
-    list_chave_prim:list[tuple] = [] #lista da chave primária
+    list_chave_prim:list[tuple[int, int]] = [] #lista da chave primária
     list_chave_gen:list[tuple[str, int]] = []  #lista da chave secundária: gênero
     list_chave_pub:list[tuple[str, int]] = [] #lista da chave secundária: publicadora
     list_encadeadas_gen: list[tuple[str, lista]] = [] #lista contendo indentificador "genero" e lista encadeada com as posições dos jogos associados
@@ -68,13 +69,13 @@ def constroi_indices():
     lista_invertida:list[list] = [] #lista invertida
     lista_aux_chaves:list[tuple[int, str, str]] = []
     with open('games.dat', 'rb') as entrada:
+        offset = 0
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
-            offset = entrada.tell()
             reg = entrada.read(tam_int)
             reg_str = reg.decode()
-            campos = reg_str.split(sep='|')
+            campos = reg_str.split('|')
             id = int(campos[0])
             genero = campos[3]
             publicadora = campos[4]
@@ -83,9 +84,9 @@ def constroi_indices():
             pub_prox =-1
             lista_invertida.append([id, gen_prox, pub_prox]) #adiciona na da lista invertida
             lista_aux_chaves.append([id, genero, publicadora]) #lista auxiliar para armazenar os gêneros e publicadoras de cada id de jogo
+            offset = entrada.tell()
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, "little")
-
         list_chave_prim.sort() 
         lista_aux_chaves.sort()
         
@@ -239,8 +240,75 @@ def busca_binaria(x: int, lista: list) -> int:
         else: 
             dir = meio - 1
     return -1
+  
 
-def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str: 
+def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], list[tuple[str,int]], list[list[int]]]:
+    # verifica se todos os arquivos existem
+    try:
+        open('primario.ind', 'rb').close()
+        open('genero.ind', 'rb').close()
+        open('publicadora.ind', 'rb').close()
+        open('listaInvertida.lst', 'rb').close()
+        open('games.dat', 'rb').close()
+    except FileNotFoundError as e:
+        print(f'Erro: {e}')
+
+    list_chave_prim: list[tuple[int, int]] = []
+    list_chave_gen: list[tuple[str, int]] = []
+    list_chave_pub: list[tuple[str, int]] = []
+    lista_invertida: list[list[int]] = []
+    with open('primario.ind', 'rb') as primario:
+        reg = primario.read(calcsize('2i'))
+        while reg:
+            tupla = unpack('2i', reg)
+            list_chave_prim.append(tupla) 
+            reg = primario.read(calcsize('2i'))
+
+    with open('genero.ind', 'rb') as genero:
+        reg = genero.read(calcsize('50si'))
+        while reg:
+            tupla = unpack('50si', reg)
+            gen: bytes = tupla[0]
+            pos: int = tupla[1]
+            chave = gen.decode().split('\x00')[0] #retira os bytes nulos
+            list_chave_gen.append((chave, pos))
+            reg = genero.read(calcsize('50si'))
+
+    with open('publicadora.ind', 'rb') as publicadora:
+        reg = publicadora.read(calcsize('50si'))
+        while reg:
+            tupla = unpack('50si', reg)
+            gen: bytes = tupla[0]
+            pos: int = tupla[1]
+            chave = gen.decode().split('\x00')[0] #retira os bytes nulos
+            list_chave_pub.append((chave, pos))
+            reg = publicadora.read(calcsize('50si'))
+    
+    with open('listaInvertida.lst', 'rb') as lista_inv:
+        reg = lista_inv.read(calcsize('3i'))
+        while reg:
+            tupla = unpack('3i', reg)
+            lista_invertida.append(list(tupla))
+            reg = lista_inv.read(calcsize('3i'))
+
+    return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida 
+
+def busca_binaria(x: int, lista: list) -> int:
+    '''Função auxiliar para realizar a busca binária de uma lista.'''
+    esq = 0
+    dir = len(lista) - 1
+    while esq <= dir:
+        meio = (esq + dir) // 2
+        id, offset = lista[meio]
+        if id == x:
+            return offset 
+        elif id < x:
+            esq = meio + 1
+        else: 
+            dir = meio - 1
+    return -1
+
+def busca_prim(id: int, list_prim: list[tuple[int, int]], arq: io.BufferedRandom ) -> str: 
     ''' O arquivo de índices primários é aberto e é percorrido em procura de
     determinado índice. A partir do byte-offset encontrado no índice, 
     fazemos o acesso direto ao arquivo *games.dat* para o registro do *id*.'''
@@ -250,16 +318,15 @@ def busca_prim(id: int, list_prim: list[tuple[int, int]] ) -> str:
     if offset == -1:
         return 'Registro não encontrado!'
     
-    with open('games.dat', 'rb') as arq:
-        arq.seek(offset - 2)
-        tam_bytes = arq.read(2)
-        tam = int.from_bytes(tam_bytes, 'little')
-        reg = arq.read(tam).decode() #transforma o registro todo em string
-        registro = reg
+    arq.seek(offset)
+    tam_bytes = arq.read(2)
+    tam = int.from_bytes(tam_bytes, 'little')
+    reg = arq.read(tam).decode() #transforma o registro todo em string
+    registro = reg
 
     return registro
 
-def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_invertida: list[list[int]]):
+def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_invertida: list[list[int]], arq: io.BufferedRandom):
     '''Procura-se o gênero (chave) necessário na lista_indice_genero. Se encontrar, guarda o ID e passa pra lista_invertida.
     Verifica na lista_invertida se existe um próximo do mesmo gênero (diferente de -1), se existir vai pra posição em que está
     o próximo e guarda o ID. Assim, vai encontrando todos os próximos do mesmo gênero até que não tenha mais.
@@ -281,22 +348,24 @@ def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_gener
                 posicao = lista_invertida[posicao][1]
             encontrado = True
         n += 1
+
+
     for id in lista_id:
         for i in range(len(list_prim)):
             if id == list_prim[i][0]:
-                 lista_offset.append(list_prim[i][1])
-    with open('games.dat', 'rb') as arq:
-        for offset in lista_offset:
-            arq.seek(offset - 2)
-            tam_bytes = arq.read(2)
-            tam = int.from_bytes(tam_bytes, 'little')
-            reg = arq.read(tam).decode()
-            registros.append(reg)
+                lista_offset.append(list_prim[i][1])
+
+    for offset in lista_offset:
+        arq.seek(offset)
+        tam_bytes = arq.read(2)
+        tam = int.from_bytes(tam_bytes, 'little')
+        reg = arq.read(tam).decode()
+        registros.append(reg)
     print(f'Busca por registros do gênero "{chave}" ({len(registros)} registros)')
     for registro in registros:
         print(registro)
 
-def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]]):
+def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]], arq: io.BufferedRandom):
     '''Procura-se a publicadora (chave) necessária na lista_indice_pub. Se encontrar, guarda o ID e passa pra lista_invertida.
     Verifica na lista_invertida se existe um próximo da mesma publicadora (diferente de -1), se existir vai pra posição em que está
     o próximo e guarda o ID. Assim, vai encontrando todos os próximos da mesma publicadora até que não tenha mais.
@@ -321,38 +390,38 @@ def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_
         for i in range(len(list_prim)):
             if id == list_prim[i][0]:
                  lista_offset.append(list_prim[i][1])
-    with open('games.dat', 'rb') as arq:
-        for offset in lista_offset:
-            arq.seek(offset - 2)
-            tam_bytes = arq.read(2)
-            tam = int.from_bytes(tam_bytes, 'little')
-            reg = arq.read(tam).decode()
-            registros.append(reg)
+    for offset in lista_offset:
+        arq.seek(offset)
+        tam_bytes = arq.read(2)
+        tam = int.from_bytes(tam_bytes, 'little')
+        reg = arq.read(tam).decode()
+        registros.append(reg)
     print(f'Busca por registros de publicadora "{chave}" ({len(registros)} registros)')
     for registro in registros:
         print(registro)
 
-def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]]):
+def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]], arq: io.BufferedRandom):
     campos = registro.split(sep='|')
-    id = campos[0]
+    id = int(campos[0])
     genero = campos[3]
     publicadora = campos[4]
 
-    if busca_binaria(int(id), list_prim) != -1:
+    if busca_binaria(id, list_prim) != -1:
         print('ID duplicado!')
         return ''
     else:
         reg_bytes = registro.encode('utf-8')
         tam_reg = len(reg_bytes)
-        with open('games.dat', 'ab') as arq:
-            arq.write(tam_reg.to_bytes(2, 'little'))
-            offset_novo = arq.tell()
-            arq.write(reg_bytes)
 
-        list_prim.append((int(id), offset_novo))
+        arq.seek(0, os.SEEK_END)
+        offset_novo = arq.tell()
+        arq.write(tam_reg.to_bytes(2, 'little'))
+        arq.write(reg_bytes)
+
+        list_prim.append((id, offset_novo))
         list_prim.sort()
 
-        info = [int(id), -1, -1]
+        info = [id, -1, -1]
         lista_invertida.append(info)
         posicao_id_inserido = len(lista_invertida) - 1
 
@@ -370,7 +439,7 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
             anterior = -1
             adicionado = False
             while posicao != -1 and not adicionado:
-                if lista_invertida[posicao][0] < int(id):
+                if lista_invertida[posicao][0] < id:
                     anterior = posicao
                     posicao = lista_invertida[posicao][1]
                 else:
@@ -388,6 +457,7 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
                 lista_invertida[posicao_id_inserido][1] = -1
         else:
             lista_indice_genero.append((genero, posicao_id_inserido))
+            lista_indice_genero.sort()
 
         #atualização da lista de publicadora e invertida na parte de publicadora
         m = 0
@@ -403,7 +473,7 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
             anterior = -1
             adicionado = False
             while posicao != -1 and not adicionado:
-                if lista_invertida[posicao][0] < int(id):
+                if lista_invertida[posicao][0] < id:
                     anterior = posicao
                     posicao = lista_invertida[posicao][2]
                 else:
@@ -421,12 +491,22 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
                 lista_invertida[posicao_id_inserido][2] = -1
         else:
             lista_indice_pub.append((publicadora, posicao_id_inserido))
+            lista_indice_pub.sort()
 
         print(f'Inserção do registro de chave "{id}" ({tam_reg} bytes)')
 
 
-def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[list[int]]):
-    pass
+def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[list[int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], arq: io.BufferedRandom) -> bool:
+    '''Realiza a remoção lógica de um registro a partir de uma determinada chave(ID) na função de execução de operações. Essa função atualiza os dados dos arquivos'''
+    offset = busca_binaria(chave, list_prim)
+    if offset == -1:
+        print('ID não encontrado!')
+        return False
+    else:#abertura do arquivo no modo leitura e escrita :P
+        arq.seek(offset) #começo do registro (pulando o indicador de tamanho)
+        indica_rem = '*'.encode()
+        arq.write(indica_rem)
+        #atualização dos arranjos
 
 def executar_operacoes(arq_operacoes: str):
     indices = carregar_indices()
@@ -435,7 +515,7 @@ def executar_operacoes(arq_operacoes: str):
     lista_indice_pub = indices[2]
     lista_invertida = indices[3]
 
-    with open(arq_operacoes, 'r') as entrada:
+    with open('games.dat', 'r+b') as arq, open(arq_operacoes, 'r') as entrada:
         for linha in entrada:
             linha = linha.strip() #retira o \n no final da linha
             partes = linha.split(' ', 1) #vai separar somente do primeiro espaço vazio que aparecer
@@ -444,19 +524,20 @@ def executar_operacoes(arq_operacoes: str):
 
             if operacao == 'bp':
                 print(f'Busca pelo registro de ID "{argumento}"')
-                print(busca_prim(int(argumento), lista_prim))
+                print(busca_prim(int(argumento), lista_prim, arq))
                 print()
             elif operacao == 'bs1':
-                busca_genero(argumento, lista_prim, lista_indice_genero, lista_invertida)
+                busca_genero(argumento, lista_prim, lista_indice_genero, lista_invertida, arq)
                 print()
             elif operacao == 'bs2':
-                busca_publicadora(argumento, lista_prim, lista_indice_pub, lista_invertida)
+                busca_publicadora(argumento, lista_prim, lista_indice_pub, lista_invertida, arq)
                 print()
             elif operacao == 'i':
-                insercao(argumento, lista_prim, lista_indice_genero, lista_indice_pub, lista_invertida)
-                print()
-            # elif operacao == 'r':
-            #     remocao(int(argumento, lista_prim, lista_invertida))
+                insercao(argumento, lista_prim, lista_indice_genero, lista_indice_pub, lista_invertida, arq)
+
+            elif operacao == 'r':
+                
+                remocao(int(argumento, lista_prim, lista_invertida))
 
 def main():
     if len(argv) < 2:
