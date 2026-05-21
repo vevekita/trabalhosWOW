@@ -5,6 +5,16 @@ import os
 from dataclasses import dataclass
 from copy import deepcopy
 
+# CONSTANTES
+FORMATO_CHAVE_SEC = '50si'   # string/bytes de 50 caracteres e um inteiro de 4 bytes
+FORMATO_ELEMLISTA = '2i'    # dois inteiros de 4 bytes
+FORMATO_TAMREG = 'h'        # um inteiro de 2 bytes
+FORMATO_LISTA_INV = '3i'    # três inteiros de 4 bytes
+SIZEOF_CHAVE_SEC = calcsize(FORMATO_CHAVE_SEC)      # 50 bytes
+SIZEOF_ELEMLISTA = calcsize(FORMATO_ELEMLISTA)      # 8 bytes
+SIZEOF_TAMREG = calcsize(FORMATO_TAMREG)            # 2 bytes
+SIZEOF_LISTA_INV = calcsize(FORMATO_LISTA_INV)
+
 @dataclass
 class chave:
     valor: int
@@ -70,7 +80,7 @@ def constroi_indices():
     lista_aux_chaves:list[tuple[int, str, str]] = []
     with open('games.dat', 'rb') as entrada:
         offset = 0
-        tam_bytes = entrada.read(2)
+        tam_bytes = entrada.read(FORMATO_TAMREG)
         tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
             reg = entrada.read(tam_int)
@@ -85,7 +95,7 @@ def constroi_indices():
             lista_invertida.append([id, gen_prox, pub_prox]) #adiciona na da lista invertida
             lista_aux_chaves.append([id, genero, publicadora]) #lista auxiliar para armazenar os gêneros e publicadoras de cada id de jogo
             offset = entrada.tell()
-            tam_bytes = entrada.read(2)
+            tam_bytes = entrada.read(FORMATO_TAMREG)
             tam_int = int.from_bytes(tam_bytes, "little")
         list_chave_prim.sort() 
         lista_aux_chaves.sort()
@@ -156,24 +166,24 @@ def constroi_indices():
 
     with open('primario.ind', 'wb') as primario:
         for prim in list_chave_prim:
-            elem_p = pack('2i', prim[0], prim[1])
+            elem_p = pack(FORMATO_ELEMLISTA, prim[0], prim[1])
             primario.write(elem_p)
     
     with open('genero.ind', 'wb') as genero:
         for gen in list_chave_gen:
             gen_bytes = gen[0].encode()
-            elem_g = pack('50si', gen_bytes, gen[1])
+            elem_g = pack(FORMATO_CHAVE_SEC, gen_bytes, gen[1])
             genero.write(elem_g)
 
     with open('publicadora.ind', 'wb') as publicadora:
         for pub in list_chave_pub:
             pub_bytes = pub[0].encode()
-            elem_pb = pack('50si', pub_bytes, pub[1])
+            elem_pb = pack(FORMATO_CHAVE_SEC, pub_bytes, pub[1])
             publicadora.write(elem_pb)
 
     with open('listaInvertida.lst', 'wb') as lista_inv:
         for lst in lista_invertida:
-            elem_lst = pack('3i', lst[0], lst[1], lst[2])
+            elem_lst = pack(FORMATO_LISTA_INV, lst[0], lst[1], lst[2])
             lista_inv.write(elem_lst)    
 
 def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], list[tuple[str,int]], list[list[int]]]:
@@ -192,38 +202,38 @@ def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], lis
     list_chave_pub: list[tuple[str, int]] = []
     lista_invertida: list[list[int]] = []
     with open('primario.ind', 'rb') as primario:
-        reg = primario.read(calcsize('2i'))
-        while reg:
-            tupla = unpack('2i', reg)
+        reg = primario.read(SIZEOF_ELEMLISTA)
+        while reg: #enquanto reg existir:
+            tupla = unpack(FORMATO_ELEMLISTA, reg)
             list_chave_prim.append(tupla) 
-            reg = primario.read(calcsize('2i'))
+            reg = primario.read(SIZEOF_ELEMLISTA)
 
     with open('genero.ind', 'rb') as genero:
-        reg = genero.read(calcsize('50si'))
+        reg = genero.read(SIZEOF_CHAVE_SEC)
         while reg:
-            tupla = unpack('50si', reg)
+            tupla = unpack(FORMATO_CHAVE_SEC, reg)
             gen: bytes = tupla[0]
             pos: int = tupla[1]
             chave = gen.decode().split('\x00')[0] #retira os bytes nulos
             list_chave_gen.append((chave, pos))
-            reg = genero.read(calcsize('50si'))
+            reg = genero.read(SIZEOF_CHAVE_SEC)
 
     with open('publicadora.ind', 'rb') as publicadora:
-        reg = publicadora.read(calcsize('50si'))
+        reg = publicadora.read(SIZEOF_CHAVE_SEC)
         while reg:
-            tupla = unpack('50si', reg)
+            tupla = unpack(FORMATO_CHAVE_SEC, reg)
             gen: bytes = tupla[0]
             pos: int = tupla[1]
             chave = gen.decode().split('\x00')[0] #retira os bytes nulos
             list_chave_pub.append((chave, pos))
-            reg = publicadora.read(calcsize('50si'))
+            reg = publicadora.read(SIZEOF_CHAVE_SEC)
     
     with open('listaInvertida.lst', 'rb') as lista_inv:
-        reg = lista_inv.read(calcsize('3i'))
+        reg = lista_inv.read(SIZEOF_LISTA_INV)
         while reg:
-            tupla = unpack('3i', reg)
+            tupla = unpack(FORMATO_LISTA_INV, reg)
             lista_invertida.append(list(tupla))
-            reg = lista_inv.read(calcsize('3i'))
+            reg = lista_inv.read(SIZEOF_LISTA_INV)
 
     return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida 
 
@@ -241,58 +251,6 @@ def busca_binaria(x: int, lista: list) -> int:
             dir = meio - 1
     return -1
   
-
-def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], list[tuple[str,int]], list[list[int]]]:
-    # verifica se todos os arquivos existem
-    try:
-        open('primario.ind', 'rb').close()
-        open('genero.ind', 'rb').close()
-        open('publicadora.ind', 'rb').close()
-        open('listaInvertida.lst', 'rb').close()
-        open('games.dat', 'rb').close()
-    except FileNotFoundError as e:
-        print(f'Erro: {e}')
-
-    list_chave_prim: list[tuple[int, int]] = []
-    list_chave_gen: list[tuple[str, int]] = []
-    list_chave_pub: list[tuple[str, int]] = []
-    lista_invertida: list[list[int]] = []
-    with open('primario.ind', 'rb') as primario:
-        reg = primario.read(calcsize('2i'))
-        while reg:
-            tupla = unpack('2i', reg)
-            list_chave_prim.append(tupla) 
-            reg = primario.read(calcsize('2i'))
-
-    with open('genero.ind', 'rb') as genero:
-        reg = genero.read(calcsize('50si'))
-        while reg:
-            tupla = unpack('50si', reg)
-            gen: bytes = tupla[0]
-            pos: int = tupla[1]
-            chave = gen.decode().split('\x00')[0] #retira os bytes nulos
-            list_chave_gen.append((chave, pos))
-            reg = genero.read(calcsize('50si'))
-
-    with open('publicadora.ind', 'rb') as publicadora:
-        reg = publicadora.read(calcsize('50si'))
-        while reg:
-            tupla = unpack('50si', reg)
-            gen: bytes = tupla[0]
-            pos: int = tupla[1]
-            chave = gen.decode().split('\x00')[0] #retira os bytes nulos
-            list_chave_pub.append((chave, pos))
-            reg = publicadora.read(calcsize('50si'))
-    
-    with open('listaInvertida.lst', 'rb') as lista_inv:
-        reg = lista_inv.read(calcsize('3i'))
-        while reg:
-            tupla = unpack('3i', reg)
-            lista_invertida.append(list(tupla))
-            reg = lista_inv.read(calcsize('3i'))
-
-    return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida 
-
 def busca_binaria(x: int, lista: list) -> int:
     '''Função auxiliar para realizar a busca binária de uma lista.'''
     esq = 0
@@ -319,7 +277,7 @@ def busca_prim(id: int, list_prim: list[tuple[int, int]], arq: io.BufferedRandom
         return 'Registro não encontrado!'
     
     arq.seek(offset)
-    tam_bytes = arq.read(2)
+    tam_bytes = arq.read(SIZEOF_TAMREG)
     tam = int.from_bytes(tam_bytes, 'little')
     reg = arq.read(tam).decode() #transforma o registro todo em string
     registro = reg
@@ -357,7 +315,7 @@ def busca_genero(chave:str, list_prim: list[tuple[int, int]], lista_indice_gener
 
     for offset in lista_offset:
         arq.seek(offset)
-        tam_bytes = arq.read(2)
+        tam_bytes = arq.read(SIZEOF_TAMREG)
         tam = int.from_bytes(tam_bytes, 'little')
         reg = arq.read(tam).decode()
         registros.append(reg)
@@ -415,7 +373,7 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
 
         arq.seek(0, os.SEEK_END)
         offset_novo = arq.tell()
-        arq.write(tam_reg.to_bytes(2, 'little'))
+        arq.write(tam_reg.to_bytes(SIZEOF_TAMREG, 'little'))
         arq.write(reg_bytes)
 
         list_prim.append((id, offset_novo))
@@ -526,7 +484,7 @@ def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[
             if pos_atual == pos_rem:
                 lista_invertida[pos_atual][1] = -1 #jogo sendo o primeiro da lista de um gênero: desvincula o jogo da organização da chave secundária
                 if prox_pos == -1: #se o registro a ser removido é o ÚNICO elemento de determinado gênero:
-                    lista_indice_genero.pop(m) #remove o gênero para não ser lido na lista de chave secundária posteriormente
+                    lista_indice_genero.pop(m) #remove o gênero para não ser lido na lista posteriormente
             else: #se o registro a ser removido NÃO é o primeiro (estando no meio ou final da lista invertida)
                 while prox_pos> -1 and removido == False:
                     if prox_pos == pos_rem:
@@ -542,7 +500,7 @@ def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[
         
         removido = False
         m = 0
-        while m <len(lista_indice_pub): #atualização em relação à chave secundária de publicadora (mesma lógica que a de gênero)
+        while m <len(lista_indice_pub): #atualização em relação à chave secundária de publicadora
             pos_atual = lista_indice_pub[m][1]
             prox_pos = lista_invertida[pos_atual][2]
             if pos_atual == pos_rem:
