@@ -520,6 +520,41 @@ def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[
                     prox_pos = lista_invertida[pos_atual][2]
             m += 1
         return True
+
+def compactar():
+    with open('games.dat', 'rb') as entrada, open('games_sem_frag.dat', 'wb') as saida:
+        tam_bytes = entrada.read(2)
+        while tam_bytes:
+            tam = int.from_bytes(tam_bytes, 'little')
+            verificacao = entrada.read(1)
+            verificacao_str = verificacao.decode()
+            if verificacao_str == '*':
+                entrada.seek(tam - 1, 1) #pula o resto do registro
+            else:
+                restante = entrada.read(tam - 1)
+                saida.write(tam_bytes)
+                saida.write(verificacao + restante)
+            tam_bytes = entrada.read(2)
+            
+    list_chave_prim = []
+    with open('games_sem_fragmentacao.dat', 'rb') as arq:
+        while True:
+            offset = arq.tell()        
+            tam_bytes = arq.read(2)
+            if not tam_bytes:
+                break
+            tam = int.from_bytes(tam_bytes, 'little')
+            reg = arq.read(tam).decode()
+            campos = reg.split('|')
+            id_jogo = int(campos[0])
+            list_chave_prim.append((id_jogo, offset))
+
+    list_chave_prim.sort()
+
+    # salva o índice primário atualizado
+    with open('primario.ind', 'wb') as saida:
+        for (id_jogo, offset) in list_chave_prim:
+            saida.write(pack('2i', id_jogo, offset))
     
 def executar_operacoes(arq_operacoes: str):
     indices = carregar_indices()
