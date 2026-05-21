@@ -80,7 +80,7 @@ def constroi_indices():
     lista_aux_chaves:list[tuple[int, str, str]] = []
     with open('games.dat', 'rb') as entrada:
         offset = 0
-        tam_bytes = entrada.read(FORMATO_TAMREG)
+        tam_bytes = entrada.read(SIZEOF_TAMREG)
         tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
             reg = entrada.read(tam_int)
@@ -95,7 +95,7 @@ def constroi_indices():
             lista_invertida.append([id, gen_prox, pub_prox]) #adiciona na da lista invertida
             lista_aux_chaves.append([id, genero, publicadora]) #lista auxiliar para armazenar os gêneros e publicadoras de cada id de jogo
             offset = entrada.tell()
-            tam_bytes = entrada.read(FORMATO_TAMREG)
+            tam_bytes = entrada.read(SIZEOF_TAMREG)
             tam_int = int.from_bytes(tam_bytes, "little")
         list_chave_prim.sort() 
         lista_aux_chaves.sort()
@@ -236,20 +236,6 @@ def carregar_indices() -> tuple[list[tuple[int,int]], list[tuple[str, int]], lis
             reg = lista_inv.read(SIZEOF_LISTA_INV)
 
     return list_chave_prim, list_chave_gen, list_chave_pub, lista_invertida 
-
-def busca_binaria(x: int, lista: list) -> int:
-    esq = 0
-    dir = len(lista) - 1
-    while esq <= dir:
-        meio = (esq + dir) // 2
-        id, offset = lista[meio]
-        if id == x:
-            return offset
-        elif id < x:
-            esq = meio + 1
-        else: 
-            dir = meio - 1
-    return -1
   
 def busca_binaria(x: int, lista: list) -> int:
     '''Função auxiliar para realizar a busca binária de uma lista.'''
@@ -536,9 +522,11 @@ def compactar():
                 saida.write(tam_bytes)
                 saida.write(verificacao + restante)
             tam_bytes = entrada.read(2)
+    
+    os.replace('games_sem_frag.dat', 'games.dat')
             
     list_chave_prim = []
-    with open('games_sem_fragmentacao.dat', 'rb') as arq:
+    with open('games.dat', 'rb') as arq:
         while True:
             offset = arq.tell()        
             tam_bytes = arq.read(2)
@@ -600,7 +588,7 @@ def main():
             raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py -e arquivo_operacoes')
         executar_operacoes(argv[2])
     elif flag == "-c":
-        # compactar()
-        pass
+        compactar()
+
 if __name__ == '__main__':
     main()
