@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "map.h"
 
@@ -41,7 +40,16 @@ void map_set(Map *m, int r, int c, char ch){
 }
 
 void map_print(const Map *m, FILE *out){
-}
+    // FILE *out = open(out, 'r')
+    for (int n = 0; n < m->cols; n++) {
+        for (int p = 0; p < m->rows; p++) {
+            int i = n * m->cols + p;
+        fprintf( out, "%c", m->mat[i]);
+        }
+    fprintf(out, "\n"); 
+    }
+} //usar o stdout na hora de testar para não precisar ficar lidando com arquivos de primeira
+
 
 void map_free(Map *m){
     if (m == NULL)
