@@ -505,7 +505,6 @@ def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[
                     pos_atual = prox_pos
                     prox_pos = lista_invertida[pos_atual][2]
             m += 1
-        print(f'Remoção do registro de chave "{chave}" (offset = {offset})')
         return True
 
 def compactar():
