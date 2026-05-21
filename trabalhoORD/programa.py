@@ -345,6 +345,9 @@ def busca_publicadora(chave:str, list_prim: list[tuple[int, int]], lista_indice_
         print(registro)
 
 def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], lista_invertida: list[list[int]], arq: io.BufferedRandom):
+    '''Recebe as listas de índice primário, índice secundário 1 e índice secundário 2, o registro a ser inserido e o arquivo aberto para leitura e escrita.
+    Para inserção, o registro recebido é transformado para ser escito em *games.dat* e posteriormente é atualizado as listas de índice primário, índices 
+    secundários e lista invertida'''
     campos = registro.split(sep='|')
     id = int(campos[0])
     genero = campos[3]
@@ -441,7 +444,7 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
 
 
 def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[list[int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], arq: io.BufferedRandom) -> bool:
-    '''Realiza a remoção lógica de um registro a partir de uma determinada chave(ID) na função de execução de operações. Essa função atualiza os dados dos arquivos'''
+    '''Realiza a remoção lógica de um registro a partir de uma determinada chave(ID) na função de execução de operações. Essa função atualiza os dados dos arquivos.'''
     offset = busca_binaria(chave, list_prim)
     
     if offset == -1:
@@ -508,6 +511,9 @@ def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[
         return True
 
 def compactar():
+    '''essa função deverá liberar fisicamente os espaços ocupados por registros removidos, 
+    resultando em um novo arquivo games.dat sem fragmentação. Após isso, é econstruído e atualizado
+    o índice primário.'''
     with open('games.dat', 'rb') as entrada, open('games_sem_frag.dat', 'wb') as saida:
         tam_bytes = entrada.read(2)
         while tam_bytes:
@@ -542,7 +548,7 @@ def compactar():
     # salva o índice primário atualizado
     with open('primario.ind', 'wb') as saida:
         for (id_jogo, offset) in list_chave_prim:
-            saida.write(pack('2i', id_jogo, offset))
+            saida.write(pack(FORMATO_ELEMLISTA, id_jogo, offset))
     
 def executar_operacoes(arq_operacoes: str):
     indices = carregar_indices()
