@@ -571,9 +571,10 @@ def executar_operacoes(arq_operacoes: str):
                 print()
             elif operacao == 'i':
                 insercao(argumento, lista_prim, lista_indice_genero, lista_indice_pub, lista_invertida, arq)
-
+                print()
             elif operacao == 'r':
                 remocao(int(argumento), lista_prim, lista_invertida, lista_indice_genero, lista_indice_pub, arq)
+                print()
 
 def main():
     if len(argv) < 2:
