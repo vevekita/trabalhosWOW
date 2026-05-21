@@ -499,15 +499,70 @@ def insercao(registro: str, list_prim: list[tuple[int, int]], lista_indice_gener
 def remocao(chave: int, list_prim: list[tuple[int, int]], lista_invertida: list[list[int]], lista_indice_genero: list[tuple[str, int]], lista_indice_pub: list[tuple[str, int]], arq: io.BufferedRandom) -> bool:
     '''Realiza a remoção lógica de um registro a partir de uma determinada chave(ID) na função de execução de operações. Essa função atualiza os dados dos arquivos'''
     offset = busca_binaria(chave, list_prim)
+    
     if offset == -1:
-        print('ID não encontrado!')
+        print(f'Remoção do registro de chave "{chave}"')
+        print('Registro não encontrado!')
         return False
-    else:#abertura do arquivo no modo leitura e escrita :P
-        arq.seek(offset) #começo do registro (pulando o indicador de tamanho)
+    else:
+        print(f'Remoção do registro de chave "{chave}" (offset = {offset})')
+        arq.seek(offset + 2) #começo do registro (pulando o indicador de tamanho)
         indica_rem = '*'.encode()
         arq.write(indica_rem)
-        #atualização dos arranjos
 
+        #atualização dos arranjos
+        pos_rem = -1
+        n = 0
+        while n < len(lista_invertida):
+            if lista_invertida[n][0] == chave:
+                pos_rem = n #encontra a posição do jogo a ser removido na lista invertida (logo, no arquivo geral também)
+            n += 1
+
+        removido = False
+        m = 0
+        while m < len(lista_indice_genero): #atualização em relação à chave secundária de gênero
+            pos_atual = lista_indice_genero[m][1]
+            prox_pos = lista_invertida[pos_atual][1]
+            if pos_atual == pos_rem:
+                lista_invertida[pos_atual][1] = -1 #jogo sendo o primeiro da lista de um gênero: desvincula o jogo da organização da chave secundária
+                if prox_pos == -1: #se o registro a ser removido é o ÚNICO elemento de determinado gênero:
+                    lista_indice_genero.pop(m) #remove o gênero para não ser lido na lista de chave secundária posteriormente
+            else: #se o registro a ser removido NÃO é o primeiro (estando no meio ou final da lista invertida)
+                while prox_pos> -1 and removido == False:
+                    if prox_pos == pos_rem:
+                        ant_pos = pos_atual
+                        pos_atual = prox_pos
+                        prox_pos = lista_invertida[pos_atual][1]
+                        lista_invertida[ant_pos][1] = prox_pos
+                        lista_invertida[pos_atual][1] = -1 #desvincula o índice do registro removido da lista de índices secundários de gênero
+                        removido = True
+                    pos_atual = prox_pos
+                    prox_pos = lista_invertida[pos_atual][1]
+            m += 1
+        
+        removido = False
+        m = 0
+        while m <len(lista_indice_pub): #atualização em relação à chave secundária de publicadora (mesma lógica que a de gênero)
+            pos_atual = lista_indice_pub[m][1]
+            prox_pos = lista_invertida[pos_atual][2]
+            if pos_atual == pos_rem:
+                lista_invertida[pos_atual][2] = -1
+                if prox_pos == -1:
+                    lista_indice_pub.pop(m)
+            else:
+                while prox_pos > -1 and removido == False:
+                    if prox_pos == pos_rem:
+                        ant_pos = pos_atual
+                        pos_atual = prox_pos
+                        prox_pos = lista_invertida[pos_atual][2]
+                        lista_invertida[ant_pos][2] = prox_pos
+                        lista_invertida[pos_atual][2] = -1
+                        removido = True
+                    pos_atual = prox_pos
+                    prox_pos = lista_invertida[pos_atual][2]
+            m += 1
+        return True
+    
 def executar_operacoes(arq_operacoes: str):
     indices = carregar_indices()
     lista_prim = indices[0]
@@ -536,8 +591,7 @@ def executar_operacoes(arq_operacoes: str):
                 insercao(argumento, lista_prim, lista_indice_genero, lista_indice_pub, lista_invertida, arq)
 
             elif operacao == 'r':
-                
-                remocao(int(argumento, lista_prim, lista_invertida))
+                remocao(int(argumento), lista_prim, lista_invertida, lista_indice_genero, lista_indice_pub, arq)
 
 def main():
     if len(argv) < 2:
