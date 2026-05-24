@@ -21,4 +21,4 @@ test_map.o: test_map.c map.h
 draw_map: draw_map.c map.h
 	$(CC) $(CFLAGS) draw_map.c -c
 clean:
-	rm test_map draw_map *.o
+	rm -f test_map draw_map *.o
