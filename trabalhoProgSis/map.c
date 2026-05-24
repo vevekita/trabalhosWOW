@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "map.h"
 
@@ -5,16 +6,9 @@
 /*colocar como as funções do map.h funcionam*/
 Map *map_create(int rows, int cols){
     Map *m = malloc(sizeof(Map));
-    //if(m == NULL){
-    //  return NULL;
-    //}
     m->rows = rows;
     m->cols = cols;
     m->mat = malloc(rows * cols * sizeof(char));
-    // if(m->mat == NULL){
-    //     free(m);
-    //     return NULL;
-    // }
     for(int i = 0; i < rows*cols; i++){
         m->mat[i] = OPEN;
     }
@@ -30,20 +24,20 @@ int map_cols(const Map *m){
 }
 
 char map_get(const Map *m, int r, int c){
-    int i = r * m->cols + c;
+    int i = (r * m->cols) + c;
     return m->mat[i];
 }
 
 void map_set(Map *m, int r, int c, char ch){
-    int i = r * m->cols + c;
+    int i = (r * m->cols) + c;
     m->mat[i] = ch;
 }
 
 void map_print(const Map *m, FILE *out){
     // FILE *out = open(out, 'r')
-    for (int n = 0; n < m->cols; n++) {
-        for (int p = 0; p < m->rows; p++) {
-            int i = n * m->cols + p;
+    for (int r = 0; r < m->rows; r++) {
+        for (int c = 0; c < m->cols; c++) {
+            int i = (r * m->cols) + c;
         fprintf( out, "%c", m->mat[i]);
         }
     fprintf(out, "\n"); 
