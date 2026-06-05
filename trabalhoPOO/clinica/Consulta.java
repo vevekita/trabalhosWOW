@@ -1,6 +1,13 @@
 package clinica;
-
-
+/**
+ * Classe que armazena os dados de determinada consulta, como:
+ * -Data
+ * -Horário
+ * -Nome do médico
+ * -Paciente
+ * -Tipo de consulta (normal -> 1 hora ou retorno -> 30 minutos)
+ * Essa classe é acessada pela Secretária
+ */
 public class Consulta {
     private String data;
     private String horario;
