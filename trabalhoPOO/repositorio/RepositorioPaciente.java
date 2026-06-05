@@ -1,1 +1,58 @@
+package repositorio;
+import java.util.ArrayList;
+import clinica.Paciente;
+
+/**
+ *
+ * Classe que guarda e opera a lista de Pacientes na Clinica
+ * 
+ * Tem como publicos os métodos:
+ * - adicionar pacientes(Que adiciona pacientes à lista)
+ * - busca paciente(Que busca o objeto paciente, a partir do seu número de indentificação)
+ * - remove paciente(Que remove um paciente da lista)
+ * - atualiza x(Atualiza a informação x de determinado paciente na lista, onde x pode ser: Endereço, info de contato ou tipo de convenio)
+ */
+public class RepositorioPaciente {
+    private final ArrayList<Paciente> pacientes = new ArrayList();
+            
+    public void adicionarPaciente(Paciente paciente){
+        pacientes.add(paciente);
+    }
+    
+    public Paciente buscaPaciente(int idPaciente){
+        int index = -1;
+        
+        for (Paciente p: pacientes){
+            if (p.getDadoIdentificacao() == idPaciente){
+                index = pacientes.indexOf(p);
+                break;
+            }
+        }
+        return pacientes.get(index);
+    }
+    
+    public void removePaciente(Paciente paciente){
+        pacientes.remove(paciente);
+    }
+    
+    public void atualizaDataNascimento(Paciente paciente, String novaData){
+        int index = pacientes.indexOf(paciente);            /*Indice na lista que se encontra o paciente que será atualizado*/
+        pacientes.get(index).setDataNascimento(novaData);
+    }
+    
+    public void atualizaEndereco(Paciente paciente, String novoEndereco){
+        int index = pacientes.indexOf(paciente);
+        pacientes.get(index).setEndereco(novoEndereco);
+    }
+    
+    public void atualizaInfoContato(Paciente paciente, String novaInfo){
+        int index = pacientes.indexOf(paciente);
+        pacientes.get(index).setInfoContato(novaInfo);
+    }
+    
+    public void atualizaTipoConvenio(Paciente paciente, String novoConvenio){
+        int index = pacientes.indexOf(paciente);
+        pacientes.get(index).setTipoConvenio(novoConvenio);
+    }
+}
 
