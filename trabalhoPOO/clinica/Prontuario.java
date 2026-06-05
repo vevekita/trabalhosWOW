@@ -14,6 +14,14 @@ public class Prontuario {
     private String diagnostico;
     private String prescricao;
 
+    public Prontuario(){}
+    public Prontuario(int idPaciente, String sintomas, String diagnostico, String prescricao){
+        this.idPaciente = idPaciente;
+        this.sintomas = sintomas;
+        this.diagnostico = diagnostico;
+        this.prescricao = prescricao;
+    }
+    
     public int getIdPaciente() {
         return idPaciente;
     }

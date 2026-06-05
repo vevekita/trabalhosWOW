@@ -1,8 +1,17 @@
 package clinica;
-
-
+/**
+ *Classe dos dados adicionais do Paciente. Ela é acessada somente pelo médico!
+ * Essa classe possui o ID do paciente (para associar à algum Paciente) e os dados:
+ * - Fuma (sim ou não)
+ * - Bebe (sim ou não)
+ * - Colesterol (sim ou não)
+ * - Diabetes (sim ou não)
+ * - Doença cardíaca (sim ou não)
+ * - Se já fez cirurgia (se sim, especificar qual tipo)
+ * - Se tem alguma alergia (se sim, especificar do quê)
+ */
 public class DadosAdicionaisPaciente {
-    private Paciente paciente;
+    private int idPaciente;
     private boolean fuma;
     private boolean bebe;
     private boolean colesterol;
@@ -12,8 +21,8 @@ public class DadosAdicionaisPaciente {
     private String alergias;
     
     public DadosAdicionaisPaciente() {}
-    public DadosAdicionaisPaciente(Paciente paciente, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
-        this.paciente = paciente;
+    public DadosAdicionaisPaciente(int idPaciente, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
+        this.idPaciente = idPaciente;
         this.fuma = fuma;
         this.bebe = bebe;
         this.colesterol = colesterol;
@@ -23,12 +32,12 @@ public class DadosAdicionaisPaciente {
         this.alergias = alergias;
     }
 
-    public Paciente getPaciente() {
-        return paciente;
+    public int getIdPaciente() {
+        return idPaciente;
     }
 
-    public void setPaciente(Paciente paciente) {
-        this.paciente = paciente;
+    public void setIdPaciente(int idPaciente) {
+        this.idPaciente = idPaciente;
     }
 
     public boolean isFuma() {
