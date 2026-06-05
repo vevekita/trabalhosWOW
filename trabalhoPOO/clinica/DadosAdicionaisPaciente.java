@@ -1,6 +1,15 @@
 package clinica;
-
-
+/**
+ *Classe dos dados adicionais do Paciente. Ela é acessada somente pelo médico!
+ * Essa classe possui o ID do paciente (para associar à algum Paciente) e os dados:
+ * - Fuma (sim ou não)
+ * - Bebe (sim ou não)
+ * - Colesterol (sim ou não)
+ * - Diabetes (sim ou não)
+ * - Doença cardíaca (sim ou não)
+ * - Se já fez cirurgia (se sim, especificar qual tipo)
+ * - Se tem alguma alergia (se sim, especificar do quê)
+ */
 public class DadosAdicionaisPaciente {
     private int idPaciente;
     private boolean fuma;
