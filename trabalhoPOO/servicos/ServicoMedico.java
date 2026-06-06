@@ -31,16 +31,33 @@ public class ServicoMedico {
     public void cadastraDadosAdicionais(DadosAdicionaisPaciente novoDadosAdd) {
         dadosAdicionais.adicionarDadosAdicionais(novoDadosAdd);
     }
-    public void atualizaDadosAdicionais(boolean novoFuma, boolean novoBebe, boolean novoColesterol, boolean novoDiabetes, boolean novoDoencaCardiaca, String novoCirurgia, String novoAlergia) {
-        dadosAdicionais.atualizaFuma(novoFuma);
-        dadosAdicionais.atualizaBebe(novoBebe);
-        dadosAdicionais.atualizaColesterol(novoColesterol);
-        dadosAdicionais.atualizaDiabetes(novoDiabetes);
-        dadosAdicionais.atualizaDoencaCardiaca(novoDoencaCardiaca);
-        dadosAdicionais.atualizaCirurgia(novoCirurgia);
-        dadosAdicionais.atualizaAlergia(novoAlergia);
-    } //o ID do paciente não pode ser mutável!
+    //atualiza os dados adicionais
+    public void atualizaDadosId(DadosAdicionaisPaciente dadosAdPaciente, int novoIdPaciente) {
+        dadosAdPaciente.setIdPaciente(novoIdPaciente);
+    }
+    public void atualizaDadosFuma(DadosAdicionaisPaciente dadosAdPaciente, boolean novoFuma) {
+        dadosAdPaciente.setFuma(novoFuma);
+    }
+    public void atualizaDadosBebe(DadosAdicionaisPaciente dadosAdPaciente, boolean novoBebe) {
+        dadosAdPaciente.setBebe(novoBebe);
+    }
+    public void atualizaDadosDiabetes(DadosAdicionaisPaciente dadosAdPaciente, boolean novoDiabetes) {
+        dadosAdPaciente.setDiabetes(novoDiabetes);
+    }
+    public void atualizaDadosColesterol(DadosAdicionaisPaciente dadosAdPaciente, boolean novoColesterol) {
+        dadosAdPaciente.setColesterol(novoColesterol);
+    }
+    public void atualizaDadosDoencaCardiaca(DadosAdicionaisPaciente dadosAdPaciente, boolean novoDoencaCardiaca) {
+        dadosAdPaciente.setDoencaCardiaca(novoDoencaCardiaca);
+    }
+    public void atualizaDadosCirurgias(DadosAdicionaisPaciente dadosAdPaciente, String novoCirurgias) {
+        dadosAdPaciente.setCirurgias(novoCirurgias);
+    }
+    public void atualizaDadosAlergias(DadosAdicionaisPaciente dadosAdPaciente, String novoAlergias) {
+        dadosAdPaciente.setAlergias(novoAlergias);
+    }
     
+    //remove os dados adicionais
     public void removeDadosAdicionais(DadosAdicionaisPaciente dadoAddRem) {
         dadosAdicionais.removeDadosAdicionais(dadoAddRem);
     }
@@ -50,6 +67,24 @@ public class ServicoMedico {
         prontuarios.cadastraProntuario(novoProntuario);
     }
     
+    //atualiza dados do prontuário
+    public void atualizaProntId(Prontuario prontuario, int novoIdPaciente) {
+        prontuario.setIdPaciente(novoIdPaciente);
+    }
+    public void atualizaProntSintomas(Prontuario prontuario, String novoSintoma) {
+        prontuario.setSintomas(novoSintoma);
+    }
+    public void atualizaDiagnostico(Prontuario prontuario, String novoDiagnostico) {
+        prontuario.setDiagnostico(novoDiagnostico);
+    }
+    public void atualizaProntPrescricao(Prontuario prontuario, String novoPrescricao) {
+        prontuario.setPrescricao(novoPrescricao);
+    }
+    
+    //remove prontuário
+    public void removeProntuario(Prontuario prontRem) {
+        prontuarios.removeProntuario(prontRem);
+    }
     
     //Gera relatórios médicos:
     //geraRelatorio() para receita -> infoAdicional inclue informações básicas do medicamento(ex: "sertralina 50g").
@@ -116,4 +151,3 @@ public class ServicoMedico {
         }
     }
 }
-
