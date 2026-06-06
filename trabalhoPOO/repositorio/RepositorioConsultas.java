@@ -1,5 +1,6 @@
 package repositorio;
 import java.util.ArrayList;
+import java.util.List;
 import clinica.Consulta;
 import clinica.Paciente;
 
@@ -16,8 +17,9 @@ import clinica.Paciente;
  * Além disso, essa classe contém um método privado:
  * - verifica colisão de horários(Serve para verificar se ocorrerá uma colisão de horários)
  */
+
 public class RepositorioConsultas {
-    private final ArrayList<Consulta> consultas = new ArrayList();
+    private final List<Consulta> consultas = new ArrayList<>();
     
     public void adicionarConsulta(Consulta consulta){
         if (consultas.isEmpty()){
@@ -42,6 +44,15 @@ public class RepositorioConsultas {
         }
         return consultas.get(index);
     }
+
+    public Consulta buscarConsulta(String data, String horario, String medico) { // Não tem como um mesmo médico estar em duas consultas diferentes no mesmo horário no mesmo dia
+        for (Consulta c : consultas) {
+            if (c.getData().equals(data) && c.getHorario().equals(horario) && c.getMedico().equals(medico)) {
+                return c; // Retorna a consulta encontrada
+            }
+        }
+        return null; // Não encontrou
+    }
     
     public void removeConsulta(Consulta consulta){
         consultas.remove(consulta);
@@ -64,8 +75,9 @@ public class RepositorioConsultas {
         
         return ocorreColisao;
     }
-    
-    public void atualizaData(Consulta consulta, String novaData){
+
+    //a parte de atualizar foi passada pro ServicoSecretaria
+    /*public void atualizaData(Consulta consulta, String novaData){
         if(verificaColisaoHorarios(consulta.getHorario(), novaData) == false){
             int index = consultas.indexOf(consulta);
             consultas.get(index).setData(novaData);
@@ -92,5 +104,5 @@ public class RepositorioConsultas {
     public void atualizaTipoConsulta(Consulta consulta, String novoTipo){
         int index = consultas.indexOf(consulta);
         consultas.get(index).setTipoConsulta(novoTipo);
-    }
+    }*/
 }
