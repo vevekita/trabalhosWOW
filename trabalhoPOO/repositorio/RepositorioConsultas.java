@@ -37,7 +37,7 @@ public class RepositorioConsultas {
         int index = -1;
         
         for(Consulta c: consultas){
-            if (c.getPaciente() == paciente){
+            if (c.getPaciente().equals(paciente)){
                 index = consultas.indexOf(c);
                 break;
             }
@@ -58,7 +58,7 @@ public class RepositorioConsultas {
         consultas.remove(consulta);
     }
     
-    private boolean verificaColisaoHorarios(String horario, String data){
+    private boolean verificaColisaoHorarios(String horario, String data, String medico){
         boolean ocorreColisao = false;
         
         if (consultas.isEmpty()){
@@ -66,7 +66,7 @@ public class RepositorioConsultas {
         }
         else{
             for (Consulta c: consultas){
-                if (c.getHorario().equals(horario) && c.getData().equals(data)){
+                if (c.getHorario().equals(horario) && c.getData().equals(data) && c.getMedico().equals(medico)){
                     ocorreColisao = true;
                     break;
                 }
