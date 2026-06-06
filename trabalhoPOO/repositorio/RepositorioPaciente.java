@@ -21,6 +21,7 @@ public class RepositorioPaciente {
     
     public Paciente buscaPaciente(int idPaciente){
         int index = -1;
+        Paciente p1 = new Paciente();
         
         for (Paciente p: pacientes){
             if (p.getDadoIdentificacao() == idPaciente){
@@ -28,7 +29,15 @@ public class RepositorioPaciente {
                 break;
             }
         }
-        return pacientes.get(index);
+        
+        if(index != -1){
+            p1 = pacientes.get(index);
+        }
+        else{
+            p1.setDadosIdentificacao(-1);      /*Marcação lógica de que o Paciente não existe, ou seja, o Paciente não está na lista*/
+        }
+        
+        return p1;
     }
     
     public void removePaciente(Paciente paciente){
