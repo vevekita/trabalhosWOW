@@ -45,9 +45,14 @@ public class RepositorioPaciente {
         pacientes.get(index).setEndereco(novoEndereco);
     }
     
-    public void atualizaInfoContato(Paciente paciente, String novaInfo){
+    public void atualizaEmail(Paciente paciente, String novoEmail){
         int index = pacientes.indexOf(paciente);
-        pacientes.get(index).setInfoContato(novaInfo);
+        pacientes.get(index).setEmail(novoEmail);
+    }
+    
+    public void atualizaTelefone(Paciente paciente, String telefone){
+        int index = pacientes.indexOf(paciente);
+        pacientes.get(index).setTelefone(telefone);
     }
     
     public void atualizaTipoConvenio(Paciente paciente, String novoConvenio){
