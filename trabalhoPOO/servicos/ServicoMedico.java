@@ -16,74 +16,92 @@ import java.util.ArrayList;
  */
 
 public class ServicoMedico {
-    private RepositorioDadosAdicionais dadosAdicionais;
-    private RepositorioProntuario prontuarios;
+    private RepositorioDadosAdicionais repositorioDadosAdicionais;
+    private RepositorioProntuario repositorioProntuarios;
     
     public ServicoMedico() {
         
     }
     public ServicoMedico(RepositorioDadosAdicionais dadosAdicionais, RepositorioProntuario prontuarios) {
-        this.dadosAdicionais = dadosAdicionais;
-        this.prontuarios = prontuarios;
+        this.repositorioDadosAdicionais = dadosAdicionais;
+        this.repositorioProntuarios = prontuarios;
     }
     
     //Gerencia dados adicionais
     public void cadastraDadosAdicionais(DadosAdicionaisPaciente novoDadosAdd) {
-        dadosAdicionais.adicionarDadosAdicionais(novoDadosAdd);
+        repositorioDadosAdicionais.cadastrarDados(novoDadosAdd);
+        System.out.println("Dados adicionais do paciente cadastrados com sucesso!");
     }
     //atualiza os dados adicionais
-    public void atualizaDadosId(DadosAdicionaisPaciente dadosAdPaciente, int novoIdPaciente) {
-        dadosAdPaciente.setIdPaciente(novoIdPaciente);
+    public void atualizaDadosFuma(Paciente paciente, boolean novoFuma) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setFuma(novoFuma);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
-    public void atualizaDadosFuma(DadosAdicionaisPaciente dadosAdPaciente, boolean novoFuma) {
-        dadosAdPaciente.setFuma(novoFuma);
+    public void atualizaDadosBebe(Paciente paciente, boolean novoBebe) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setBebe(novoBebe);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
-    public void atualizaDadosBebe(DadosAdicionaisPaciente dadosAdPaciente, boolean novoBebe) {
-        dadosAdPaciente.setBebe(novoBebe);
+    public void atualizaDadosDiabetes(Paciente paciente, boolean novoDiabetes) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setDiabetes(novoDiabetes);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
-    public void atualizaDadosDiabetes(DadosAdicionaisPaciente dadosAdPaciente, boolean novoDiabetes) {
-        dadosAdPaciente.setDiabetes(novoDiabetes);
+    public void atualizaDadosColesterol(Paciente paciente, boolean novoColesterol) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setColesterol(novoColesterol);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
-    public void atualizaDadosColesterol(DadosAdicionaisPaciente dadosAdPaciente, boolean novoColesterol) {
-        dadosAdPaciente.setColesterol(novoColesterol);
+    public void atualizaDadosDoencaCardiaca(Paciente paciente, boolean novoDoencaCardiaca) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setDoencaCardiaca(novoDoencaCardiaca);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
-    public void atualizaDadosDoencaCardiaca(DadosAdicionaisPaciente dadosAdPaciente, boolean novoDoencaCardiaca) {
-        dadosAdPaciente.setDoencaCardiaca(novoDoencaCardiaca);
+    public void atualizaDadosCirurgias(Paciente paciente, String novoCirurgias) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setCirurgias(novoCirurgias);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
-    public void atualizaDadosCirurgias(DadosAdicionaisPaciente dadosAdPaciente, String novoCirurgias) {
-        dadosAdPaciente.setCirurgias(novoCirurgias);
-    }
-    public void atualizaDadosAlergias(DadosAdicionaisPaciente dadosAdPaciente, String novoAlergias) {
-        dadosAdPaciente.setAlergias(novoAlergias);
+    public void atualizaDadosAlergias(Paciente paciente, String novoAlergias) {
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        dadosExistentes.setAlergias(novoAlergias);
+        System.out.println("Dado adicional atualizado com sucesso!");
     }
     
     //remove os dados adicionais
     public void removeDadosAdicionais(DadosAdicionaisPaciente dadoAddRem) {
-        dadosAdicionais.removeDadosAdicionais(dadoAddRem);
+        repositorioDadosAdicionais.removeDadosAdicionais(dadoAddRem);
+        System.out.println("Dados adicionais removidos com sucesso!");
     }
     
     //gerencia Prontuario
     public void cadastraProntuario(Prontuario novoProntuario) {
-        prontuarios.cadastraProntuario(novoProntuario);
+        repositorioProntuarios.cadastrarProntuario(novoProntuario);
+        System.out.println("Prontuário cadastrado com sucesso!");
     }
     
     //atualiza dados do prontuário
-    public void atualizaProntId(Prontuario prontuario, int novoIdPaciente) {
-        prontuario.setIdPaciente(novoIdPaciente);
+    public void atualizaProntSintomas(int idPaciente, String novoSintoma) {
+        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
+        prontuarioExistente.setSintomas(novoSintoma);
+        System.out.println("Sintomas do paciente atualizados!");
     }
-    public void atualizaProntSintomas(Prontuario prontuario, String novoSintoma) {
-        prontuario.setSintomas(novoSintoma);
+    public void atualizaDiagnostico(int idPaciente, String novoDiagnostico) {
+        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
+        prontuarioExistente.setDiagnostico(novoDiagnostico);
+        System.out.println("Diagnóstico do paciente atualizado!");
     }
-    public void atualizaDiagnostico(Prontuario prontuario, String novoDiagnostico) {
-        prontuario.setDiagnostico(novoDiagnostico);
-    }
-    public void atualizaProntPrescricao(Prontuario prontuario, String novoPrescricao) {
-        prontuario.setPrescricao(novoPrescricao);
+    public void atualizaProntPrescricao(int idPaciente, String novoPrescricao) {
+        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
+        prontuarioExistente.setPrescricao(novoPrescricao);
+        System.out.println("Prescrição médica do paciente atualizado!");
     }
     
     //remove prontuário
     public void removeProntuario(Prontuario prontRem) {
-        prontuarios.removeProntuario(prontRem);
+        repositorioProntuarios.removeProntuario(prontRem);
+        System.out.println("Prontuário removido com sucesso!");
     }
     
     //Gera relatórios médicos:
@@ -99,7 +117,7 @@ public class ServicoMedico {
         }
     }
     
-    //geraRelatorio() para declaração de acompanhamento -> infoAdicional inclue informações do indivíduo a acompanhar o paciente(ex: Maria Giu, irmã).
+    //geraRelatorio() para declaração de acompanhamento -> infoAdicional inclue informações do indivíduo a acompanhar o paciente(ex: Maria Gil, irmã).
     public void geraRelatorio(int tipoRelatorio, String medico, Paciente paciente, String infoAdicional, int diasAfastado) {
         if (tipoRelatorio == 1) {
             System.out.println("-------DECLARAÇÃO-DE-ACOMPANHAMENTO-------");
