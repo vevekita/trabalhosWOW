@@ -36,44 +36,77 @@ public class ServicoMedico {
     //atualiza os dados adicionais
     public void atualizaDadosFuma(Paciente paciente, boolean novoFuma) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setFuma(novoFuma);
-        System.out.println("Dado adicional atualizado com sucesso!");
+        if (dadosExistentes != null) {
+            dadosExistentes.setFuma(novoFuma);
+            System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     public void atualizaDadosBebe(Paciente paciente, boolean novoBebe) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setBebe(novoBebe);
-        System.out.println("Dado adicional atualizado com sucesso!");
+        if (dadosExistentes != null) {
+            dadosExistentes.setBebe(novoBebe);
+            System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     public void atualizaDadosDiabetes(Paciente paciente, boolean novoDiabetes) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setDiabetes(novoDiabetes);
-        System.out.println("Dado adicional atualizado com sucesso!");
+        if (dadosExistentes != null) { 
+            dadosExistentes.setDiabetes(novoDiabetes);
+            System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     public void atualizaDadosColesterol(Paciente paciente, boolean novoColesterol) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setColesterol(novoColesterol);
-        System.out.println("Dado adicional atualizado com sucesso!");
+        if (dadosExistentes != null) {
+            dadosExistentes.setColesterol(novoColesterol);
+            System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     public void atualizaDadosDoencaCardiaca(Paciente paciente, boolean novoDoencaCardiaca) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setDoencaCardiaca(novoDoencaCardiaca);
-        System.out.println("Dado adicional atualizado com sucesso!");
+        if (dadosExistentes != null) {
+            dadosExistentes.setDoencaCardiaca(novoDoencaCardiaca);
+            System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     public void atualizaDadosCirurgias(Paciente paciente, String novoCirurgias) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setCirurgias(novoCirurgias);
-        System.out.println("Dado adicional atualizado com sucesso!");
+        if (dadosExistentes != null) {
+            dadosExistentes.setCirurgias(novoCirurgias);
+            System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     public void atualizaDadosAlergias(Paciente paciente, String novoAlergias) {
         DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
+        if (dadosExistentes != null) {
         dadosExistentes.setAlergias(novoAlergias);
         System.out.println("Dado adicional atualizado com sucesso!");
+        } else {
+            System.out.println("Dado adicional não encontrado.");
+        }
     }
     
     //remove os dados adicionais
     public void removeDadosAdicionais(DadosAdicionaisPaciente dadoAddRem) {
-        repositorioDadosAdicionais.removeDadosAdicionais(dadoAddRem);
-        System.out.println("Dados adicionais removidos com sucesso!");
+        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(dadoAddRem.getPaciente());
+        if (dadosExistentes != null) {
+            repositorioDadosAdicionais.removeDadosAdicionais(dadoAddRem);
+            System.out.println("Dados adicionais removidos com sucesso!");
+        } else {
+            System.out.println("Não foi possível remover: Dados adicionais não encontrados");
+        }
     }
     
     //gerencia Prontuario
@@ -85,24 +118,41 @@ public class ServicoMedico {
     //atualiza dados do prontuário
     public void atualizaProntSintomas(int idPaciente, String novoSintoma) {
         Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
-        prontuarioExistente.setSintomas(novoSintoma);
-        System.out.println("Sintomas do paciente atualizados!");
+        if (prontuarioExistente != null) {
+            prontuarioExistente.setSintomas(novoSintoma);
+            System.out.println("Sintomas do paciente atualizados!");
+        } else {
+            System.out.println("Dado não encontrado.");
+        }
     }
     public void atualizaDiagnostico(int idPaciente, String novoDiagnostico) {
         Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
-        prontuarioExistente.setDiagnostico(novoDiagnostico);
-        System.out.println("Diagnóstico do paciente atualizado!");
+        if (prontuarioExistente != null) {
+            prontuarioExistente.setDiagnostico(novoDiagnostico);
+            System.out.println("Diagnóstico do paciente atualizado!");
+        } else {
+            System.out.println("Dado não encontrado.");
+        }
     }
     public void atualizaProntPrescricao(int idPaciente, String novoPrescricao) {
         Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
-        prontuarioExistente.setPrescricao(novoPrescricao);
-        System.out.println("Prescrição médica do paciente atualizado!");
+        if (prontuarioExistente != null) {
+            prontuarioExistente.setPrescricao(novoPrescricao);
+            System.out.println("Prescrição médica do paciente atualizado!");
+        } else {
+            System.out.println("Dado não encontrado.");
+        }
     }
     
     //remove prontuário
     public void removeProntuario(Prontuario prontRem) {
+        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(prontRem.getIdPaciente());
+        if (prontuarioExistente != null) {
         repositorioProntuarios.removeProntuario(prontRem);
         System.out.println("Prontuário removido com sucesso!");
+        } else {
+            System.out.println("Não foi possível remover: Prontuário não encontrado");
+        }
     }
     
     //Gera relatórios médicos:
@@ -170,3 +220,4 @@ public class ServicoMedico {
         }
     }
 }
+
