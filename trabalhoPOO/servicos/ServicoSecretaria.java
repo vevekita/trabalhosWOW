@@ -120,10 +120,14 @@ public class ServicoSecretaria {
     public void atualizarDataConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, LocalDate novaData){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
         if(consultaExistente != null){
-            consultaExistente.setData(novaData);
-            System.out.println("Data da consulta atualizada com sucesso!");
-        }
-        else{
+            if (repositorioConsultas.verificaColisaoHorarios(horaAntiga, minutoAntigo, novaData, medicoAntigo, consultaExistente.getTipoConsulta(), consultaExistente) == false) {
+                consultaExistente.setData(novaData);
+                System.out.println("Data da consulta atualizada com sucesso!");
+            } else {
+                System.out.println("Não foi possível atuualizar a data: horario já agendado!");
+            }
+            
+        } else {
             System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
         }
     }
@@ -131,7 +135,7 @@ public class ServicoSecretaria {
     public void atualizarHorarioConsulta(LocalDate dataAntiga, int horasAntigas, int minutosAntigos, String medicoAntigo, int horasNovas, int minutosNovos){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horasAntigas, minutosAntigos, medicoAntigo);
         if (consultaExistente != null) {
-            if (repositorioConsultas.verificaColisaoHorarios(horasNovas, minutosNovos, consultaExistente.getData(), consultaExistente.getMedico(), consultaExistente.getPaciente(), consultaExistente.getTipoConsulta()) == false) {
+            if (repositorioConsultas.verificaColisaoHorarios(horasNovas, minutosNovos, dataAntiga, medicoAntigo, consultaExistente.getTipoConsulta(), consultaExistente) == false) {
                 consultaExistente.setHoras(horasNovas);
                 consultaExistente.setMinutos(minutosNovos);
                 System.out.println("Horário da consulta atualizada com sucesso!");
@@ -145,8 +149,12 @@ public class ServicoSecretaria {
     public void atualizarTipoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, String novoTipoConsulta){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
         if(consultaExistente != null){
-            consultaExistente.setTipoConsulta(novoTipoConsulta);
-            System.out.println("Tipo da consulta atualizada com sucesso!");
+            if (repositorioConsultas.verificaColisaoHorarios(horaAntiga, minutoAntigo, dataAntiga, medicoAntigo, novoTipoConsulta, consultaExistente) == false) {
+                consultaExistente.setTipoConsulta(novoTipoConsulta);
+                System.out.println("Tipo da consulta atualizada com sucesso!");
+            } else {
+                System.out.println("Não foi possível atualizar o tipo de consulta: ocupação de horario reservado!");
+            }  
         }
         else{
             System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
