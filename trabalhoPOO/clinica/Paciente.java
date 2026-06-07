@@ -21,7 +21,7 @@ public class Paciente{
     public Paciente() {
         
     }
-    public Paciente(int dadoIdentificacao, String nome, String dataNascimento, String endereco, String telefone, String email, String tipoConvenio, DadosAdicionaisPaciente dadosAdicionais) {
+    public Paciente(int dadoIdentificacao, String nome, String dataNascimento, String endereco, String telefone, String email, String tipoConvenio) {
         this.dadoIdentificacao = dadoIdentificacao;
         this.nome = nome;
         this.dataNascimento = dataNascimento;
