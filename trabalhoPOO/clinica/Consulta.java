@@ -1,4 +1,6 @@
 package clinica;
+
+import java.time.LocalDate;
 /**
  * Classe que armazena os dados de determinada consulta, como:
  * -Data
@@ -10,7 +12,7 @@ package clinica;
  * Essa classe é acessada pela Secretária
  */
 public class Consulta {
-    private String data;
+    private LocalDate data;
     private int horas;
     private int minutos;
     private String medico;
@@ -20,7 +22,7 @@ public class Consulta {
     public Consulta() {
         
     }
-    public Consulta(String data, int horas, int minutos, String medico, Paciente paciente, String tipoConsulta) {
+    public Consulta(LocalDate data, int horas, int minutos, String medico, Paciente paciente, String tipoConsulta) {
         this.data = data;
         this.horas = horas;
         this.minutos = minutos;
@@ -29,7 +31,7 @@ public class Consulta {
         this.tipoConsulta = tipoConsulta;
     }
 
-    public void setData(String data) {
+    public void setData(LocalDate data) {
         this.data = data;
     }
 
@@ -53,7 +55,7 @@ public class Consulta {
         this.tipoConsulta = tipoConsulta;
     }
 
-    public String getData() {
+    public LocalDate getData() {
         return data;
     }
 
