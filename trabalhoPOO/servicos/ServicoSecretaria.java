@@ -25,13 +25,21 @@ public class ServicoSecretaria {
     }
     
     public void cadastrarPaciente(Paciente paciente){
-        repositorioPaciente.adicionarPaciente(paciente);
-        System.out.println("Paciente cadastrado com sucesso!");
+            repositorioPaciente.adicionarPaciente(paciente);
+            System.out.println("Paciente cadastrado com sucesso!");
+        
     }
     
     public void removerPaciente(Paciente paciente){
-        repositorioPaciente.removePaciente(paciente);
-        System.out.println("Paciente removido com sucesso!");
+        int id = paciente.getDadoIdentificacao();
+        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
+        if(pacienteExistente != null){
+            repositorioPaciente.removePaciente(paciente);
+            System.out.println("Paciente removido com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar o paciente para remoção!");
+        }
     }
     
     public void atualizarDataNascimento(int id, String novaDataNascimento){
@@ -39,6 +47,9 @@ public class ServicoSecretaria {
         if(pacienteExistente != null){
             pacienteExistente.setDataNascimento(novaDataNascimento);
             System.out.println("Data de nascimento do paciente atualizado com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
         }
     }
     
@@ -48,6 +59,9 @@ public class ServicoSecretaria {
             pacienteExistente.setEndereco(novoEndereco);
             System.out.println("Endereço do paciente atualizado com sucesso!");
         }
+        else{
+            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
+        }
     }
     
     public void atualizarTelefone(int id, String novoTelefone){
@@ -55,6 +69,9 @@ public class ServicoSecretaria {
         if(pacienteExistente != null){
             pacienteExistente.setTelefone(novoTelefone);
             System.out.println("Telefone do paciente atualizado com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
         }
     }
     
@@ -64,6 +81,9 @@ public class ServicoSecretaria {
             pacienteExistente.setEmail(novoEmail);
             System.out.println("Email do paciente atualizado com sucesso!");
         }
+        else{
+            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
+        }
     }
     
     public void atualizarTipoConvenio(int id, String novoTipoConvenio){
@@ -71,6 +91,9 @@ public class ServicoSecretaria {
         if(pacienteExistente != null){
             pacienteExistente.setTipoConvenio(novoTipoConvenio);
             System.out.println("Tipo de convênio do paciente atualizado com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
         }
     }
     
@@ -80,8 +103,18 @@ public class ServicoSecretaria {
     }
     
     public void removerConsulta(Consulta consulta){
-        repositorioConsultas.removeConsulta(consulta);
-        System.out.println("Consulta removida com sucesso!");
+        LocalDate data = consulta.getData();
+        int hora = consulta.getHoras();
+        int minuto = consulta.getMinutos();
+        String medico = consulta.getMedico();
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(data, hora, minuto, medico);
+        if(consultaExistente != null){
+            repositorioConsultas.removeConsulta(consulta);
+            System.out.println("Consulta removida com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar a consulta para remoção!");
+        }
     }
     
     public void atualizarDataConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, LocalDate novaData){
@@ -89,6 +122,9 @@ public class ServicoSecretaria {
         if(consultaExistente != null){
             consultaExistente.setData(novaData);
             System.out.println("Data da consulta atualizada com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
         }
     }
     
@@ -98,6 +134,9 @@ public class ServicoSecretaria {
             consultaExistente.setHoras(novaHora);
             System.out.println("Hora da consulta atualizada com sucesso!");
         }
+        else{
+            System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
+        }
     }
     
     public void atualizarMinutoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novoMinuto){
@@ -106,6 +145,9 @@ public class ServicoSecretaria {
             consultaExistente.setMinutos(novoMinuto);
             System.out.println("Minuto da consulta atualizada com sucesso!");
         }
+        else{
+            System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
+        }
     }
     
     public void atualizarTipoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, String novoTipoConsulta){
@@ -113,6 +155,9 @@ public class ServicoSecretaria {
         if(consultaExistente != null){
             consultaExistente.setTipoConsulta(novoTipoConsulta);
             System.out.println("Tipo da consulta atualizada com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
         }
     }
     
