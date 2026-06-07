@@ -10,6 +10,8 @@ import repositorio.RepositorioProntuario;
 import servicos.GerenciadorMensagens;
 import servicos.ServicoMedico;
 import servicos.ServicoSecretaria;
+import java.time.LocalDate;
+import java.util.List;
 
 
 /**
@@ -22,6 +24,8 @@ public class Main {
         RepositorioPaciente repPaciente = new RepositorioPaciente();
         RepositorioConsultas repConsultas = new RepositorioConsultas();
         ServicoSecretaria servicoSecretaria = new ServicoSecretaria(repPaciente, repConsultas);
+        GerenciadorMensagens gerenciadorMensagens = new GerenciadorMensagens();
+        List<Consulta> consultasAmanha = servicoSecretaria.gerarRelatorioComContato();
         
         //repositórios para uso do médico e instanciação do serviço
         RepositorioDadosAdicionais repDadosAdicionais = new RepositorioDadosAdicionais();
@@ -42,14 +46,14 @@ public class Main {
         servicoSecretaria.cadastrarPaciente(p5);
         
         //o mesmo com consultas
-        Consulta c1 = new Consulta("03/06/2026", 12, 30, "Barnabe", p1 , "normal");
-        Consulta c2 = new Consulta("08/06/2026", 16, 00, "Barnabe", p1 , "retorno");
-        Consulta c3 = new Consulta("08/06/2026", 16, 00, "Denise", p2 , "normal");
-        Consulta c4 = new Consulta("08/06/2026", 16, 30, "Denise", p3 , "normal");
-        Consulta c5 = new Consulta("09/06/2026", 16, 30, "Wilda", p4 , "normal");
-        Consulta c6 = new Consulta("08/06/2026", 16, 30, "Denise", p5 , "normal");
-        Consulta c7 = new Consulta("08/06/2026", 18, 30, "Barnabe", p3 , "retorno");
-        Consulta c8 = new Consulta("08/06/2026", 18, 30, "Wilda", p4 , "retorno");
+        Consulta c1 = new Consulta(LocalDate.of(2026, 6, 3), 12, 30, "Barnabe", p1 , "normal");
+        Consulta c2 = new Consulta(LocalDate.of(2026, 6, 8), 16, 00, "Barnabe", p1 , "retorno");
+        Consulta c3 = new Consulta(LocalDate.of(2026, 6, 8), 16, 00, "Denise", p2 , "normal");
+        Consulta c4 = new Consulta(LocalDate.of(2026, 6, 8), 16, 30, "Denise", p3 , "normal");
+        Consulta c5 = new Consulta(LocalDate.of(2026, 6, 9), 16, 30, "Wilda", p4 , "normal");
+        Consulta c6 = new Consulta(LocalDate.of(2026, 6, 8), 16, 30, "Denise", p5 , "normal");
+        Consulta c7 = new Consulta(LocalDate.of(2026, 6, 8), 18, 30, "Barnabe", p3 , "retorno");
+        Consulta c8 = new Consulta(LocalDate.of(2026, 6, 8), 18, 30, "Wilda", p4 , "retorno");
         
         //registrando consultas no sistema
         servicoSecretaria.cadastrarConsulta(c1);
@@ -61,7 +65,8 @@ public class Main {
         servicoSecretaria.cadastrarConsulta(c7);
         servicoSecretaria.cadastrarConsulta(c8);
         
-        
+        //envio das mensagens por SMS ou email
+        gerenciadorMensagens.enviarMensagens(consultasAmanha);
     }
     
 }
