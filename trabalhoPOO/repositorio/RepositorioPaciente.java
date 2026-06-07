@@ -19,7 +19,12 @@ public class RepositorioPaciente {
     private final List<Paciente> pacientes = new ArrayList<>();
             
     public void adicionarPaciente(Paciente paciente){
-        pacientes.add(paciente);
+        if(verificaPacienteNaLista(paciente) == false){
+            pacientes.add(paciente);
+        }
+        else{
+            System.out.println("Não foi possível cadastrar o paciente: Id já existente");
+        }
     }
 
     public void removePaciente(Paciente paciente){
@@ -33,6 +38,19 @@ public class RepositorioPaciente {
             }
         }
         return null;
+    }
+    
+    private boolean verificaPacienteNaLista(Paciente paciente){
+        boolean estaPresente = false;
+        
+        for(Paciente p: pacientes){
+            if(p.getDadoIdentificacao() == paciente.getDadoIdentificacao()){
+            estaPresente = true;
+            break;
+            }
+        }
+        
+        return estaPresente;
     }
     
     /*public Paciente buscaPaciente(int idPaciente){
