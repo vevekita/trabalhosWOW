@@ -2,15 +2,17 @@ package clinica;
 /**
  * Classe que armazena os dados de determinada consulta, como:
  * -Data
- * -Horário
+ * -Horas
+ * -Minutos
  * -Nome do médico
  * -Paciente
- * -Tipo de consulta (normal -> 1 hora ou retorno -> 30 minutos)
+ * -Tipo de consulta (normal -> 1 hora ou retorno .> 30 minutos)
  * Essa classe é acessada pela Secretária
  */
 public class Consulta {
     private String data;
-    private String horario;
+    private int horas;
+    private int minutos;
     private String medico;
     private Paciente paciente;
     private String tipoConsulta; //consulta normal(1h) ou retorno(30min)
@@ -18,9 +20,10 @@ public class Consulta {
     public Consulta() {
         
     }
-    public Consulta(String data, String horario, String medico, Paciente paciente, String tipoConsulta) {
+    public Consulta(String data, int horas, int minutos, String medico, Paciente paciente, String tipoConsulta) {
         this.data = data;
-        this.horario = horario;
+        this.horas = horas;
+        this.minutos = minutos;
         this.medico = medico;
         this.paciente = paciente;
         this.tipoConsulta = tipoConsulta;
@@ -30,10 +33,14 @@ public class Consulta {
         this.data = data;
     }
 
-    public void setHorario(String horario) {
-        this.horario = horario;
+    public void setHoras(int horas) {
+        this.horas = horas;
     }
 
+    public void setMinutos(int minutos) {
+        this.minutos = minutos;
+    }
+    
     public void setMedico(String medico) {
         this.medico = medico;
     }
@@ -50,10 +57,14 @@ public class Consulta {
         return data;
     }
 
-    public String getHorario() {
-        return horario;
+    public int getHoras() {
+        return horas;
     }
 
+    public int getMinutos() {
+        return minutos;
+    }
+    
     public String getMedico() {
         return medico;
     }
