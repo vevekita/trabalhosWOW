@@ -58,27 +58,28 @@ public class RepositorioConsultas {
         consultas.remove(consulta);
     }
     
-    public boolean verificaColisaoHorarios(Consulta cons){
+    public boolean verificaColisaoHorarios(int horas, int minutos, String data, String medico, Paciente paciente, String tipoConsulta){
         boolean ocorreColisao = false;
         
         if (consultas.isEmpty()){
             ocorreColisao = false;
         }
         else{
-            int horarioCons = (cons.getHoras() * 60) + cons.getMinutos();
+            int horarioCons = (horas * 60) + minutos;
             int duracaoCons = 0;
             //se o tipo da Consulta for o normal(duração de 1h):
-            if ("normal".equals(cons.getTipoConsulta())) {
-                duracaoCons = 30;
+            if ("normal".equals(tipoConsulta)) {
+                duracaoCons = 60;
             } else {
                 //se o tipo da Consulta for de retorno (duração de 30min):
-                if ("retorno".equals(cons.getTipoConsulta())) {
-                    duracaoCons = 60;
+                if ("retorno".equals(tipoConsulta)) {
+                    duracaoCons = 30;
                 }
             }
             int fimCons = horarioCons + duracaoCons;
             
             for (Consulta c: consultas){
+                
                 int horarioC = (c.getHoras() * 60) + c.getMinutos();
                 int duracaoC = 0;
                 if ("normal".equals(c.getTipoConsulta())) {
@@ -89,12 +90,12 @@ public class RepositorioConsultas {
                     }
                 }
                 int fimC = horarioC + duracaoC;
-                if (c == cons) {  //se a consulta de verificação é igual à consulta na lista:
+                if (c.getHoras() == horas && c.getMinutos() == minutos && c.getData().equals(data) && c.getMedico().equals(medico) && c.getPaciente().equals(paciente) && c.getTipoConsulta().equals(tipoConsulta)) {  //se a consulta de verificação é igual à consulta na lista:
                     ocorreColisao = false;
                     break;
                 }
-                if (c.getData().equals(cons.getData())){
-                    if (c.getMedico().equals(cons.getMedico()) || c.getPaciente().equals(cons.getPaciente())) {
+                if (c.getData().equals(data)){
+                    if (c.getMedico().equals(medico) || c.getPaciente().equals(paciente)) {
                         if (horarioC < fimCons && fimC > horarioCons) { //verifica sobreposição de horários
                             ocorreColisao = true;
                             break;
@@ -106,7 +107,6 @@ public class RepositorioConsultas {
         
         return ocorreColisao;
     }
-
     public List<Consulta> listarConsultas(){
         return new ArrayList<>(consultas); // Retorna uma cópia da lista de consultas
     }
