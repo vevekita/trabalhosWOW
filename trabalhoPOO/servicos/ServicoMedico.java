@@ -5,6 +5,7 @@ import repositorio.RepositorioDadosAdicionais;
 import repositorio.RepositorioProntuario;
 import clinica.Paciente;
 import clinica.Consulta;
+import java.time.LocalDate;
 import java.util.ArrayList;
 /**
  * Classe que contém todas as operações que um médico pode fazer no sistema, tais como:
@@ -142,12 +143,12 @@ public class ServicoMedico {
         }
     }
     
-    //geraRelatorio() para acessar todos os clientes do mês -> mesAno se refere ao Mês e o Ano selecionado (ex: 06/2026)
-    public void geraRelatorio(int tipoRelatorio, String medico, ArrayList<Consulta> todasConsultas, String mesAno) {
+    //geraRelatorio() para acessar todos os clientes do mês
+    public void geraRelatorio(int tipoRelatorio, String medico, ArrayList<Consulta> todasConsultas, LocalDate data) {
         if (tipoRelatorio == 3) {
             System.out.println("------------CLIENTES-NO-MÊS------------");
             System.out.println("MÉDICO: " + medico);
-            System.out.println("MÊS E ANO SELECIONADOS: " + mesAno);
+            System.out.println("MÊS E ANO SELECIONADOS: " + data.getMonthValue() + "/" + data.getYear());
             
             int i = 0; //tipo de contador para a numeração de clientes
             if (todasConsultas == null) {
@@ -155,7 +156,7 @@ public class ServicoMedico {
             } else {
                 for (Consulta c: todasConsultas) {
                     if (c.getMedico().equals(medico)) {
-                        if (c.getData().contains("/"+mesAno)) {
+                        if (c.getData().getMonthValue() == data.getMonthValue() && c.getData().getYear() == data.getYear()) {
                             i += 1;
                             System.out.println("PACIENTE #" + i + " - " + c.getPaciente().getNome());
                         }
