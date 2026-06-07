@@ -33,7 +33,7 @@ public class ServicoSecretaria {
         repositorioPaciente.removePaciente(paciente);
         System.out.println("Paciente removido com sucesso!");
     }
-
+    
     public void atualizarDataNascimento(int id, String novaDataNascimento){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
         pacienteExistente.setDataNascimento(novaDataNascimento);
@@ -63,7 +63,7 @@ public class ServicoSecretaria {
         pacienteExistente.setTipoConvenio(novoTipoConvenio);
         System.out.println("Tipo de convênio do paciente atualizado com sucesso!");
     }
-
+    
     public void cadastrarConsulta(Consulta consulta){
         repositorioConsultas.adicionarConsulta(consulta);
         System.out.println("Consulta cadastrada com sucesso!");
@@ -73,22 +73,69 @@ public class ServicoSecretaria {
         repositorioConsultas.removeConsulta(consulta);
         System.out.println("Consulta removida com sucesso!");
     }
-
-    public void atualizarDataConsulta(String dataAntiga, String horarioAntigo, String medicoAntigo, String novaData){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horarioAntigo, medicoAntigo);
-        consultaExistente.setData(novaData);
-        System.out.println("Data da consulta atualizada com sucesso!");
+    
+    public void atualizarDataConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, LocalDate novaData){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
+        if(consultaExistente != null){
+            consultaExistente.setData(novaData);
+            System.out.println("Data da consulta atualizada com sucesso!");
+        }
     }
     
-    public void atualizarHorarioConsulta(String dataAntiga, String horarioAntigo, String medicoAntigo, String novoHorario){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horarioAntigo, medicoAntigo);
-        consultaExistente.setHorario(novoHorario);
-        System.out.println("Horário da consulta atualizada com sucesso!");
+    public void atualizarHoraConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novaHora){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
+        consultaExistente.setHoras(novaHora);
+        System.out.println("Hora da consulta atualizada com sucesso!");
     }
     
-    public void atualizarTipoConsulta(String dataAntiga, String horarioAntigo, String medicoAntigo, String novoTipoConsulta){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horarioAntigo, medicoAntigo);
+    public void atualizarMinutoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novoMinuto){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
+        consultaExistente.setMinutos(novoMinuto);
+        System.out.println("Minuto da consulta atualizada com sucesso!");
+    }
+    
+    public void atualizarTipoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, String novoTipoConsulta){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
         consultaExistente.setTipoConsulta(novoTipoConsulta);
         System.out.println("Tipo da consulta atualizada com sucesso!");
+    }
+    
+    //gera o relatório das consultas de amanhã cujos pacientes possuem pelo menos uma forma de contato (email ou telefone)
+    public List<Consulta> gerarRelatorioComContato(){
+        LocalDate amanha = LocalDate.now().plusDays(1); //para conseguir a data de amanhã
+        List<Consulta> todasConsultas = repositorioConsultas.listarConsultas();
+        List<Consulta> consultasAmanhaContato = new ArrayList<>();
+        
+        for(Consulta c : todasConsultas){
+            if(c.getData().equals(amanha)){
+                String telefone = c.getPaciente().getTelefone();
+                String email = c.getPaciente().getEmail();
+                
+                if(telefone != null || email != null){
+                    consultasAmanhaContato.add(c);
+                }
+            }
+        }
+        
+        return consultasAmanhaContato;
+    }
+    
+    //gera o relatório das consultas de amanhã cujos pacientes não possuem forma de contato
+    public List<Consulta> gerarRelatorioSemContato(){
+        LocalDate amanha = LocalDate.now().plusDays(1);
+        List<Consulta> todasConsultas = repositorioConsultas.listarConsultas();
+        List<Consulta> consultasAmanhaSemContato = new ArrayList<>();
+        
+        for(Consulta c : todasConsultas){
+            if(c.getData().equals(amanha)){
+                String telefone = c.getPaciente().getTelefone();
+                String email = c.getPaciente().getEmail();
+                
+                if(telefone == null && email == null){
+                    consultasAmanhaSemContato.add(c);
+                }
+            }
+        }
+        return consultasAmanhaSemContato;
     }
 }
