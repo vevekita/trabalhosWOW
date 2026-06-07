@@ -27,8 +27,7 @@ public class Main {
         RepositorioDadosAdicionais repDadosAdicionais = new RepositorioDadosAdicionais();
         RepositorioProntuario repProntuario = new RepositorioProntuario();
         ServicoMedico servicoMedico = new ServicoMedico(repDadosAdicionais, repProntuario);
-
-        //criação dos objetos Paciente
+        
         Paciente p1 = new Paciente(1, "Abgail", "22/03/1988", "Rua das Abobrinhas, N762", "(22) 78943567", null, "Particular");
         Paciente p2 = new Paciente(2, "Alexandre", "14/08/1967", "Rua Ofélia, N128", null, "alexandreogrande@hotmail.com", "Público");
         Paciente p3 = new Paciente(3, "Katylin", "12/12/2012", "Rua genérica, N001", null, null, "Particular");
@@ -42,7 +41,27 @@ public class Main {
         servicoSecretaria.cadastrarPaciente(p4);
         servicoSecretaria.cadastrarPaciente(p5);
         
-        //o mesmo com consultas...
+        //o mesmo com consultas
+        Consulta c1 = new Consulta("03/06/2026", 12, 30, "Barnabe", p1 , "normal");
+        Consulta c2 = new Consulta("08/06/2026", 16, 00, "Barnabe", p1 , "retorno");
+        Consulta c3 = new Consulta("08/06/2026", 16, 00, "Denise", p2 , "normal");
+        Consulta c4 = new Consulta("08/06/2026", 16, 30, "Denise", p3 , "normal");
+        Consulta c5 = new Consulta("09/06/2026", 16, 30, "Wilda", p4 , "normal");
+        Consulta c6 = new Consulta("08/06/2026", 16, 30, "Denise", p5 , "normal");
+        Consulta c7 = new Consulta("08/06/2026", 18, 30, "Barnabe", p3 , "retorno");
+        Consulta c8 = new Consulta("08/06/2026", 18, 30, "Wilda", p4 , "retorno");
+        
+        //registrando consultas no sistema
+        servicoSecretaria.cadastrarConsulta(c1);
+        servicoSecretaria.cadastrarConsulta(c2);
+        servicoSecretaria.cadastrarConsulta(c3);
+        servicoSecretaria.cadastrarConsulta(c4);
+        servicoSecretaria.cadastrarConsulta(c5);
+        servicoSecretaria.cadastrarConsulta(c6);
+        servicoSecretaria.cadastrarConsulta(c7);
+        servicoSecretaria.cadastrarConsulta(c8);
+        
+        
     }
     
 }
