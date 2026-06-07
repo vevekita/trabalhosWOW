@@ -84,20 +84,26 @@ public class ServicoSecretaria {
     
     public void atualizarHoraConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novaHora){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
-        consultaExistente.setHoras(novaHora);
-        System.out.println("Hora da consulta atualizada com sucesso!");
+        if(consultaExistente != null){
+            consultaExistente.setHoras(novaHora);
+            System.out.println("Hora da consulta atualizada com sucesso!");
+        }
     }
     
     public void atualizarMinutoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novoMinuto){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
-        consultaExistente.setMinutos(novoMinuto);
-        System.out.println("Minuto da consulta atualizada com sucesso!");
+        if(consultaExistente != null){
+            consultaExistente.setMinutos(novoMinuto);
+            System.out.println("Minuto da consulta atualizada com sucesso!");
+        }
     }
     
     public void atualizarTipoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, String novoTipoConsulta){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
-        consultaExistente.setTipoConsulta(novoTipoConsulta);
-        System.out.println("Tipo da consulta atualizada com sucesso!");
+        if(consultaExistente != null){
+            consultaExistente.setTipoConsulta(novoTipoConsulta);
+            System.out.println("Tipo da consulta atualizada com sucesso!");
+        }
     }
     
     //gera o relatório das consultas de amanhã cujos pacientes possuem pelo menos uma forma de contato (email ou telefone)
