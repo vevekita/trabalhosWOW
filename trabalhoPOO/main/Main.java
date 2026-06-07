@@ -25,7 +25,7 @@ public class Main {
         RepositorioConsultas repConsultas = new RepositorioConsultas();
         ServicoSecretaria servicoSecretaria = new ServicoSecretaria(repPaciente, repConsultas);
         GerenciadorMensagens gerenciadorMensagens = new GerenciadorMensagens();
-        List<Consulta> consultasAmanha = servicoSecretaria.gerarRelatorioComContato();
+        
         
         //repositórios para uso do médico e instanciação do serviço
         RepositorioDadosAdicionais repDadosAdicionais = new RepositorioDadosAdicionais();
@@ -66,6 +66,7 @@ public class Main {
         servicoSecretaria.cadastrarConsulta(c8);
         
         //envio das mensagens por SMS ou email
+        List<Consulta> consultasAmanha = servicoSecretaria.gerarRelatorioComContato();
         gerenciadorMensagens.enviarMensagens(consultasAmanha);
     }
     
