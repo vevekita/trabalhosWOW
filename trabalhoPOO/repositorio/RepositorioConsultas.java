@@ -26,7 +26,7 @@ public class RepositorioConsultas {
             consultas.add(consulta);
         }
         else{
-            if(verificaColisaoHorarios(consulta.getHorario(), consulta.getData()) == false){
+            if(verificaColisaoHorarios(consulta) == false){
                 consultas.add(consulta);
             }
         }
@@ -45,9 +45,9 @@ public class RepositorioConsultas {
         return consultas.get(index);
     }
 
-    public Consulta buscarConsulta(String data, String horario, String medico) { // Não tem como um mesmo médico estar em duas consultas diferentes no mesmo horário no mesmo dia
+    public Consulta buscarConsulta(String data, int horas, int minutos, String medico) { // Não tem como um mesmo médico estar em duas consultas diferentes no mesmo horário no mesmo dia
         for (Consulta c : consultas) {
-            if (c.getData().equals(data) && c.getHorario().equals(horario) && c.getMedico().equals(medico)) {
+            if (c.getData().equals(data) && c.getHoras() == horas && c.getMinutos() == minutos && c.getMedico().equals(medico)) {
                 return c; // Retorna a consulta encontrada
             }
         }
@@ -58,51 +58,52 @@ public class RepositorioConsultas {
         consultas.remove(consulta);
     }
     
-    private boolean verificaColisaoHorarios(String horario, String data, String medico){
+    public boolean verificaColisaoHorarios(Consulta cons){
         boolean ocorreColisao = false;
         
         if (consultas.isEmpty()){
             ocorreColisao = false;
         }
         else{
+            int horarioCons = (cons.getHoras() * 60) + cons.getMinutos();
+            int duracaoCons = 0;
+            //se o tipo da Consulta for o normal(duração de 1h):
+            if ("normal".equals(cons.getTipoConsulta())) {
+                duracaoCons = 30;
+            } else {
+                //se o tipo da Consulta for de retorno (duração de 30min):
+                if ("retorno".equals(cons.getTipoConsulta())) {
+                    duracaoCons = 60;
+                }
+            }
+            int fimCons = horarioCons + duracaoCons;
+            
             for (Consulta c: consultas){
-                if (c.getHorario().equals(horario) && c.getData().equals(data) && c.getMedico().equals(medico)){
-                    ocorreColisao = true;
+                int horarioC = (c.getHoras() * 60) + c.getMinutos();
+                int duracaoC = 0;
+                if ("normal".equals(c.getTipoConsulta())) {
+                    duracaoC = 60;
+                } else {
+                    if ("retorno".equals(c.getTipoConsulta())) {
+                        duracaoC = 30;
+                    }
+                }
+                int fimC = horarioC + duracaoC;
+                if (c == cons) {  //se a consulta de verificação é igual à consulta na lista:
+                    ocorreColisao = false;
                     break;
+                }
+                if (c.getData().equals(cons.getData())){
+                    if (c.getMedico().equals(cons.getMedico()) || c.getPaciente().equals(cons.getPaciente())) {
+                        if (horarioC < fimCons && fimC > horarioCons) { //verifica sobreposição de horários
+                            ocorreColisao = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
         
         return ocorreColisao;
     }
-
-    //a parte de atualizar foi passada pro ServicoSecretaria
-    /*public void atualizaData(Consulta consulta, String novaData){
-        if(verificaColisaoHorarios(consulta.getHorario(), novaData) == false){
-            int index = consultas.indexOf(consulta);
-            consultas.get(index).setData(novaData);
-        }
-    }
-    
-    public void atualizaHorario(Consulta consulta, String novoHorario){
-        if(verificaColisaoHorarios(novoHorario, consulta.getData()) == false){
-            int index = consultas.indexOf(consulta);
-            consultas.get(index).setHorario(novoHorario);
-        }
-    }
-    
-    public void atualizaMedico(Consulta consulta, String medico){
-        int index = consultas.indexOf(consulta);
-        consultas.get(index).setMedico(medico);
-    }
-    
-    public void atualizaPaciente(Consulta consulta, Paciente novoPaciente){
-        int index = consultas.indexOf(consulta);
-        consultas.get(index).setPaciente(novoPaciente);
-    }
-    
-    public void atualizaTipoConsulta(Consulta consulta, String novoTipo){
-        int index = consultas.indexOf(consulta);
-        consultas.get(index).setTipoConsulta(novoTipo);
-    }*/
 }
