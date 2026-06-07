@@ -28,19 +28,13 @@ public class RepositorioProntuario {
     }
     
     public Prontuario buscaProntuario(int idPaciente){
-        Prontuario p1 = new Prontuario();
-        
         for(Prontuario p: prontuarios){
-            if(p.getIdPaciente() == idPaciente){
-                p1 = p;
-                break;
-            }
-            else{
-                p1.setIdPaciente(-1);       /*Marcação lógica de que o Paciente não existe, ou seja, o prontuário não foi encontrado*/
-            }
+            if(p.getIdPaciente() == idPaciente){               
+                return p;
+            }  
         }
         
-        return p1;
+        return null;
     }
     
     public void atualizaSintomas(Prontuario prontuario, String novosSintomas){

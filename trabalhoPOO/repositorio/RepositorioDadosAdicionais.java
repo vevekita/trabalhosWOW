@@ -35,17 +35,13 @@ public class RepositorioDadosAdicionais {
     }
     
     private int buscaIndiceDados(Paciente paciente){
-        int index = 0;
         for(DadosAdicionaisPaciente d: dadosAdicionais){
             if(d.getPaciente().equals(paciente)){
-                break;
-            }
-            else{
-                index++;
+                return d;
             }
         }
         
-        return index;
+        return null;
     }
     
     public DadosAdicionaisPaciente buscaDadosAdicionais(Paciente paciente){
