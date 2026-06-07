@@ -1,4 +1,4 @@
-package servico;
+package servicos;
 
 import clinica.Consulta;
 import java.util.List;
@@ -14,15 +14,15 @@ public class GerenciadorMensagens {
             for(Consulta c : consultasParaAvisar){
                 String nomePaciente = c.getPaciente().getNome();
                 String medico = c.getMedico();
-                String horario = c.getHoras() + ":" + c.getMinutos();
+                String horario = c.getHoras() + ":" + (c.getMinutos() < 10 ? "0" + c.getMinutos() : c.getMinutos());
                 String telefone = c.getPaciente().getTelefone();
                 String email = c.getPaciente().getEmail();
                 
                 if(telefone != null){ //se tiver telefone envia SMS
-                    System.out.println("(SMS enviado para o número " + telefone + ") " + nomePaciente + " sua consulta é amanhã às " + horario + " com o médico " + medico);
+                    System.out.println("(SMS enviado para o numero " + telefone + ") " + nomePaciente + " sua consulta esta marcada para amanha as " + horario + " com o(a) doutor(a) " + medico);
                 }
                 if(email != null){ //se tiver email envia email
-                    System.out.println("(Email enviado para o email " + email + ") " + nomePaciente + " sua consulta é amanhã às " + horario + " com o médico " + medico);
+                    System.out.println("(Email enviado para o email " + email + ") " + nomePaciente + " sua consulta esta marcada para amanha as " + horario + " com o(a) doutor(a) " + medico);
                 }
             }
         }
