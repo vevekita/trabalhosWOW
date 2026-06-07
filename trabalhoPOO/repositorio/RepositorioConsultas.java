@@ -26,7 +26,7 @@ public class RepositorioConsultas {
             consultas.add(consulta);
         }
         else{
-            if(verificaColisaoHorarios(consulta) == false){
+            if(verificaColisaoHorarios(consulta.getHoras(), consulta.getMinutos(), consulta.getData(), consulta.getMedico(), consulta.getPaciente(), consulta.getTipoConsulta()) == false){
                 consultas.add(consulta);
             }
         }
