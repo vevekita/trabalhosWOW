@@ -106,4 +106,8 @@ public class RepositorioConsultas {
         
         return ocorreColisao;
     }
+
+    public List<Consulta> listarConsultas(){
+        return new ArrayList<>(consultas); // Retorna uma cópia da lista de consultas
+    }
 }
