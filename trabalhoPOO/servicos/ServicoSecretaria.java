@@ -128,28 +128,20 @@ public class ServicoSecretaria {
         }
     }
     
-    public void atualizarHoraConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novaHora){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
-        if(consultaExistente != null){
-            consultaExistente.setHoras(novaHora);
-            System.out.println("Hora da consulta atualizada com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
-        }
-    }
-    
-    public void atualizarMinutoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, int novoMinuto){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
-        if(consultaExistente != null){
-            consultaExistente.setMinutos(novoMinuto);
-            System.out.println("Minuto da consulta atualizada com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
+    public void atualizarHorarioConsulta(LocalDate dataAntiga, int horasAntigas, int minutosAntigos, String medicoAntigo, int horasNovas, int minutosNovos){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horasAntigas, minutosAntigos, medicoAntigo);
+        if (consultaExistente != null) {
+            if (repositorioConsultas.verificaColisaoHorarios(horasNovas, minutosNovos, consultaExistente.getData(), consultaExistente.getMedico(), consultaExistente.getPaciente(), consultaExistente.getTipoConsulta()) == false) {
+                consultaExistente.setHoras(horasNovas);
+                consultaExistente.setMinutos(minutosNovos);
+                System.out.println("Horário da consulta atualizada com sucesso!");
+            } else {
+                System.out.println("Horário da consulta inválido: Já existe uma consulta agendado no horário");
+            }
+        } else {
+            System.out.println("Consulta não encontrada");
         }
     }
-    
     public void atualizarTipoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, String novoTipoConsulta){
         Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
         if(consultaExistente != null){
