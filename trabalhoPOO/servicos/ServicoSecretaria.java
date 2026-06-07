@@ -36,32 +36,42 @@ public class ServicoSecretaria {
     
     public void atualizarDataNascimento(int id, String novaDataNascimento){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        pacienteExistente.setDataNascimento(novaDataNascimento);
-        System.out.println("Data de nascimento do paciente atualizado com sucesso!");
+        if(pacienteExistente != null){
+            pacienteExistente.setDataNascimento(novaDataNascimento);
+            System.out.println("Data de nascimento do paciente atualizado com sucesso!");
+        }
     }
     
     public void atualizarNovoEndereco(int id, String novoEndereco){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        pacienteExistente.setEndereco(novoEndereco);
-        System.out.println("Endereço do paciente atualizado com sucesso!");
+        if(pacienteExistente != null){
+            pacienteExistente.setEndereco(novoEndereco);
+            System.out.println("Endereço do paciente atualizado com sucesso!");
+        }
     }
     
     public void atualizarTelefone(int id, String novoTelefone){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        pacienteExistente.setTelefone(novoTelefone);
-        System.out.println("Telefone do paciente atualizado com sucesso!");
+        if(pacienteExistente != null){
+            pacienteExistente.setTelefone(novoTelefone);
+            System.out.println("Telefone do paciente atualizado com sucesso!");
+        }
     }
     
     public void atualizarEmail(int id, String novoEmail){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        pacienteExistente.setEmail(novoEmail);
-        System.out.println("Email do paciente atualizado com sucesso!");
+        if(pacienteExistente != null){
+            pacienteExistente.setEmail(novoEmail);
+            System.out.println("Email do paciente atualizado com sucesso!");
+        }
     }
     
     public void atualizarTipoConvenio(int id, String novoTipoConvenio){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        pacienteExistente.setTipoConvenio(novoTipoConvenio);
-        System.out.println("Tipo de convênio do paciente atualizado com sucesso!");
+        if(pacienteExistente != null){
+            pacienteExistente.setTipoConvenio(novoTipoConvenio);
+            System.out.println("Tipo de convênio do paciente atualizado com sucesso!");
+        }
     }
     
     public void cadastrarConsulta(Consulta consulta){
