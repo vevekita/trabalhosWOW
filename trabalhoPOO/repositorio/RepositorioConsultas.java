@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import clinica.Consulta;
 import clinica.Paciente;
+import java.time.LocalDate;
 
 /**
  *
@@ -58,7 +59,7 @@ public class RepositorioConsultas {
         consultas.remove(consulta);
     }
     
-    public boolean verificaColisaoHorarios(int horas, int minutos, String data, String medico, Paciente paciente, String tipoConsulta){
+    public boolean verificaColisaoHorarios(int horas, int minutos, LocalDate data, String medico, Paciente paciente, String tipoConsulta){
         boolean ocorreColisao = false;
         
         if (consultas.isEmpty()){
