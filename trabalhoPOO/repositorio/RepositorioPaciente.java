@@ -18,12 +18,13 @@ import clinica.Paciente;
 public class RepositorioPaciente {
     private final List<Paciente> pacientes = new ArrayList<>();
             
-    public void adicionarPaciente(Paciente paciente){
+    public boolean adicionarPaciente(Paciente paciente){
         if(verificaPacienteNaLista(paciente) == false){
             pacientes.add(paciente);
+            return true;
         }
         else{
-            System.out.println("Não foi possível cadastrar o paciente: Id já existente");
+            return false;
         }
     }
 
