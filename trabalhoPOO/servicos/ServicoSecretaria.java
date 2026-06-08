@@ -98,8 +98,16 @@ public class ServicoSecretaria {
     }
     
     public void cadastrarConsulta(Consulta consulta){
-        repositorioConsultas.adicionarConsulta(consulta);
-        System.out.println("Consulta cadastrada com sucesso!");
+        boolean verificacao = repositorioConsultas.adicionarConsulta(consulta);
+        if(verificacao == true){
+            repositorioConsultas.adicionarConsulta(consulta);
+            System.out.println("Consulta cadastrada com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível realizar o cadastro da consulta pois já existe uma consulta marcada.");
+        }
+        
+        
     }
     
     public void removerConsulta(Consulta consulta){
