@@ -25,8 +25,14 @@ public class ServicoSecretaria {
     }
     
     public void cadastrarPaciente(Paciente paciente){
+        boolean verificacao = repositorioPaciente.adicionarPaciente(paciente);
+        if(verificacao == true){
             repositorioPaciente.adicionarPaciente(paciente);
             System.out.println("Paciente cadastrado com sucesso!");
+        }
+        else{
+            System.out.println("Não foi possível cadastrar o paciente pois já existe um cadastro de mesmo ID!");
+        }
         
     }
     
