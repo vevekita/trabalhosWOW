@@ -117,6 +117,6 @@ public class RepositorioDadosAdicionais {
     }
     
     public List<DadosAdicionaisPaciente> listarDadosAdicionais(){
-        return new ArrayList<>(dadosAdicionais); // Retorna uma cópia da lista de consultas
+        return new ArrayList<>(dadosAdicionais); // Retorna uma cópia da lista de dados adicionais
     }
 }
