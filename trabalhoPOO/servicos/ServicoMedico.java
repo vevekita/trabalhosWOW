@@ -6,7 +6,7 @@ import repositorio.RepositorioProntuario;
 import clinica.Paciente;
 import clinica.Consulta;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 /**
  * Classe que contém todas as operações que um médico pode fazer no sistema, tais como:
  * -Gerenciar os dados adicionais do paciente (cadastrar, atualizar e remover)
@@ -194,7 +194,7 @@ public class ServicoMedico {
     }
     
     //geraRelatorio() para acessar todos os clientes do mês
-    public void geraRelatorio(int tipoRelatorio, String medico, ArrayList<Consulta> todasConsultas, LocalDate data) {
+    public void geraRelatorio(int tipoRelatorio, String medico, List<Consulta> todasConsultas, LocalDate data) {
         if (tipoRelatorio == 3) {
             System.out.println("------------CLIENTES-NO-MÊS------------");
             System.out.println("MÉDICO: " + medico);

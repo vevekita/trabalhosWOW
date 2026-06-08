@@ -22,6 +22,10 @@ import java.time.LocalDate;
 public class RepositorioConsultas {
     private final List<Consulta> consultas = new ArrayList<>();
     
+    public List<Consulta> getConsultas(){
+        return consultas;
+    }
+    
     public void adicionarConsulta(Consulta consulta){
         if (consultas.isEmpty()){
             consultas.add(consulta);

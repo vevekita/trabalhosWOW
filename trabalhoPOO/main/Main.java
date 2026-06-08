@@ -172,6 +172,31 @@ public class Main {
         else{
             System.out.println("Remocao falhou:(");
         }
+        
+        //Gerando relatórios médicos:
+        //geraRelatorio() para receita -> infoAdicional inclue informações básicas do medicamento(ex: "sertralina 50g").
+        servicoMedico.geraRelatorio(0, "Denise", p4, "Tomar um comprimido ao dia");
+        
+        //caso em que da errado
+        servicoMedico.geraRelatorio(20, "Denise", p4, "Tomar um comprimido ao dia");
+        
+        //geraRelatorio() para declaração de acompanhamento -> infoAdicional inclue informações do indivíduo a acompanhar o paciente(ex: Maria Gil, irmã).
+        servicoMedico.geraRelatorio(1, "Denise", p4, "Maria Gil, irmã", 7);
+        
+        //caso em que da errado
+        servicoMedico.geraRelatorio(-2, "Denise", p4, "Maria Gil, irmã", 7);
+        
+        //geraRelatorio() para o atestado do paciente
+        servicoMedico.geraRelatorio(2, "Denise", p4, 7);
+        
+        //caso em que da errado
+        servicoMedico.geraRelatorio(23, "Denise", p4, 7);
+        
+        //geraRelatorio() para acessar todos os clientes do mês
+        servicoMedico.geraRelatorio(3, "Wilda", repConsultas.getConsultas(), LocalDate.of(2026, 6, 8));
+        
+        //caso em que da errado
+        servicoMedico.geraRelatorio(30, "Wilda", repConsultas.getConsultas(), LocalDate.of(2026, 6, 8));
    
     }
     
