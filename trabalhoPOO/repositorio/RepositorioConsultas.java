@@ -26,13 +26,18 @@ public class RepositorioConsultas {
         return consultas;
     }
     
-    public void adicionarConsulta(Consulta consulta){
+    public boolean adicionarConsulta(Consulta consulta){
         if (consultas.isEmpty()){
             consultas.add(consulta);
+            return true;
         }
         else{
             if(verificaColisaoHorarios(consulta.getHoras(), consulta.getMinutos(), consulta.getData(), consulta.getMedico(), consulta.getPaciente(), consulta.getTipoConsulta()) == false){
                 consultas.add(consulta);
+                return true;
+            }
+            else{
+                return false;
             }
         }
         
