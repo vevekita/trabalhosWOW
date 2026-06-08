@@ -1,5 +1,6 @@
 package repositorio;
 import java.util.ArrayList;
+import java.util.List;
 import clinica.DadosAdicionaisPaciente;
 import clinica.Paciente;
 
@@ -17,11 +18,7 @@ import clinica.Paciente;
  * - busca indice dados(Busca o indice em que os dados adicionais de um determinado paciente se encontra na lista)
  */
 public class RepositorioDadosAdicionais {
-    private final ArrayList<DadosAdicionaisPaciente> dadosAdicionais;
-    
-    public RepositorioDadosAdicionais(){
-        dadosAdicionais = new ArrayList();
-    }
+    private final List<DadosAdicionaisPaciente> dadosAdicionais = new ArrayList<>();
     
     public void cadastrarDados(DadosAdicionaisPaciente dados){
         int index = buscaIndiceDados(dados.getPaciente());
@@ -35,13 +32,17 @@ public class RepositorioDadosAdicionais {
     }
     
     private int buscaIndiceDados(Paciente paciente){
+        int index = 0;
         for(DadosAdicionaisPaciente d: dadosAdicionais){
             if(d.getPaciente().equals(paciente)){
-                return d;
+                break;
+            }
+            else{
+                index++;
             }
         }
         
-        return null;
+        return index;
     }
     
     public DadosAdicionaisPaciente buscaDadosAdicionais(Paciente paciente){
@@ -114,5 +115,8 @@ public class RepositorioDadosAdicionais {
             dadosAdicionais.get(index).setAlergias(novaAlergia);
         }
     }
+    
+    public List<DadosAdicionaisPaciente> listarDadosAdicionais(){
+        return new ArrayList<>(dadosAdicionais); // Retorna uma cópia da lista de consultas
+    }
 }
-
