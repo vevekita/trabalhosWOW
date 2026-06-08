@@ -1,5 +1,6 @@
 package repositorio;
 import java.util.ArrayList;
+import java.util.List;
 import clinica.Prontuario;
 
 /**
@@ -13,11 +14,7 @@ import clinica.Prontuario;
  * - atualiza x(Atualiza a informação x de um determinado prontuario)
  */
 public class RepositorioProntuario {
-    private final ArrayList<Prontuario> prontuarios;
-    
-    public RepositorioProntuario(){
-        prontuarios = new ArrayList();
-    }
+    private final List<Prontuario> prontuarios = new ArrayList<>();
     
     public void cadastrarProntuario(Prontuario prontuario){
         prontuarios.add(prontuario);
@@ -28,13 +25,19 @@ public class RepositorioProntuario {
     }
     
     public Prontuario buscaProntuario(int idPaciente){
+        Prontuario p1 = new Prontuario();
+        
         for(Prontuario p: prontuarios){
-            if(p.getIdPaciente() == idPaciente){               
-                return p;
-            }  
+            if(p.getIdPaciente() == idPaciente){
+                p1 = p;
+                break;
+            }
+            else{
+                p1.setIdPaciente(-1);       /*Marcação lógica de que o Paciente não existe, ou seja, o prontuário não foi encontrado*/
+            }
         }
         
-        return null;
+        return p1;
     }
     
     public void atualizaSintomas(Prontuario prontuario, String novosSintomas){
@@ -54,5 +57,8 @@ public class RepositorioProntuario {
         
         prontuarios.get(index).setPrescricao(novaPrescricao);
     }
+    
+    public List<Prontuario> listarProntuarios(){
+        return new ArrayList<>(prontuarios); // Retorna uma cópia da lista de prontuarios
+    }
 }
-
