@@ -81,6 +81,23 @@ public class Main {
         System.out.println(repPaciente.buscaPaciente(1).getTelefone());
         System.out.println(repPaciente.buscaPaciente(1).getTipoConvenio());
         
+        System.out.println("\nRepositorio dos pacientes----------");
+        if (repPaciente.listarPacientes().isEmpty()) {
+            System.out.println("Nenhum paciente cadastrado no repositorio.");
+        } else {
+            for (Paciente p : repPaciente.listarPacientes()) {
+                System.out.println(
+                        "ID: " + p.getDadoIdentificacao() + 
+                        " | Nome: " + p.getNome() +  
+                        " | Data de Nascimento: " + p.getDataNascimento() +
+                        " | Endereco: " + p.getEndereco() +
+                        " | Telefone: " + p.getTelefone() +
+                        " | Email: " + p.getEmail() +
+                        " | Tipo de Convenio: " + p.getTipoConvenio()
+                );
+            }
+        }
+        
         //atualizando cadastros de consutas
         servicoSecretaria.atualizarTipoConsulta(LocalDate.of(2026, 6, 3), 12, 30, "Barnabe", "retorno");
         servicoSecretaria.atualizarDataConsulta(LocalDate.of(2026, 6, 3), 12, 30, "Barnabe", LocalDate.of(2026, 6, 4));
@@ -91,23 +108,12 @@ public class Main {
         System.out.println(repConsultas.buscarConsulta(LocalDate.of(2026, 6, 4), 13, 0, "Barnabe").getMedico());
         System.out.println(repConsultas.buscarConsulta(LocalDate.of(2026, 6, 4), 13, 0, "Barnabe").getTipoConsulta());
         
+        
         //removendo cadastros de consultas
         servicoSecretaria.removerConsulta(c1);
-        if(repConsultas.buscarConsulta(LocalDate.of(2026, 6, 4), 13, 0, "Barnabe") == null){
-            System.out.println("Consulta não encontrada");
-        }
-        else{
-            System.out.println("Remocao falhou:(");
-        }
         
         //removendo cadastro de pacientes
         servicoSecretaria.removerPaciente(p1);
-        if(repPaciente.buscaPaciente(1) == null){
-            System.out.println("Paciente não encontrado");
-        }
-        else{
-            System.out.println("Remocao falhou:(");
-        }
         
         //Instanciando Dados adicionais
         DadosAdicionaisPaciente d1 = new DadosAdicionaisPaciente(p2, false, true, false, false, false, "Nenhuma", "Paracetamol");
@@ -139,13 +145,7 @@ public class Main {
         
         //removendo dados adicionais
         servicoMedico.removeDadosAdicionais(d2);
-        if(repDadosAdicionais.buscaDadosAdicionais(p3) == null){
-            System.out.println("Dados não encontrados");
-        }
-        else{
-            System.out.println("Remocao falhou:(");
-        }
-        
+
         //instanciando prontuarios
         Prontuario pr3 = new Prontuario(3, "Dor no peito", "Pneumonia", "Inalacao 2x por dia, por 7 dias");
         Prontuario pr4 = new Prontuario(4, "Dor de cabeca", "Virose", "Benegripe 1x ao dia, por 5 dias");
@@ -166,38 +166,74 @@ public class Main {
         
         //removendo prontuarios
         servicoMedico.removeProntuario(pr3);
-        if(repProntuario.buscaProntuario(3) == null){
-            System.out.println("Prontuario não encontrado");
+        
+        System.out.println("\nRepositorio dos pacientes----------");
+        if (repPaciente.listarPacientes().isEmpty()) {
+            System.out.println("Nenhum paciente cadastrado no repositorio.");
+        } else {
+            for (Paciente p : repPaciente.listarPacientes()) {
+                System.out.println(
+                        "ID: " + p.getDadoIdentificacao() + 
+                        " | Nome: " + p.getNome() +  
+                        " | Data de Nascimento: " + p.getDataNascimento() +
+                        " | Endereco: " + p.getEndereco() +
+                        " | Telefone: " + p.getTelefone() +
+                        " | Email: " + p.getEmail() +
+                        " | Tipo de Convenio: " + p.getTipoConvenio()
+                );
+            }
         }
-        else{
-            System.out.println("Remocao falhou:(");
+
+        System.out.println("\nRepositorio das consultas-----------");
+        if (repConsultas.listarConsultas().isEmpty()) {
+            System.out.println("Nenhuma consulta cadastrada no repositorio.");
+        } else {
+            for (Consulta c : repConsultas.listarConsultas()) {
+                System.out.println(
+                        "Paciente: " + c.getPaciente().getNome() +                      
+                        " | Data: " + c.getData() +
+                        " | Medico: " + c.getMedico() +
+                        " | Paciente: " + c.getPaciente().getNome() +
+                        " | Horario: " + c.getHoras() + ":" + (c.getMinutos() < 10 ? "0" + c.getMinutos() : c.getMinutos()) +
+                        " | Tipo de Consulta: " + c.getTipoConsulta()
+                );
+            }
         }
         
-        //Gerando relatórios médicos:
-        //geraRelatorio() para receita -> infoAdicional inclue informações básicas do medicamento(ex: "sertralina 50g").
-        servicoMedico.geraRelatorio(0, "Denise", p4, "Tomar um comprimido ao dia");
         
-        //caso em que da errado
-        servicoMedico.geraRelatorio(20, "Denise", p4, "Tomar um comprimido ao dia");
+        System.out.println("\nRepositorio dos dados adicionais dos pacientes-----------");
+        if (repDadosAdicionais.listarDadosAdicionais().isEmpty()) {
+            System.out.println("Nenhum dado adicional cadastrado no repositorio.");
+        } else {
+            for (DadosAdicionaisPaciente d : repDadosAdicionais.listarDadosAdicionais()) {
+                System.out.println(
+                        "Paciente: " + d.getPaciente().getNome() +                      
+                        " | Fuma: " + d.isFuma() +
+                        " | Bebe: " + d.isBebe() +
+                        " | Colesterol: " + d.isColesterol() +
+                        " | Diabetes: " + d.isDiabetes() +
+                        " | Doenca Cardiaca: " + d.isDoencaCardiaca() +
+                        " | Cirugias: " + d.getCirurgias() +
+                        " | Alergias: " + d.getAlergias()
+                );
+            }
+        }
         
-        //geraRelatorio() para declaração de acompanhamento -> infoAdicional inclue informações do indivíduo a acompanhar o paciente(ex: Maria Gil, irmã).
-        servicoMedico.geraRelatorio(1, "Denise", p4, "Maria Gil, irmã", 7);
-        
-        //caso em que da errado
-        servicoMedico.geraRelatorio(-2, "Denise", p4, "Maria Gil, irmã", 7);
-        
-        //geraRelatorio() para o atestado do paciente
-        servicoMedico.geraRelatorio(2, "Denise", p4, 7);
-        
-        //caso em que da errado
-        servicoMedico.geraRelatorio(23, "Denise", p4, 7);
-        
-        //geraRelatorio() para acessar todos os clientes do mês
-        servicoMedico.geraRelatorio(3, "Wilda", repConsultas.getConsultas(), LocalDate.of(2026, 6, 8));
-        
-        //caso em que da errado
-        servicoMedico.geraRelatorio(30, "Wilda", repConsultas.getConsultas(), LocalDate.of(2026, 6, 8));
-   
+        System.out.println("\nRepositorio dos Prontuarios-----------");
+        if (repProntuario.listarProntuarios().isEmpty()) {
+            System.out.println("Nenhum prontuario cadastrado no repositorio.");
+        } else {
+            for (Prontuario pr : repProntuario.listarProntuarios()) {
+                System.out.println(
+                        "Paciente: " + pr.getIdPaciente() +                      
+                        " | Sintomas: " + pr.getSintomas() +
+                        " | Diagnostico: " + pr.getDiagnostico() +
+                        " | Prescricao: " + pr.getPrescricao()
+                );
+            }
+        }
+
+
     }
     
 }
