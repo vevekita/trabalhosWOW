@@ -52,6 +52,10 @@ public class RepositorioPaciente {
         
         return estaPresente;
     }
+
+    public List<Paciente> listarPacientes(){
+        return new ArrayList<>(pacientes); // Retorna uma cópia da lista de pacientes
+    }
     
     /*public Paciente buscaPaciente(int idPaciente){
         int index = -1;
