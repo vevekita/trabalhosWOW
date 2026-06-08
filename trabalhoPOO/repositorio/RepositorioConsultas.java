@@ -42,18 +42,6 @@ public class RepositorioConsultas {
         }
         
     }
-    
-    public Consulta buscarConsultaPaciente(Paciente paciente){
-        int index = -1;
-        
-        for(Consulta c: consultas){
-            if (c.getPaciente().equals(paciente)){
-                index = consultas.indexOf(c);
-                break;
-            }
-        }
-        return consultas.get(index);
-    }
 
     public Consulta buscarConsulta(LocalDate data, int horas, int minutos, String medico) { // Não tem como um mesmo médico estar em duas consultas diferentes no mesmo horário no mesmo dia
         for (Consulta c : consultas) {
