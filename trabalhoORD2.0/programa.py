@@ -1,5 +1,17 @@
 from sys import argv
 from struct import pack, unpack, calcsize
+from dataclasses import dataclass
+
+# Variável Global
+ORDEM: int = 0
+NULO: int = -1
+
+@dataclass
+class Pagina:
+    def __init__(self) -> None:
+        self.numChaves: int = 0
+        self.chaves: list = [NULO] * (ORDEM-1)
+        self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
 def constroi_indices():
     btree: list[tuple[int, int]] = []
