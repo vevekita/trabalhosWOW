@@ -14,7 +14,7 @@ class Pagina:
         self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
 def constroi_indices():
-    btree: list[tuple[int, int]] = []
+    lista_id_offset: list[tuple[int, int]] = []
     with open('games.dat', 'rb') as entrada:
         offset = 0
         tam_bytes = entrada.read(2)
@@ -24,7 +24,7 @@ def constroi_indices():
             reg_str = reg.decode()
             campos = reg_str.split('|')
             id = int(campos[0])
-            btree.append((id, offset))
+            lista_id_offset.append((id, offset))
             offset = entrada.tell()
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, 'little')
