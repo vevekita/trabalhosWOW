@@ -1,7 +1,21 @@
 from sys import argv
+from struct import pack, unpack, calcsize
 
 def constroi_indices():
-    pass
+    btree: list[tuple[int, int]] = []
+    with open('games.dat', 'rb') as entrada:
+        offset = 0
+        tam_bytes = entrada.read(2)
+        tam_int = int.from_bytes(tam_bytes, 'little')
+        while tam_int > 0:
+            reg = entrada.read(tam_int)
+            reg_str = reg.decode()
+            campos = reg_str.split('|')
+            id = int(campos[0])
+            btree.append((id, offset))
+            offset = entrada.tell()
+            tam_bytes = entrada.read(2)
+            tam_int = int.from_bytes(tam_bytes, 'little')
 
 def executa_operacoes(arquivo_operacoes: str):
     pass
