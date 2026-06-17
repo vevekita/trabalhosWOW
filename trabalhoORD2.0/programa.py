@@ -11,12 +11,19 @@ class Pagina:
     def __init__(self) -> None:
         self.numChaves: int = 0
         self.chaves: list = [NULO] * (ORDEM-1)
-        self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
+        self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita) 
+
+# isso aqui é uma ideia, mas pode ignorar por enquanto
+# MAX_CHAVES = ORDEM - 1
+# MAX_FILHOS = ORDEM
+
+# FORMATO_PAGINA = f'i{MAX_CHAVES}i{MAX_CHAVES}i{MAX_FILHOS}i' # n + chave + offset + filhos
+# TAMANHO_PAGINA = calcsize(FORMATO_PAGINA)
 
 def constroi_indices():
-    lista_id_offset: list[tuple[int, int]] = []
-    with open('games.dat', 'rb') as entrada:
-        offset = 0
+    btree: list[Pagina] = [] # não sei como definir o tipo da lista
+    with open('games.dat', 'rb') as entrada, open('btree,dat', 'wb') as saida:
+        offset = 0 # ou poderia ser entrada.tell()?
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
@@ -24,10 +31,30 @@ def constroi_indices():
             reg_str = reg.decode()
             campos = reg_str.split('|')
             id = int(campos[0])
-            lista_id_offset.append((id, offset))
+            #btree.append((id, offset)) # usar a função de inserção para inserir na árvore
             offset = entrada.tell()
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, 'little')
+
+def buscaNaArvore(chave, rrn):
+    if rrn == NULO:
+        return False, NULO, NULO
+    else:
+        pag = #leitura da página armazenada no rrn
+        achou, pos = buscaNaPagina(chave, pag)
+        if achou:
+            return True, rrn, pos
+        else:
+            return buscaNaArvore(chave, pag.filhos[pos])
+
+def buscaNaPagina(chave, pag):
+    pos = 0
+    while pos < pag.numChaves and chave > pag.chaves[pos]:
+        pos += 1
+    if pos < pag.numChaves and chave == pag.chaves[pos]:
+        return True, pos
+    else:
+        return False, pos
 
 def executa_operacoes(arquivo_operacoes: str):
     pass
