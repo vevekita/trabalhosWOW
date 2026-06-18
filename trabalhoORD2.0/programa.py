@@ -20,22 +20,6 @@ class Pagina:
 # FORMATO_PAGINA = f'i{MAX_CHAVES}i{MAX_CHAVES}i{MAX_FILHOS}i' # n + chave + offset + filhos
 # TAMANHO_PAGINA = calcsize(FORMATO_PAGINA)
 
-def constroi_indices():
-    btree: list[Pagina] = [] # não sei como definir o tipo da lista
-    with open('games.dat', 'rb') as entrada, open('btree,dat', 'wb') as saida:
-        offset = 0 # ou poderia ser entrada.tell()?
-        tam_bytes = entrada.read(2)
-        tam_int = int.from_bytes(tam_bytes, 'little')
-        while tam_int > 0:
-            reg = entrada.read(tam_int)
-            reg_str = reg.decode()
-            campos = reg_str.split('|')
-            id = int(campos[0])
-            #btree.append((id, offset)) # usar a função de inserção para inserir na árvore
-            offset = entrada.tell()
-            tam_bytes = entrada.read(2)
-            tam_int = int.from_bytes(tam_bytes, 'little')
-
 def buscaNaArvore(chave, rrn):
     if rrn == NULO:
         return False, NULO, NULO
@@ -56,6 +40,35 @@ def buscaNaPagina(chave, pag):
     else:
         return False, pos
 
+# FUNÇÕES AUXILIARES PARA A FUNÇÃO INSERE (tem mais a buscaNaPagina())
+def lePagina(rrn):
+    pass
+
+def escrevePagina(rrn, pag):
+    pass
+
+def insereChavePromo(chave, filhoD, pag):
+    pass
+
+def divide(chave, filhoD, pag):
+    pass
+
+def constroi_indices():
+    btree: list[Pagina] = [] # não sei como definir o tipo da lista
+    with open('games.dat', 'rb') as entrada, open('btree,dat', 'wb') as saida:
+        offset = 0 # ou poderia ser entrada.tell()?
+        tam_bytes = entrada.read(2)
+        tam_int = int.from_bytes(tam_bytes, 'little')
+        while tam_int > 0:
+            reg = entrada.read(tam_int)
+            reg_str = reg.decode()
+            campos = reg_str.split('|')
+            id = int(campos[0])
+            #btree.append((id, offset)) # usar a função de inserção para inserir na árvore
+            offset = entrada.tell()
+            tam_bytes = entrada.read(2)
+            tam_int = int.from_bytes(tam_bytes, 'little')
+            
 def executa_operacoes(arquivo_operacoes: str):
     pass
 
