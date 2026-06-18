@@ -40,6 +40,25 @@ def buscaNaPagina(chave, pag):
     else:
         return False, pos
 
+def insereChave(chave, rrnAtual):
+    if rrnAtual == NULO:
+        chavePro = chave
+        filhoDpro = NULO
+        return chavePro, filhoDpro, True
+    else:
+        pag = #leitura página armazenada em rrnAtual
+        achou, pos = buscaNaPagina(chave, pag)
+    if achou:
+        raise ValueError("Chave duplicada!")
+    
+    chavePro, filhoDpro, promo = insereChave(chave, pag.filhos[pos])
+
+    if not promo:
+        return NULO, NULO, False
+    else:
+        if #existe espaço em pag para inserir chavePro:
+            # não terminado!
+
 # FUNÇÕES AUXILIARES PARA A FUNÇÃO INSERE (tem mais a buscaNaPagina())
 def lePagina(rrn):
     pass
