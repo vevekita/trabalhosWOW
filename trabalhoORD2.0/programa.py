@@ -1,30 +1,51 @@
 from sys import argv
 from struct import pack, unpack, calcsize
 from dataclasses import dataclass
+import io
+import os
 
 # Variável Global
 ORDEM: int = 0
 NULO: int = -1
+FORMATO_HEADER = 'i'
+SIZEOF_HEADER = calcsize(FORMATO_HEADER)
+MAX_CHAVES = ORDEM - 1
+MAX_FILHOS = ORDEM
+FORMATO_PAG = f'i {MAX_CHAVES}i {MAX_CHAVES}i {MAX_FILHOS}i'
+SIZEOF_PAG = calcsize(FORMATO_PAG)
 
 @dataclass
 class Pagina:
     def __init__(self) -> None:
         self.numChaves: int = 0
-        self.chaves: list = [NULO] * (ORDEM-1)
-        self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita) 
+        self.chaves: list[tuple[int, int]] = [(NULO, NULO)] * (ORDEM-1)
+        self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
-# isso aqui é uma ideia, mas pode ignorar por enquanto
-# MAX_CHAVES = ORDEM - 1
-# MAX_FILHOS = ORDEM
+def ler_pagina(rrn: int, arq: io.BufferedReader) -> Pagina:
+    '''Função auxiliar para a busca de uma página em um arquivo com uma árvore-B'''
+    arq.seek(SIZEOF_HEADER + (rrn * SIZEOF_PAG))
+    pag_bytes = arq.read(SIZEOF_PAG)
+    pag_str = unpack(FORMATO_PAG, pag_bytes)
+    num_chaves = pag_str[0]
+    list_id = pag_str[1:(1 + MAX_CHAVES)]
+    list_offset = pag_str[(1 + MAX_CHAVES):(1 + (MAX_CHAVES * 2))]
+    list_filhos = pag_str[(1 + (MAX_CHAVES * 2)):]
+    pag = Pagina() #cria uma página pag
+    pag.numChaves = num_chaves
 
-# FORMATO_PAGINA = f'i{MAX_CHAVES}i{MAX_CHAVES}i{MAX_FILHOS}i' # n + chave + offset + filhos
-# TAMANHO_PAGINA = calcsize(FORMATO_PAGINA)
+    for i in range(MAX_CHAVES):
+        pag.chaves.append((list_id[i], list_offset[i])) #cada chave é uma tupla (id, offset). Aqui, vai inserindo cada uma das chaves da página
+    
+    for n in range(MAX_FILHOS):
+        pag.filhos.append(list_filhos[n]) #insere cada página filho de determinada página
 
-def buscaNaArvore(chave, rrn):
+    return pag
+
+def buscaNaArvore(chave: int, rrn: int, arq: io.BufferedReader):
     if rrn == NULO:
         return False, NULO, NULO
     else:
-        pag = #leitura da página armazenada no rrn
+        pag = ler_pagina(rrn, arq)#leitura da página armazenada no rrn
         achou, pos = buscaNaPagina(chave, pag)
         if achou:
             return True, rrn, pos
