@@ -1,7 +1,7 @@
 # ALUNAS: Ana Julia Thibes, RA: 145108; Anna Lísia Yaguti, RA: 145093; Verônica Kitamura, RA: 145096
 #---------------------------------------------------------------------------------------------------
 
-RAM = [None] * 256
+RAM = [None] * 256 # Aparecem erros durante o código por causa da inicialização aqui, mas ainda não descobri como resolver
 
 REGS_GERAIS = {
     'A': 0,
