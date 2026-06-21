@@ -4,14 +4,14 @@ from dataclasses import dataclass
 import io
 import os
 
-# Variável Global
+# Variáveis Globais
 ORDEM: int = 0
 NULO: int = -1
 FORMATO_HEADER = 'i'
 SIZEOF_HEADER = calcsize(FORMATO_HEADER)
 MAX_CHAVES = ORDEM - 1
 MAX_FILHOS = ORDEM
-FORMATO_PAG = f'i {MAX_CHAVES}i {MAX_CHAVES}i {MAX_FILHOS}i'
+FORMATO_PAG = f'i {MAX_CHAVES*2}i {MAX_FILHOS}i'
 SIZEOF_PAG = calcsize(FORMATO_PAG)
 
 @dataclass
@@ -23,25 +23,32 @@ class Pagina:
 
 def ler_pagina(rrn: int, arq: io.BufferedReader) -> Pagina:
     '''Função auxiliar para a busca de uma página em um arquivo com uma árvore-B'''
-    arq.seek(SIZEOF_HEADER + (rrn * SIZEOF_PAG))
+    offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
+    arq.seek(offset)
     pag_bytes = arq.read(SIZEOF_PAG)
     pag_str = unpack(FORMATO_PAG, pag_bytes)
     num_chaves = pag_str[0]
-    list_id = pag_str[1:(1 + MAX_CHAVES)]
-    list_offset = pag_str[(1 + MAX_CHAVES):(1 + (MAX_CHAVES * 2))]
     list_filhos = pag_str[(1 + (MAX_CHAVES * 2)):]
+    chaves: tuple = pag_str[1:(1 + (MAX_CHAVES * 2))]
     pag = Pagina() #cria uma página pag
     pag.numChaves = num_chaves
 
-    for i in range(MAX_CHAVES):
-        pag.chaves.append((list_id[i], list_offset[i])) #cada chave é uma tupla (id, offset). Aqui, vai inserindo cada uma das chaves da página
+    i = 0
+    id_atual = NULO
+    offset_atual = NULO
+    while i < (MAX_CHAVES * 2): #cada tipo de chave (id e offset) tem tamanho de MAX_CHAVES, logo o tamanho de chaves no total é (2 * MAX_CHAVES)
+        id_atual: int = chaves[i]
+        offset_atual: int = chaves[i + 1]
+        indice: int = i // 2 #inclui um id e um offset respectivos como parte de um único índice, então define-se o índice como a metade inteira (arredondada para baixo) do indice da chave tratada individualmente
+        pag.chaves[indice] = (id_atual, offset_atual)
+        i += 2 #pula de 2 em 2 pois cada elemento vai ser uma tupla
     
     for n in range(MAX_FILHOS):
-        pag.filhos.append(list_filhos[n]) #insere cada página filho de determinada página
+        pag.filhos[n] = list_filhos[n] #substitui valor vazio inicialmente definido pela criação do objeto Página em um indice i por um elemento da lista de filhos remetente ao mesmo índice
 
     return pag
 
-def buscaNaArvore(chave: int, rrn: int, arq: io.BufferedReader):
+def buscaNaArvore(chave: tuple[int, int], rrn: int, arq: io.BufferedReader):
     if rrn == NULO:
         return False, NULO, NULO
     else:
@@ -52,7 +59,7 @@ def buscaNaArvore(chave: int, rrn: int, arq: io.BufferedReader):
         else:
             return buscaNaArvore(chave, pag.filhos[pos])
 
-def buscaNaPagina(chave, pag):
+def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
     pos = 0
     while pos < pag.numChaves and chave > pag.chaves[pos]:
         pos += 1
@@ -61,7 +68,7 @@ def buscaNaPagina(chave, pag):
     else:
         return False, pos
 
-def insereChave(chave, rrnAtual):
+def insereChave(chave: tuple[int, int], rrnAtual: int):
     if rrnAtual == NULO:
         chavePro = chave
         filhoDpro = NULO
@@ -81,21 +88,30 @@ def insereChave(chave, rrnAtual):
             # não terminado!
 
 # FUNÇÕES AUXILIARES PARA A FUNÇÃO INSERE (tem mais a buscaNaPagina())
-def lePagina(rrn):
+def escrevePagina(rrn: int, pag: Pagina, arq: io.BufferedWriter):
+    '''Registra os dados presentes em determinada página no arquivo 'btree.dat' '''
+    offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
+    arq.seek(offset)
+    pag_bytes = pack(FORMATO_PAG, pag.numChaves)
+
+    for i in range(MAX_CHAVES): #transforma a lista de tuplas em só uma lista de inteiros
+        chave_tupla = pag.chaves[i]
+        pag_bytes += pack('2i', chave_tupla[0], chave_tupla[1])
+
+    for n in range(MAX_FILHOS):
+        pag_bytes += pack('i', pag.filhos[n])
+
+    arq.write(pag_bytes)
+
+    
+def insereChavePromo(chave: tuple[int, int], filhoD: int, pag: Pagina):
     pass
 
-def escrevePagina(rrn, pag):
-    pass
-
-def insereChavePromo(chave, filhoD, pag):
-    pass
-
-def divide(chave, filhoD, pag):
+def divide(chave: tuple[int, int], filhoD: int, pag: Pagina):
     pass
 
 def constroi_indices():
-    btree: list[Pagina] = [] # não sei como definir o tipo da lista
-    with open('games.dat', 'rb') as entrada, open('btree,dat', 'wb') as saida:
+    with open('games.dat', 'rb') as entrada, open('btree,dat', 'r + b') as saida:
         offset = 0 # ou poderia ser entrada.tell()?
         tam_bytes = entrada.read(2)
         tam_int = int.from_bytes(tam_bytes, 'little')
@@ -104,7 +120,6 @@ def constroi_indices():
             reg_str = reg.decode()
             campos = reg_str.split('|')
             id = int(campos[0])
-            #btree.append((id, offset)) # usar a função de inserção para inserir na árvore
             offset = entrada.tell()
             tam_bytes = entrada.read(2)
             tam_int = int.from_bytes(tam_bytes, 'little')
@@ -131,4 +146,4 @@ def main():
         imprime()
 
 if __name__ == '__main__':
-    main()
+    main
