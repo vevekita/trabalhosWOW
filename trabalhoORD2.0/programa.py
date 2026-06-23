@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import io
 import os
 
-# Variáveis Globais
+# Variável Global
 ORDEM: int = 0
 NULO: int = -1
 FORMATO_HEADER = 'i'
@@ -19,13 +19,14 @@ class Pagina:
     def __init__(self) -> None:
         self.numChaves: int = 0
         self.chaves: list[tuple[int, int]] = [(NULO, NULO)] * (ORDEM-1)
-        self.filhos: list = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
+        self.filhos: list[int] = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
-def ler_pagina(rrn: int, arq: io.BufferedReader) -> Pagina:
-    '''Função auxiliar para a busca de uma página em um arquivo com uma árvore-B'''
+def ler_pagina(rrn: int, btree: io.BufferedReader) -> Pagina:
+    '''Função auxiliar para a busca e inserção de uma chave em um arquivo com uma árvore-B. 
+    Ela busca pegar os registros de determinado rrn no arquivo onde fica a árvore-B e colocar eles conforme as propriedades de uma Pagina'''
     offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
-    arq.seek(offset)
-    pag_bytes = arq.read(SIZEOF_PAG)
+    btree.seek(offset)
+    pag_bytes = btree.read(SIZEOF_PAG)
     pag_str = unpack(FORMATO_PAG, pag_bytes)
     num_chaves = pag_str[0]
     list_filhos = pag_str[(1 + (MAX_CHAVES * 2)):]
@@ -48,11 +49,13 @@ def ler_pagina(rrn: int, arq: io.BufferedReader) -> Pagina:
 
     return pag
 
-def buscaNaArvore(chave: tuple[int, int], rrn: int, arq: io.BufferedReader):
+def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedReader):
+    '''Busca uma chave na árvore-B. Retorna se a ocorrência acontece ou não (True | False). 
+    Se ocorre, retorna também o rrn e a posição na página do rrn'''
     if rrn == NULO:
         return False, NULO, NULO
     else:
-        pag = ler_pagina(rrn, arq)#leitura da página armazenada no rrn
+        pag = ler_pagina(rrn, btree)#leitura da página armazenada no rrn
         achou, pos = buscaNaPagina(chave, pag)
         if achou:
             return True, rrn, pos
@@ -60,6 +63,7 @@ def buscaNaArvore(chave: tuple[int, int], rrn: int, arq: io.BufferedReader):
             return buscaNaArvore(chave, pag.filhos[pos])
 
 def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
+    '''Realiza a busca de uma chave em determinada página.'''
     pos = 0
     while pos < pag.numChaves and chave > pag.chaves[pos]:
         pos += 1
@@ -68,13 +72,16 @@ def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
     else:
         return False, pos
 
-def insereChave(chave: tuple[int, int], rrnAtual: int):
-    if rrnAtual == NULO:
+def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedReader):
+    '''Função que insere uma chave em uma página, percorrendo recursivamente pelas páginas 
+    filhas até encontrar um ponteiro nulo e insere, de forma válida (utilizando métodos de 
+    divisão e promoção se necessários), a chave'''
+    if rrnAtual == NULO: #condição de parada da recursão
         chavePro = chave
         filhoDpro = NULO
         return chavePro, filhoDpro, True
     else:
-        pag = #leitura página armazenada em rrnAtual
+        pag = ler_pagina(rrnAtual, btree)
         achou, pos = buscaNaPagina(chave, pag)
     if achou:
         raise ValueError("Chave duplicada!")
@@ -84,31 +91,66 @@ def insereChave(chave: tuple[int, int], rrnAtual: int):
     if not promo:
         return NULO, NULO, False
     else:
-        if #existe espaço em pag para inserir chavePro:
-            # não terminado!
+        chavePro, filhoDpro, pag, novaPag = divide(chavePro, filhoDpro, pag)
+        escrevePagina(rrnAtual, pag, btree)
+        escrevePagina(filhoDpro, novaPag, btree)
+        return chavePro, filhoDpro, True
 
 # FUNÇÕES AUXILIARES PARA A FUNÇÃO INSERE (tem mais a buscaNaPagina())
-def escrevePagina(rrn: int, pag: Pagina, arq: io.BufferedWriter):
+def escrevePagina(rrn: int, pag: Pagina, btree: io.BufferedWriter):
     '''Registra os dados presentes em determinada página no arquivo 'btree.dat' '''
     offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
-    arq.seek(offset)
+    btree.seek(offset)
     pag_bytes = pack(FORMATO_PAG, pag.numChaves)
 
     for i in range(MAX_CHAVES): #transforma a lista de tuplas em só uma lista de inteiros
         chave_tupla = pag.chaves[i]
         pag_bytes += pack('2i', chave_tupla[0], chave_tupla[1])
-
     for n in range(MAX_FILHOS):
         pag_bytes += pack('i', pag.filhos[n])
+    btree.write(pag_bytes)
 
-    arq.write(pag_bytes)
-
-    
 def insereChavePromo(chave: tuple[int, int], filhoD: int, pag: Pagina):
-    pass
+    '''Função auxiliar que insere uma chave (e seu filho direito) em determinada página da árvore-B,
+    empurrandos os elementos maiores para a direita para abrir espaço à chave a ser inserida.'''
+    if pag.numChaves == MAX_CHAVES:
+        pag.chaves.append((NULO, NULO))
+        pag.filhos.append(NULO)
+    i = pag.numChaves
+    while i > 0 and chave[0] < pag.chaves[i-1][0]:
+        pag.chaves[i] = pag.chaves[i-1]
+        pag.filhos[i+1] = pag.filhos[i]
+        i -= 1
+    pag.chaves[i] = chave
+    pag.filhos[i+1] = filhoD
+    pag.numChaves += 1
 
-def divide(chave: tuple[int, int], filhoD: int, pag: Pagina):
-    pass
+def divide(chave: tuple[int, int], filhoD: int, pag: Pagina, btree: io.BufferedReader):
+    '''Divide uma página em duas páginas(uma delas sendo a página em si)'''
+    insereChavePromo(chave, filhoD, pag)
+    meio = ORDEM // 2
+    chavePro = pag.chaves[meio]
+    filhoDpro = novoRRN(btree)
+  
+    chaves: list[tuple[int, int]] = pag.chaves[0:meio]
+    filhos: list[int] = pag.filhos[0:meio + 1]
+    qtdChaves: int = 0
+    for i in range(len(chaves)):
+        if chaves[i] != (NULO, NULO):
+            qtdChaves += 1
+    
+    pNova = Pagina()
+    novaChaves: list[tuple[int, int]] = pag.chaves[meio + 1: ]
+    novaFilhos: list[int] = pag.filhos[meio + 2 : ]
+    novaQtdChaves: int = 0
+    for i in range()
+    #não terminado 
+    
+def novoRRN(btree: io.BufferedReader) -> int:
+    '''Função auxiliar que encontra o RRN de uma nova página adicionada na árvore-B'''
+    btree.seek(0, os.SEEK_END)
+    offset = btree.tell()
+    return (offset - SIZEOF_HEADER) // SIZEOF_PAG
 
 def constroi_indices():
     with open('games.dat', 'rb') as entrada, open('btree,dat', 'r + b') as saida:
