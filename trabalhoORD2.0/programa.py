@@ -86,11 +86,11 @@ def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedReader)
     if achou:
         raise ValueError("Chave duplicada!")
     
-    chavePro, filhoDpro, promo = insereChave(chave, pag.filhos[pos])
+    chavePro, filhoDpro, promo = insereChave(chave, pag.filhos[pos], btree)
 
-    if not promo:
+    if not promo: #se não houver promoção
         return NULO, NULO, False
-    else:
+    else: #se houver promoção
         chavePro, filhoDpro, pag, novaPag = divide(chavePro, filhoDpro, pag)
         escrevePagina(rrnAtual, pag, btree)
         escrevePagina(filhoDpro, novaPag, btree)
@@ -125,27 +125,41 @@ def insereChavePromo(chave: tuple[int, int], filhoD: int, pag: Pagina):
     pag.filhos[i+1] = filhoD
     pag.numChaves += 1
 
-def divide(chave: tuple[int, int], filhoD: int, pag: Pagina, btree: io.BufferedReader):
+def divide(chave: tuple[int, int], filhoD: int, pag: Pagina, btree: io.BufferedRandom):
     '''Divide uma página em duas páginas(uma delas sendo a página em si)'''
     insereChavePromo(chave, filhoD, pag)
     meio = ORDEM // 2
     chavePro = pag.chaves[meio]
     filhoDpro = novoRRN(btree)
-  
-    chaves: list[tuple[int, int]] = pag.chaves[0:meio]
-    filhos: list[int] = pag.filhos[0:meio + 1]
-    qtdChaves: int = 0
-    for i in range(len(chaves)):
-        if chaves[i] != (NULO, NULO):
-            qtdChaves += 1
-    
+
+    pAtual = Pagina()
     pNova = Pagina()
-    novaChaves: list[tuple[int, int]] = pag.chaves[meio + 1: ]
-    novaFilhos: list[int] = pag.filhos[meio + 2 : ]
+    qtdChaves: int = 0
     novaQtdChaves: int = 0
-    for i in range()
-    #não terminado 
-    
+    #Recebimento de valores de pag no pAtual
+    for n in range(meio):
+        if pag.chaves[n] != (NULO, NULO):
+            pAtual.chaves[n] = pag.chaves[n]#atribui as chaves da primeira metade às chaves do pAtual
+            qtdChaves += 1
+        if pag.filhos[n] != NULO:
+            pAtual.filhos[n] = pag.filhos[n]#atribui os filhos da primeira metade aos filhos do pAtual
+    if pag.filhos[meio] != NULO:
+        pAtual.filhos[meio] = pag.filhos[meio]
+    pAtual.numChaves = qtdChaves      
+
+    #Recebimento de valores de pag na pNova
+    for m in range(meio):
+        if pag.chaves[meio + 1 + m] != (NULO, NULO):
+            pNova.chaves[m] = pag.chaves[meio + 1 + m]
+            novaQtdChaves += 1
+        if pag.filhos[meio + 1 + m] != NULO:
+            pNova.filhos[m] = pag.filhos[meio + 1 + m]
+    if pag.filhos[MAX_FILHOS] != NULO: #se o filho da extremidade direita da página não fo nulo, transferimos ele para a pNova
+        pNova.filhos[novaQtdChaves] = pag.filhos[MAX_FILHOS]
+    pNova.numChaves = novaQtdChaves
+
+    return chavePro, filhoDpro, pAtual, pNova
+
 def novoRRN(btree: io.BufferedReader) -> int:
     '''Função auxiliar que encontra o RRN de uma nova página adicionada na árvore-B'''
     btree.seek(0, os.SEEK_END)
