@@ -166,6 +166,22 @@ def novoRRN(btree: io.BufferedReader) -> int:
     offset = btree.tell()
     return (offset - SIZEOF_HEADER) // SIZEOF_PAG
 
+def insereNaArvore(chave, raiz, btree): # Adicionado parametro btree
+    chavePro, filhoDpro, promocao = insereChave(chave, raiz, btree) # Adicionado parametro btree
+    # if promocao:
+        # inicializar pNova
+        # pNova.chaves[0] = cahvePro # nova chave raiz
+        # pNova.filhos[0] = raiz # filho esquerdo
+        # pNova.filhos[1] = filhoDpro # filho direito
+
+        # incremente pNova.numChaves # RRN da nova raiz
+        # faça raiz receber o RRn da pNova
+        # escreva pNova no arquivo em raiz
+    
+    # return raiz
+    pass
+    # Não sei como codar :(
+
 def constroi_indices():
     with open('games.dat', 'rb') as entrada, open('btree,dat', 'r + b') as saida:
         offset = 0 # ou poderia ser entrada.tell()?
