@@ -1,0 +1,35 @@
+#Dados
+4       # 0x00: N (Número que queremos o fatorial)
+1       # 0x01: Constante 1
+0       # 0x02: Resultado acumulado (Fatorial)
+
+#Endereço inicial da primeira instrução
+0xA0
+
+# --- INICIALIZAÇÃO ---
+LOAD A, 0x00   # Carrega N em A
+STORE A, 0x02  # Inicializa o Resultado com N (Resultado = 4)
+
+# --- LOOP DO FATORIAL (Endereço 0xA2) ---
+LOAD A, 0x00   # A = N
+SUB A, 0x01    # A = N - 1
+STORE A, 0x00  # Salva o novo valor em N (N agora é 3)
+
+# Se (N - 1) for menor ou igual a 0, o cálculo acabou. 
+# Como não temos JUMP-, fazemos: se N-1 >= 0 continua, se der 0 ou negativo o loop deve parar.
+# Para simplificar: se N for 1, subtrair 1 dá 0. 
+SUB A, 0x01    # Testa se N chegou a 1 (A = N - 1)
+JUMP+ 0xAA     # Se A >= 0 (ou seja, N ainda é maior que 1), vai para a MULTIPLICAÇÃO (0xAA)
+JUMP 0xB2      # Se não, vai para o FIM (0xB2)
+
+# --- MULTIPLICAÇÃO (Endereço 0xAA) ---
+LOAD A, 0x02   # Carrega o Resultado acumulado em A
+MOV B, A       # Move para o registrador B (Multiplicando)
+MULT B, 0x00   # Multiplica B pelo N atual (M armazena o resultado da ULA)
+LOAD A, 0x01   # Truque para mover de M para o Resultado: carregamos o valor de M
+MOV A, M       # (Garante que o resultado saído da ULA vá para A)
+STORE A, 0x02  # Salva o novo produto no Resultado
+JUMP 0xA2      # Volta para o início do Loop para decrementar N de novo
+
+# --- FIM (Endereço 0xB2) ---
+LOAD A, 0x02   # Carrega o resultado final em A para exibição no painel
