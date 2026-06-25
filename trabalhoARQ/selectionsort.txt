@@ -1,0 +1,131 @@
+#Dados
+5       # 0x00: N (Tamanho do vetor)
+1       # 0x01: Constante 1
+0       # 0x02: Variável i
+0       # 0x03: Variável j
+0       # 0x04: Variável min
+0       # 0x05: Variável temp
+0x10    # 0x06: Base do vetor (Aponta para o endereço do início do vetor)
+0       # 0x07: Espaço reservado/alinhamento
+0       # 0x08: Espaço reservado/alinhamento
+0       # 0x09: Espaço reservado/alinhamento
+0       # 0x0A: Espaço reservado/alinhamento
+0       # 0x0B: Espaço reservado/alinhamento
+0       # 0x0C: Espaço reservado/alinhamento
+0       # 0x0D: Espaço reservado/alinhamento
+0       # 0x0E: Espaço reservado/alinhamento
+0       # 0x0F: Espaço reservado/alinhamento
+10      # 0x10: Vetor[0] (Elementos desordenados conforme pág. 5)
+3       # 0x11: Vetor[1]
+7       # 0x12: Vetor[2]
+2       # 0x13: Vetor[3]
+8       # 0x14: Vetor[4]
+0       # 0x15: Espaço vago vetor
+0       # 0x16: Espaço vago vetor
+0       # 0x17: Espvapor vetor
+0       # 0x18: Espvapor vetor
+0       # 0x19: Espvapor vetor
+0       # 0x1A: Espvapor vetor
+0       # 0x1B: Espvapor vetor
+0       # 0x1C: Espvapor vetor
+0       # 0x1D: Espvapor vetor
+0       # 0x1E: Espvapor vetor
+0       # 0x1F: Espvapor vetor
+0       # 0x20: addr_j (Ponteiro auxiliar)
+0       # 0x21: addr_min (Ponteiro auxiliar)
+0       # 0x22: addr_i (Ponteiro auxiliar)
+0       # 0x23: addr_min_troca (Ponteiro auxiliar)
+0       # 0x30: A[j] (Valor temporário)
+0       # 0x31: A[min] (Valor temporário)
+
+#Endereço inicial da primeira instrução
+0xA0
+
+# --- INICIALIZAÇÃO: i = 0 ---
+LOAD A, 0x01
+SUB A, 0x01
+STORE A, 0x02
+
+# --- LOOP I (Endereço 0xA3) ---
+LOAD A, 0x02
+SUB A, 0x00
+JUMP+ 0xF0     # Se i >= N, vai para o FIM (0xF0)
+
+# --- min = i ---
+LOAD A, 0x02
+STORE A, 0x04
+
+# --- j = i + 1 ---
+LOAD A, 0x02
+ADD A, 0x01
+STORE A, 0x03
+
+# --- LOOP J (Endereço 0xAA) ---
+LOAD A, 0x03
+SUB A, 0x00
+JUMP+ 0xD0     # Se j >= N, sai do Loop J e vai para a TROCA (0xD0)
+
+# --- addr_j = base + j ---
+LOAD A, 0x06
+ADD A, 0x03
+STORE A, 0x20
+
+# --- addr_min = base + min ---
+LOAD A, 0x06
+ADD A, 0x04
+STORE A, 0x21
+
+# --- A[j] = RAM[addr_j] (Indireto) ---
+LOADI A, 0x20
+STORE A, 0x30
+
+# --- A[min] = RAM[addr_min] (Indireto) ---
+LOADI A, 0x21
+STORE A, 0x31
+
+# --- COMPARAÇÃO: Se A[j] >= A[min] pula atribuição de novo mínimo ---
+LOAD A, 0x30
+SUB A, 0x31
+JUMP+ 0xC6     # Se A[j] - A[min] >= 0, pula para o próximo J (NEXT J em 0xC6)
+
+# --- min = j (Se for menor, atualiza min) ---
+LOAD A, 0x03
+STORE A, 0x04
+
+# --- NEXT J (Endereço 0xC6) ---
+LOAD A, 0x03
+ADD A, 0x01
+STORE A, 0x03
+JUMP 0xAA      # Volta para o início do Loop J
+
+# --- TROCA (Endereço 0xD0) ---
+# addr_i = base + i
+LOAD A, 0x06
+ADD A, 0x02
+STORE A, 0x22
+
+# addr_min_troca = base + min
+LOAD A, 0x06
+ADD A, 0x04
+STORE A, 0x23
+
+# temp = A[i] (Indireto)
+LOADI A, 0x22
+STORE A, 0x05
+
+# A[i] = A[min] (Lê de addr_min_troca e guarda em addr_i)
+LOADI A, 0x23
+STORI A, 0x22
+
+# A[min] = temp (Lê de temp e guarda em addr_min_troca)
+LOAD A, 0x05
+STORI A, 0x23
+
+# --- INCREMENTO: i++ ---
+LOAD A, 0x02
+ADD A, 0x01
+STORE A, 0x02
+JUMP 0xA3      # Volta para o início do Loop I
+
+# --- FIM (Endereço 0xF0) ---
+LOAD A, 0x30   # Apenas uma instrução qualquer para marcar o fim do programa
