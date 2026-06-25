@@ -181,10 +181,30 @@ def constroi_indices():
             tam_int = int.from_bytes(tam_bytes, 'little')
             
 def executa_operacoes(arquivo_operacoes: str):
-    pass
+    try:
+        open('games.dat', 'rb').close()
+        open('btree.dat', 'rb').close()
+    except FileNotFoundError as e:
+        print(f'Erro: {e}')
+
+    # As buscas deverão ser realizadas no índice que está armazenado no arquivo btree.dat. Uma vez localizada a chave
+    # no índice, o byte-offset do registro correspondente deverá ser recuperado e o registro deverá ser acessado de forma
+    # direta no arquivo games.dat.
+    # As inserções sempre acontecerão no fim do arquivo games.dat e, complementarmente, as informações do novo
+    # registro (chave e byte-offset) deverão ser inseridas no índice do arquivo btree.dat. Não será permitida a inserção de
+    # registros com chave duplicada. Dessa forma, antes de realizar uma inserção, o índice deverá ser consultado e uma
+    # mensagem de erro deverá ser dada caso se identifique a duplicação.
 
 def imprime():
-    pass
+    try:
+        open('btree.dat', 'r').close()
+    except FileNotFoundError as e:
+        print(f'Erro: {e}')
+
+    # Sempre que ativada, essa funcionalidade apresentará na tela o conteúdo de todas as páginas da árvore-B armazenada
+    # no arquivo btree.dat. Para cada página da árvore deverá ser informado: (a) o seu RRN; (b) os valores das chaves; (c)
+    # os valores dos byte-offsets dos registros associados às chaves; e (d) os RRNs das páginas filhas. As páginas devem ser
+    # apresentadas pela ordem do seu RRN e a página raiz deve ser devidamente identificada.
 
 def main():
     if len(argv) < 2:
