@@ -10,7 +10,7 @@
 #define GOOD_APPLE 0
 #define BAD_APPLE 1
 
-int timer = 120;
+int timer = 3600;
 int score = 0;
 int frame = 0;
 struct point {
