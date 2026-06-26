@@ -10,7 +10,8 @@
 #define GOOD_APPLE 0
 #define BAD_APPLE 1
 
-int pontos = 0;
+int timer = 120;
+int score = 0;
 int frame = 0;
 struct point {
     int32_t x;
@@ -61,7 +62,6 @@ void update () {
         }
     }
     if (fruit.y > 110) { //se a maçã cair no chão
-        pontos -= 5;
         spawn_fruit(); //spawna outra fruta
     }
 
@@ -69,6 +69,17 @@ void update () {
     *DRAW_COLORS = 0x1234;
     blit(background_jogo, 0, 0, background_jogoWidth, background_jogoHeight, background_jogoFlags);
     
+    if (timer <= 0) {
+        *DRAW_COLORS = 0x12;
+        rect(35, 50, 92, 30);
+        *DRAW_COLORS = 0x0001;
+        text("GAME OVER", 45, 62);
+        tone(100, 40, 100, 2);
+        return;
+    } else {
+        timer--;
+    }
+
     //parte do input
     srand((unsigned int)frame);
     int dx = 0; // deslocamento, permite mais de uma tecla pressionada
@@ -84,12 +95,12 @@ void update () {
     x += dx;
     
     int frameAtual = 0;
-    if (x < 0) {
-        x = 0;
+    if (x < -2) {
+        x = -2;
     }
 
-    if (x > 144) {
-        x = 144;
+    if (x > 150) {
+        x = 150;
     }
     if (dx != 0) {
         frameAtual = ((frame / 12) % 2) + 1;
@@ -106,10 +117,13 @@ void update () {
     
     if (x < fruit.x + 5 && x + 5 > fruit.x && y < fruit.y + 5 && y + 5 > fruit.y) { //se colidiu
         if (fruit.type == GOOD_APPLE) {
-            pontos += 10;
+            score += 10;
             tone(800, 20, 100, TONE_PULSE1);
         } else {
-            pontos -= 10;
+            if (score > 0) {
+                score -= 10;
+            }
+            
             tone(120, 25 << 16, 90, 3);
         }
         
@@ -124,7 +138,21 @@ void update () {
         blitSub(pony, fruit.x, fruit.y, 16, 16, (uint32_t)48, (uint32_t)spriteY, ponyWidth, BLIT_2BPP);
     }
 
-    *DRAW_COLORS = 0x0001;
-    text("PONTOS:", 4, 140);
-}
+    *DRAW_COLORS = 0x12;
+    rect(0, 125, 160, 35);
 
+    char textScore[11] = "SCORE:0000";
+    textScore[9] = (char)('0' + score % 10);
+    textScore[8] = (char)('0' + ((score / 10) % 10));
+    textScore[7] = (char)('0' + ((score / 100) % 10));
+    textScore[6] = (char)('0' + ((score / 1000) % 10));
+    *DRAW_COLORS = 0x0001;
+    text(textScore, 4, 140);
+
+    int timerSec= timer / 60;
+    char textTime[9] = "TIME:000";
+    textTime[7] = (char)('0' + timerSec % 10); //calcula as unidades
+    textTime[6] = (char)('0' + ((timerSec / 10) % 10));//calcula as dezenas
+    textTime[5] = (char)('0' + ((timerSec / 100) % 10)); //calcula as centenas
+    text(textTime, 90, 140);
+}
