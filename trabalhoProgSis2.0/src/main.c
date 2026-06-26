@@ -1,11 +1,26 @@
 #include "wasm4.h"
 #include "background_jogo.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include "pony.h"
 #include "ponyBehind.h"
 
+#define GRAVITY 0
 
+#define GOOD_APPLE 0
+#define BAD_APPLE 1
+
+int pontos = 0;
 int frame = 0;
+struct point {
+    int32_t x;
+    int32_t y;
+    int type;
+    int stop;
+};
+struct point fruit;
+int velocity_apple = 0;
+
 // retorna cor do pixel (x,y)
 int pget(int x, int y) {
     if (x < 0 || x > 159 || y < 0 || y > 159) { return 0; }
@@ -17,6 +32,13 @@ int pget(int x, int y) {
 
 int x, y; // posição do jogador
 
+void spawn_fruit() {
+    fruit.x = rand()%153;
+    fruit.y = (rand() % 41) + 30;
+    fruit.type = rand()%2;
+    fruit.stop = 40;
+}
+
 void start () {
     PALETTE[0] = 0x483852; //roxo escuro
     PALETTE[1] = 0x5b768d; //laranjinha
@@ -24,44 +46,85 @@ void start () {
     PALETTE[3] = 0xf6d7a8; //nude
    x = 80;
    y = 105; // posição inicial
+   spawn_fruit();
+   
 }
 
 void update () {
-    frame += 1;
-    //ordem de cores do fundo
+    frame++;
+    
+    if (fruit.stop>0) { //faz contagem regressiva para a maçã não cair
+        fruit.stop--;
+    } else {
+        if (frame % 2 == 0) {
+            fruit.y++;  
+        }
+    }
+    if (fruit.y > 110) { //se a maçã cair no chão
+        pontos -= 5;
+        spawn_fruit(); //spawna outra fruta
+    }
+
+    //background
     *DRAW_COLORS = 0x1234;
     blit(background_jogo, 0, 0, background_jogoWidth, background_jogoHeight, background_jogoFlags);
     
+    //parte do input
+    srand((unsigned int)frame);
     int dx = 0; // deslocamento, permite mais de uma tecla pressionada
+    int esquerda = 0;
     uint8_t gamepad = *GAMEPAD1;
     if (gamepad & BUTTON_LEFT)  { 
         dx -= 1;
+        esquerda = 1;
     }
     if (gamepad & BUTTON_RIGHT) { 
         dx += 1; 
     }
     x += dx;
     
-    int frameAtual = 0; //vai representar a pose estática da personagem
-    //bara a applejack para o limite da esquerda
+    int frameAtual = 0;
     if (x < 0) {
         x = 0;
     }
-    //barra a applejack para o limite da direita
+
     if (x > 144) {
         x = 144;
     }
     if (dx != 0) {
-        frameAtual = ((frame / 12) % 2) + 1; //oscila entre sprite 1 e spite 2 (sprites da applejack correndo)
+        frameAtual = ((frame / 12) % 2) + 1;
     }
     
-    int spriteX = frameAtual * 16; //operação para pegar cada sprite (se frameAtual = 0, pega o primeiro srite. Se for 1, pega o segundo sprite (que começa no pixel 16))
-    int spriteY = 0; //mesma coisa que o frameAtual, mas não é relevante porque o arquivo de sprites só tem uma linha
+    int spriteX = frameAtual * 16;
+    int spriteY = 0;
 
+    //applejack (pony)
     *DRAW_COLORS = 0x0024;
     blitSub(ponyBehind, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyBehindWidth, BLIT_2BPP);
     *DRAW_COLORS = 0x0123;
     blitSub(pony, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyWidth, BLIT_2BPP);
     
+    if (x < fruit.x + 5 && x + 5 > fruit.x && y < fruit.y + 5 && y + 5 > fruit.y) { //se colidiu
+        if (fruit.type == GOOD_APPLE) {
+            pontos += 10;
+            tone(800, 20, 100, TONE_PULSE1);
+        } else {
+            pontos -= 10;
+            tone(120, 25 << 16, 90, 3);
+        }
+        
+        spawn_fruit();
+    }
+
+    if (fruit.type == BAD_APPLE) {
+        *DRAW_COLORS = 0x0123;
+        blitSub(ponyBehind, fruit.x, fruit.y, 16, 16, (uint32_t)64, (uint32_t)spriteY, ponyBehindWidth, BLIT_2BPP);
+    } else {
+        blitSub(ponyBehind, fruit.x, fruit.y, 16, 16, (uint32_t)48, (uint32_t)spriteY, ponyBehindWidth, BLIT_2BPP);
+        blitSub(pony, fruit.x, fruit.y, 16, 16, (uint32_t)48, (uint32_t)spriteY, ponyWidth, BLIT_2BPP);
+    }
+
+    *DRAW_COLORS = 0x0001;
+    text("PONTOS:", 4, 140);
 }
 
