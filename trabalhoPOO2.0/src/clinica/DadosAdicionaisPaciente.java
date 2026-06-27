@@ -3,6 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package clinica;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Table;
+
 /**
  *Classe dos dados adicionais do Paciente. Ela é acessada somente pelo médico!
  * Essa classe, por complementar a classe Paciente, mas por precisar ter acesso restrito do médico, possui um atributo Paciente a fim de criar uma associação
@@ -14,8 +21,16 @@ package clinica;
  * - Se já fez cirurgia (se sim, especificar qual tipo)
  * - Se tem alguma alergia (se sim, especificar do quê)
  */
+
+@Entity
+@Table(name="DADOS ADICIONAIS DO PACIENTE")
 public class DadosAdicionaisPaciente {
-    private Paciente paciente; 
+    // Pojo para representar um objeto do tipo DadosAdicionaisPaciente com nome do paciente,
+    // se fuma, se bebe, tipo de colesterol, se tem diabetes, se tem doença cardiaca, se tem cirurgias e se tem alergias.
+    // Este Pojo será mapeado em uma tabela chamada Consultas no banco de dados.
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Paciente paciente;
     private boolean fuma;
     private boolean bebe;
     private boolean colesterol;
