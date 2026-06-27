@@ -1,6 +1,13 @@
 package clinica;
 
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Table;
+
 /**
  * Classe que armazena os dados de determinada consulta, como:
  * -Data
@@ -11,12 +18,22 @@ import java.time.LocalDate;
  * -Tipo de consulta (normal -> 1 hora ou retorno .> 30 minutos)
  * Essa classe é acessada pela Secretária
  */
+@Entity
+@Table(name="CONSULTAS")
 public class Consulta {
+    // Pojo para representar um objeto do tipo Consulta com data, horas, minutos, 
+    // nome do médico, nome do paciente, tipo da consulta.
+    // Este Pojo será mapeado em uma tabela chamada Consultas no banco de dados.
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private LocalDate data;
     private int horas;
     private int minutos;
+    @Column(length=10, name = "MEDICO", nullable = false)
     private String medico;
+    @Column(length=100, name = "PACIENTE", nullable = false) // aqui ele deve puxar o paciente todo, mas queremos só o nome
     private Paciente paciente;
+    @Column(length=15, name = "TIPO DE CONSULTA", nullable = false)
     private String tipoConsulta; //consulta normal(1h) ou retorno(30min)
     
     public Consulta() {}
