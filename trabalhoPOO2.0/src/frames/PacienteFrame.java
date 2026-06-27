@@ -44,6 +44,7 @@ public class PacienteFrame extends javax.swing.JFrame {
         convenio = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
+        excluir = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -75,7 +76,11 @@ public class PacienteFrame extends javax.swing.JFrame {
 
         convenio.setText("insira convênio...");
 
-        jButton1.setText("OK");
+        jButton1.setText("Concluir");
+
+        excluir.setBackground(new java.awt.Color(255, 0, 0));
+        excluir.setText("Excluir dados");
+        excluir.addActionListener(this::excluirActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -117,8 +122,10 @@ public class PacienteFrame extends javax.swing.JFrame {
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(excluir)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(144, 144, 144))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -154,12 +161,24 @@ public class PacienteFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(excluir))
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void excluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_excluirActionPerformed
+        VerificacaoExcluir VerificaDados = new VerificacaoExcluir(this, true);
+        VerificaDados.setLocationRelativeTo(this);
+        VerificaDados.setVisible(true);
+        
+        if(VerificaDados.isConfirmou()) { //se o usuário querer excluir os dados mesmo
+            this.dispose();
+        }
+    }//GEN-LAST:event_excluirActionPerformed
 
     /**
      * @param args the command line arguments
@@ -191,6 +210,7 @@ public class PacienteFrame extends javax.swing.JFrame {
     private javax.swing.JTextField dataNascimento;
     private javax.swing.JTextField email;
     private javax.swing.JTextField endereço;
+    private javax.swing.JButton excluir;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
