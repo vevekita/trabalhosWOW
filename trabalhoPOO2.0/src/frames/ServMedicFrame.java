@@ -17,6 +17,7 @@ public class ServMedicFrame extends javax.swing.JFrame {
      */
     public ServMedicFrame() {
         initComponents();
+        setVisible(true);
     }
 
     /**

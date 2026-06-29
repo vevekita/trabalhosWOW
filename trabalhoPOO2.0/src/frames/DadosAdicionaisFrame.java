@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
+import clinica.DadosAdicionaisPaciente;
+import clinica.Paciente;
 
 /**
  *
@@ -11,12 +13,16 @@ package frames;
 public class DadosAdicionaisFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DadosAdicionaisFrame.class.getName());
-
+    private DadosAdicionaisPaciente dados;
+    
     /**
      * Creates new form DadosAdicionaisFrame
+     * @param dados
      */
-    public DadosAdicionaisFrame() {
+    public DadosAdicionaisFrame(DadosAdicionaisPaciente dados) {
+        this.dados = dados;
         initComponents();
+        setVisible(true);
     }
 
     /**
@@ -48,21 +54,77 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
         jLabel1.setText("Dados Adicionais do Paciente");
 
         jCheckBox1.setText("Fuma com frequência");
+        jCheckBox1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox1MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox1MousePressed(evt);
+            }
+        });
 
         jCheckBox2.setText("Bebe bebidas alcoólicas com frequência");
+        jCheckBox2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox2MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox2MousePressed(evt);
+            }
+        });
 
         jCheckBox3.setText("Possui colesterol");
+        jCheckBox3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox3MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox3MousePressed(evt);
+            }
+        });
 
         jCheckBox4.setText("Possui diabetes");
+        jCheckBox4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox4MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox4MousePressed(evt);
+            }
+        });
 
         jCheckBox5.setText("Possui doença(s) cardíaca(s)");
+        jCheckBox5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox5MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox5MousePressed(evt);
+            }
+        });
 
         jTextField1.setText("insira Cirurgias...");
         jTextField1.addActionListener(this::jTextField1ActionPerformed);
 
         jCheckBox6.setText("Cirurgia(s) feita(s) (se marcado, especificar)");
+        jCheckBox6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox6MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox6MousePressed(evt);
+            }
+        });
 
         jCheckBox7.setText("Alergia(s) (se marcado, especificar)");
+        jCheckBox7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jCheckBox7MouseClicked(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jCheckBox7MousePressed(evt);
+            }
+        });
 
         jTextField2.setText("insira Alergias...");
 
@@ -158,6 +220,52 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
 
     private void concluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_concluirActionPerformed
         // TODO add your handling code here:
+        if(jCheckBox1.isSelected()){
+            dados.setFuma(true);
+        }
+        else{
+            dados.setFuma(false);
+        }
+        
+        if(jCheckBox2.isSelected()){
+            dados.setBebe(true);
+        }
+        else{
+            dados.setBebe(false);
+        }
+        
+        if(jCheckBox3.isSelected()){
+            dados.setColesterol(true);
+        }
+        else{
+            dados.setColesterol(false);
+        }
+        
+        if(jCheckBox4.isSelected()){
+            dados.setDiabetes(true);
+        }
+        else{
+            dados.setDiabetes(false);
+        }
+        
+        if(jCheckBox5.isSelected()){
+            dados.setDoencaCardiaca(true);
+        }
+        else{
+            dados.setDoencaCardiaca(false);
+        }
+        
+        if(jCheckBox6.isSelected()){
+            String cirurgias = jTextField1.getText();
+            dados.setCirurgias(cirurgias);
+        }
+        
+        if(jCheckBox7.isSelected()){
+            String alergias = jTextField2.getText();
+            dados.setAlergias(alergias);
+        }
+        
+        this.dispose();
     }//GEN-LAST:event_concluirActionPerformed
 
     private void excluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_excluirActionPerformed
@@ -169,6 +277,146 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
             this.dispose();
         }
     }//GEN-LAST:event_excluirActionPerformed
+
+    private void jCheckBox2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox2MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox2.isSelected()){
+            jCheckBox2.setSelected(false);
+        }
+        else{
+            jCheckBox2.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox2MouseClicked
+
+    private void jCheckBox3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox3MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox3.isSelected()){
+            jCheckBox3.setSelected(false);
+        }
+        else{
+            jCheckBox3.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox3MouseClicked
+
+    private void jCheckBox4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox4MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox4.isSelected()){
+            jCheckBox4.setSelected(false);
+        }
+        else{
+            jCheckBox4.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox4MouseClicked
+
+    private void jCheckBox5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox5MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox5.isSelected()){
+            jCheckBox5.setSelected(false); 
+        }
+        else{
+            jCheckBox5.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox5MouseClicked
+
+    private void jCheckBox6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox6MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox6.isSelected()){
+            jCheckBox6.setSelected(false); 
+        }
+        else{
+            jCheckBox6.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox6MouseClicked
+
+    private void jCheckBox7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox7MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox7.isSelected()){
+            jCheckBox7.setSelected(false);   
+        }
+        else{
+            jCheckBox7.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox7MouseClicked
+
+    private void jCheckBox1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox1MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox1.isSelected() == true){
+            jCheckBox1.setSelected(false);
+        }
+        else{
+            jCheckBox1.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox1MousePressed
+
+    private void jCheckBox1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox1MouseClicked
+        // TODO add your handling code here:
+        if(jCheckBox1.isSelected() == true){
+            jCheckBox1.setSelected(false);
+        }
+        else{
+            jCheckBox1.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox1MouseClicked
+
+    private void jCheckBox2MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox2MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox2.isSelected()){
+            jCheckBox2.setSelected(false);
+        }
+        else{
+            jCheckBox2.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox2MousePressed
+
+    private void jCheckBox3MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox3MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox3.isSelected()){
+            jCheckBox3.setSelected(false);
+        }
+        else{
+            jCheckBox3.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox3MousePressed
+
+    private void jCheckBox4MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox4MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox4.isSelected()){
+            jCheckBox4.setSelected(false);
+        }
+        else{
+            jCheckBox4.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox4MousePressed
+
+    private void jCheckBox5MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox5MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox5.isSelected()){
+            jCheckBox5.setSelected(false);   
+        }
+        else{
+            jCheckBox5.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox5MousePressed
+
+    private void jCheckBox6MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox6MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox6.isSelected()){
+            jCheckBox6.setSelected(false);   
+        }
+        else{
+            jCheckBox6.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox6MousePressed
+
+    private void jCheckBox7MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBox7MousePressed
+        // TODO add your handling code here:
+        if(jCheckBox7.isSelected()){
+            jCheckBox7.setSelected(false);   
+        }
+        else{
+            jCheckBox7.setSelected(true);
+        }
+    }//GEN-LAST:event_jCheckBox7MousePressed
 
     /**
      * @param args the command line arguments
@@ -190,9 +438,11 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
             logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        Paciente p1 = new Paciente();
+        DadosAdicionaisPaciente dadosAdicionais = new DadosAdicionaisPaciente(p1, false, false, false, false, false, "Nenhuma", "Nenhuma");
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new DadosAdicionaisFrame().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new DadosAdicionaisFrame(dadosAdicionais).setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

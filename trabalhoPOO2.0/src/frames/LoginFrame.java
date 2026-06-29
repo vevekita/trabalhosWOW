@@ -4,6 +4,8 @@
  */
 package frames;
 
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Cliente
@@ -103,6 +105,19 @@ public class LoginFrame extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        if(jRadioButton1.isSelected()){
+            ServMedicFrame sm = new ServMedicFrame();
+            this.dispose();
+        }
+        else{
+            if(jRadioButton2.isSelected()){
+                ServSecretFrame sc = new ServSecretFrame();
+                this.dispose();
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Voce deve marcar alguma das opcoes acima!");
+            }
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**

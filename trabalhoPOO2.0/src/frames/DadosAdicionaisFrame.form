@@ -122,26 +122,46 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Fuma com frequ&#xea;ncia"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox1MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox1MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="jCheckBox2">
       <Properties>
         <Property name="text" type="java.lang.String" value="Bebe bebidas alco&#xf3;licas com frequ&#xea;ncia"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox2MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox2MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="jCheckBox3">
       <Properties>
         <Property name="text" type="java.lang.String" value="Possui colesterol"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox3MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox3MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="jCheckBox4">
       <Properties>
         <Property name="text" type="java.lang.String" value="Possui diabetes"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox4MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox4MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="jCheckBox5">
       <Properties>
         <Property name="text" type="java.lang.String" value="Possui doen&#xe7;a(s) card&#xed;aca(s)"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox5MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox5MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextField1">
       <Properties>
@@ -157,11 +177,19 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Cirurgia(s) feita(s) (se marcado, especificar)"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox6MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox6MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="jCheckBox7">
       <Properties>
         <Property name="text" type="java.lang.String" value="Alergia(s) (se marcado, especificar)"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox7MouseClicked"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jCheckBox7MousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextField2">
       <Properties>

@@ -17,6 +17,7 @@ public class ServSecretFrame extends javax.swing.JFrame {
      */
     public ServSecretFrame() {
         initComponents();
+        setVisible(true);
     }
 
     /**
