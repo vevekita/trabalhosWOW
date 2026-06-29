@@ -22,7 +22,7 @@ import javax.persistence.Table;
 public class Consulta {
     // Pojo para representar um objeto do tipo Consulta com data, horas, minutos, 
     // nome do médico, nome do paciente, tipo da consulta.
-    // Este Pojo será mapeado em uma tabela chamada Consultas no banco de dados.
+    // Este Pojo será mapeado em uma tabela chamada CONSULTAS no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private LocalDate data; // Existe uma notação específica, mas tem que ver se dá pra usar sem
