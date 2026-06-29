@@ -1,7 +1,6 @@
 package clinica;
 
 import java.time.LocalDate;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -26,14 +25,11 @@ public class Consulta {
     // Este Pojo será mapeado em uma tabela chamada Consultas no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private LocalDate data;
+    private LocalDate data; // Existe uma notação específica, mas tem que ver se dá pra usar sem
     private int horas;
     private int minutos;
-    @Column(length=10, name = "MEDICO", nullable = false)
     private String medico;
-    @Column(length=100, name = "PACIENTE", nullable = false) // aqui ele deve puxar o paciente todo, mas queremos só o nome
     private Paciente paciente;
-    @Column(length=15, name = "TIPO DE CONSULTA", nullable = false)
     private String tipoConsulta; //consulta normal(1h) ou retorno(30min)
     
     public Consulta() {}
