@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package clinica;
-import javax.persistence.Column;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -27,7 +27,7 @@ import javax.persistence.Table;
 public class DadosAdicionaisPaciente {
     // Pojo para representar um objeto do tipo DadosAdicionaisPaciente com nome do paciente,
     // se fuma, se bebe, tipo de colesterol, se tem diabetes, se tem doença cardiaca, se tem cirurgias e se tem alergias.
-    // Este Pojo será mapeado em uma tabela chamada Consultas no banco de dados.
+    // Este Pojo será mapeado em uma tabela chamada DADOS ADICIONAIS DO PACIENTE no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Paciente paciente;
