@@ -26,7 +26,7 @@ import javax.persistence.Table;
 public class Paciente {
     // Pojo para representar um objeto do tipo Paciente com dadoIdentificação, nome, dataNascimento, endereco,
     // telefone, email e tipoConvenio.
-    // Este Pojo será mapeado em uma tabela chamada Pacientes no banco de dados.
+    // Este Pojo será mapeado em uma tabela chamada PACEINTES no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int dadoIdentificacao;
