@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package clinica;
-import javax.persistence.Column;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -26,11 +26,8 @@ public class Prontuario {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int idPaciente;
-    @Column(length=100, name = "SINTOMAS", nullable = false)
     private String sintomas;
-    @Column(length=50, name = "DIAGNÓSTICO", nullable = false)
     private String diagnostico;
-    @Column(length=50, name = "PRESCRIÇÃO", nullable = false)
     private String prescricao;
     
     public Prontuario(){}
