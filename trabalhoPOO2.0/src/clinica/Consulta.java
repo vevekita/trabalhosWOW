@@ -36,7 +36,6 @@ public class Consulta {
     private int minutos;
     @Column(length=10, name = "MEDICO", nullable = false)
     private String medico;
-    @ManyToOne
     @Column(length=100, name = "PACIENTE", nullable = false) // aqui ele deve puxar o paciente todo, mas queremos só o nome
     private int pacienteId;
     @Column(length=15, name = "TIPO DE CONSULTA", nullable = false)
