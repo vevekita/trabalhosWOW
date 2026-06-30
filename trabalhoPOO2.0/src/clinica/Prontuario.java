@@ -3,11 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package clinica;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Table;
 
 /**
@@ -24,8 +21,7 @@ public class Prontuario {
     // Pojo para representar um objeto do tipo Prontuario com id do paciente, sintomas, diagnostico e prescrição.
     // Este Pojo será mapeado em uma tabela chamada PRONTUÁRIOS no banco de dados.
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private int idPaciente;
+    private int idPaciente; //existe 1 prontuario por paciente, então é possível determinar o identificar um prontuario pelo id de seu paciente
     private String sintomas;
     private String diagnostico;
     private String prescricao;

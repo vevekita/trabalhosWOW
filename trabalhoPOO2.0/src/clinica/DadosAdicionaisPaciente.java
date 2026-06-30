@@ -6,8 +6,6 @@ package clinica;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Table;
 
 /**
@@ -29,8 +27,7 @@ public class DadosAdicionaisPaciente {
     // se fuma, se bebe, tipo de colesterol, se tem diabetes, se tem doença cardiaca, se tem cirurgias e se tem alergias.
     // Este Pojo será mapeado em uma tabela chamada DADOS ADICIONAIS DO PACIENTE no banco de dados.
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private int pacienteId;
+    private int pacienteId; //dados adicionais do paciente vão usar o id do paciente como identificação
     private boolean fuma;
     private boolean bebe;
     private boolean colesterol;
