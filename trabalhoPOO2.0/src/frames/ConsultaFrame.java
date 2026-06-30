@@ -3,22 +3,59 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
-
+import clinica.Consulta;
+import servicos.ServicoSecretaria;
+import java.util.List;
+import clinica.Paciente;
+import java.time.LocalDate;
 /**
  *
  * @author Cliente
  */
 public class ConsultaFrame extends javax.swing.JFrame {
-    
+    private final ServicoSecretaria servicoAtual;
+    private Paciente pacienteAtual;
+    private Consulta consultaAtual;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ConsultaFrame.class.getName());
 
     /**
      * Creates new form ConsultaFrame
+     * @param servicoAtual
+     * @param consultaAtual
      */
-    public ConsultaFrame() {
+    public ConsultaFrame(ServicoSecretaria servicoAtual, Paciente pacienteAtual, Consulta consultaAtual) {
         initComponents();
+        this.servicoAtual = servicoAtual;
+        this.pacienteAtual = pacienteAtual;
+        this.consultaAtual = consultaAtual;
+        carregaConsultaPaciente();
+        if (this.consultaAtual != null) {
+            
+        }
     }
-
+    // metodos auxiliares
+    private void carregaConsultaPaciente() {
+        consultas.removeAllItems();
+        List<Consulta> consultasPaciente = servicoAtual.
+    }
+    private void marcarCamposEditar() {
+        int horaInt = consultaAtual.getHoras();
+        String horaStr = String.valueOf(horaInt);
+        horas.setText(horaStr);
+        
+        int minInt = consultaAtual.getMinutos();
+        String minStr = String.valueOf(minInt);
+        minutos.setText(minStr);
+        
+        LocalDate dataLD = consultaAtual.getData();
+        data.setText(dataLD.toString());
+        
+        int idInt = consultaAtual.getPaciente().getDadoIdentificacao();
+        String idString = String.valueOf(idInt);
+        pacientes.setSelectedItem(idString);
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -31,19 +68,21 @@ public class ConsultaFrame extends javax.swing.JFrame {
         ConsultaType = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
+        horas = new javax.swing.JTextField();
+        minutos = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
         jLabel6 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        normal = new javax.swing.JRadioButton();
+        retorno = new javax.swing.JRadioButton();
         jSeparator1 = new javax.swing.JSeparator();
-        jButton1 = new javax.swing.JButton();
+        concluir = new javax.swing.JButton();
         excluir = new javax.swing.JButton();
+        data = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        consultas = new javax.swing.JComboBox<>();
+        jLabel7 = new javax.swing.JLabel();
+        criar = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -51,121 +90,159 @@ public class ConsultaFrame extends javax.swing.JFrame {
 
         jLabel2.setText("Data da Consulta:");
 
-        jFormattedTextField1.setText("dd/mm/aa");
-
         jLabel3.setText("Horário da Consulta:");
 
-        jTextField1.setText("horas");
+        horas.setText("horas");
 
-        jTextField2.setText("minutos");
+        minutos.setText("minutos");
 
         jLabel4.setText(":");
 
-        jLabel5.setText("Paciente da Consulta:");
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         jLabel6.setText("Tipo da Consulta:");
 
-        ConsultaType.add(jRadioButton1);
-        jRadioButton1.setText("Normal (1h)");
+        ConsultaType.add(normal);
+        normal.setText("Normal (1h)");
+        normal.addActionListener(this::normalActionPerformed);
 
-        ConsultaType.add(jRadioButton2);
-        jRadioButton2.setText("Retorno (30min)");
+        ConsultaType.add(retorno);
+        retorno.setText("Retorno (30min)");
 
-        jButton1.setText("Concluir");
-        jButton1.addActionListener(this::jButton1ActionPerformed);
+        concluir.setText("Concluir");
+        concluir.addActionListener(this::concluirActionPerformed);
 
         excluir.setBackground(new java.awt.Color(255, 0, 0));
         excluir.setText("Excluir dados");
         excluir.addActionListener(this::excluirActionPerformed);
 
+        data.setText("dd/mm/aa");
+
+        jLabel5.setText("Escolha uma consulta para editar:");
+
+        consultas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel7.setText("ou:");
+
+        criar.setText("criar Consulta");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel1))
+                        .addGap(129, 129, 129))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(criar)
+                            .addComponent(excluir))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(concluir)
+                        .addContainerGap())))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(6, 6, 6)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jSeparator1)
-                        .addContainerGap())
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(data, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(horas, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addGap(129, 129, 129))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5)
+                                .addComponent(minutos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel6)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jRadioButton1)
-                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 337, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jRadioButton2))))
-                        .addGap(0, 49, Short.MAX_VALUE))))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(excluir)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
-                .addGap(14, 14, 14))
+                                    .addComponent(retorno)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(8, 8, 8)
+                                        .addComponent(normal)))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(consultas, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(17, 17, 17)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(consultas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(criar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(data, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(horas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(minutos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
-                .addGap(18, 18, 18)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton1)
+                .addComponent(normal)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton2)
+                .addComponent(retorno)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(concluir)
                     .addComponent(excluir))
-                .addGap(0, 15, Short.MAX_VALUE))
+                .addGap(12, 12, 12))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void concluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_concluirActionPerformed
+        if (consultaAtual == null) {
+            consultaAtual = new Consulta();
+        }
+        
+        String dataInput = data.getText();
+        LocalDate dataLD = LocalDate.parse(dataInput);
+        String horasInput = horas.getText();
+        int horasInt = Integer.parseInt(horasInput);
+        String minInput = minutos.getText();
+        int minInt = Integer.parseInt(minInput);
+        String idPaciente = (String) pacientes.getSelectedItem();
+        int idInt = Integer.parseInt(idPaciente);
+        Paciente pacienteAtual = servicoAtual.buscaPaciente(idInt);
+        consultaAtual.setData(dataLD);
+        consultaAtual.setHoras(horasInt);
+        consultaAtual.setMinutos(minInt);
+        consultaAtual.setPacienteId(pacienteAtual);
+        if (normal.isSelected()) {
+            consultaAtual.setTipoConsulta("normal");
+        } else if (retorno.isSelected()) {
+            consultaAtual.setTipoConsulta("retorno");
+        }
+    }//GEN-LAST:event_concluirActionPerformed
 
     private void excluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_excluirActionPerformed
         VerificacaoExcluir VerificaDados = new VerificacaoExcluir(this, true);
@@ -174,8 +251,15 @@ public class ConsultaFrame extends javax.swing.JFrame {
         
         if(VerificaDados.isConfirmou()) {
             this.dispose();
+            String idPaciente = (String) pacientes.getSelectedItem();
+            int idInt = Integer.parseInt(idPaciente);
+            servicoAtual.removerPaciente(idInt);
         }
     }//GEN-LAST:event_excluirActionPerformed
+
+    private void normalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_normalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_normalActionPerformed
 
     /**
      * @param args the command line arguments
@@ -204,20 +288,22 @@ public class ConsultaFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup ConsultaType;
+    private javax.swing.JButton concluir;
+    private javax.swing.JComboBox<String> consultas;
+    private javax.swing.JCheckBox criar;
+    private javax.swing.JTextField data;
     private javax.swing.JButton excluir;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JFormattedTextField jFormattedTextField1;
+    private javax.swing.JTextField horas;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField minutos;
+    private javax.swing.JRadioButton normal;
+    private javax.swing.JRadioButton retorno;
     // End of variables declaration//GEN-END:variables
 }
