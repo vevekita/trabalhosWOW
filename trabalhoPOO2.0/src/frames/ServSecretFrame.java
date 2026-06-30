@@ -50,11 +50,10 @@ public class ServSecretFrame extends javax.swing.JFrame {
         consulta = new javax.swing.JRadioButton();
         jLabel3 = new javax.swing.JLabel();
         relatorio = new javax.swing.JRadioButton();
-        pacientes = new javax.swing.JComboBox<>();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         ok = new javax.swing.JButton();
-        criarPaciente = new javax.swing.JCheckBox();
+        jTextField1 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -73,14 +72,12 @@ public class ServSecretFrame extends javax.swing.JFrame {
         escolha.add(relatorio);
         relatorio.setText("Gerar Relatório de Consulta");
 
-        pacientes.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jLabel4.setText("Selecione o Paciente em que queira gerenciar os dados:");
+        jLabel4.setText("ID do Paciente em que queira gerenciar os dados:");
 
         ok.setText("OK");
         ok.addActionListener(this::okActionPerformed);
 
-        criarPaciente.setText("criar paciente");
+        jTextField1.setText("insira o Id...");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -89,13 +86,8 @@ public class ServSecretFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(129, 129, 129)
-                                .addComponent(jLabel1))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(pacientes, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(129, 129, 129)
+                        .addComponent(jLabel1)
                         .addGap(0, 120, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
@@ -108,11 +100,10 @@ public class ServSecretFrame extends javax.swing.JFrame {
                                     .addComponent(consulta)
                                     .addComponent(jLabel3)
                                     .addComponent(relatorio)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(dadosPaciente)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(criarPaciente)))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(dadosPaciente)))
+                                .addGap(0, 76, Short.MAX_VALUE)))))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
@@ -127,13 +118,11 @@ public class ServSecretFrame extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pacientes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dadosPaciente)
-                    .addComponent(criarPaciente))
+                .addComponent(dadosPaciente)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(consulta)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -197,7 +186,6 @@ public class ServSecretFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton consulta;
-    private javax.swing.JCheckBox criarPaciente;
     private javax.swing.JRadioButton dadosPaciente;
     private javax.swing.ButtonGroup escolha;
     private javax.swing.JLabel jLabel1;
@@ -205,8 +193,8 @@ public class ServSecretFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JButton ok;
-    private javax.swing.JComboBox<String> pacientes;
     private javax.swing.JRadioButton relatorio;
     // End of variables declaration//GEN-END:variables
 
