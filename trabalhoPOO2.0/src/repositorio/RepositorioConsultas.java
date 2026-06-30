@@ -4,11 +4,11 @@
  */
 
 package repositorio;
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
 import java.util.List;
 import clinica.Consulta;
-import clinica.Paciente;
 import java.time.LocalDate;
+import javax.persistence.Query;
 
 /**
  *
@@ -25,47 +25,56 @@ import java.time.LocalDate;
  */
 
 public class RepositorioConsultas {
-    private final List<Consulta> consultas = new ArrayList<>();
+    private final EntityManager em;
     
-    public List<Consulta> getConsultas(){
-        return consultas;
+    public RepositorioConsultas(EntityManager em) {
+        this.em = em;
     }
     
     public boolean adicionarConsulta(Consulta consulta){
-        if (consultas.isEmpty()){
-            consultas.add(consulta);
+        if (verificaColisaoHorarios(consulta.getHoras(), consulta.getMinutos(), consulta.getData(), consulta.getMedico(), consulta.getPacienteId(), consulta.getTipoConsulta()) == false) {
+            em.getTransaction().begin();
+            em.persist(consulta);
+            em.getTransaction().commit();
             return true;
-        }
-        else{
-            if(verificaColisaoHorarios(consulta.getHoras(), consulta.getMinutos(), consulta.getData(), consulta.getMedico(), consulta.getPaciente(), consulta.getTipoConsulta()) == false){
-                consultas.add(consulta);
-                return true;
-            }
-            else{
-                return false;
-            }
+        } else {
+            return false;
         }
         
     }
 
-    public Consulta buscarConsulta(LocalDate data, int horas, int minutos, String medico) { // Não tem como um mesmo médico estar em duas consultas diferentes no mesmo horário no mesmo dia
-        for (Consulta c : consultas) {
-            if (c.getData().equals(data) && c.getHoras() == horas && c.getMinutos() == minutos && c.getMedico().equals(medico)) {
-                return c; // Retorna a consulta encontrada
-            }
-        }
-        return null; // Não encontrou
-    }
-    
-    public void removeConsulta(Consulta consulta){
-        consultas.remove(consulta);
-    }
-    
-    //sobrecarga paa cadastro:
-    public boolean verificaColisaoHorarios(int horas, int minutos, LocalDate data, String medico, Paciente paciente, String tipoConsulta){
-        boolean ocorreColisao = false;
+    public Consulta buscarConsulta(int consultaId) {
+        return em.find(Consulta.class, consultaId);
         
-        if (consultas.isEmpty()){
+    }
+    
+    public void removeConsulta(int consultaId){
+        em.getTransaction().begin();
+        Consulta consulta = em.find(Consulta.class, consultaId);
+        if (consulta != null) {
+            em.remove(consulta);
+        }
+        em.getTransaction().commit();
+    }
+    
+    public List<Consulta> listarConsultas() { //lista todas as consultas
+        Query query = em.createQuery("SELECT c FROM Consulta c");
+        List<Consulta> consultas = query.getResultList();
+        return consultas;
+    }
+    
+    public List<Consulta> listarConsultasPaciente(int idPaciente) { //lista todas as consultas de um determinado paciente
+        Query query = em.createQuery("SELECT c FROM Consulta c WHERE c.paciente.dadoIdentificado =:id");
+        query.setParameter("id", idPaciente);
+        List<Consulta> consultasPessoa = query.getResultList();
+        return consultasPessoa;
+    }
+    //sobrecarga paa cadastro:
+    public boolean verificaColisaoHorarios(int horas, int minutos, LocalDate data, String medico, int pacienteId, String tipoConsulta){
+        boolean ocorreColisao = false;
+        List<Consulta> todasConsultas = listarConsultas();
+        
+        if (todasConsultas.isEmpty()){
             ocorreColisao = false;
         }
         else{
@@ -82,7 +91,7 @@ public class RepositorioConsultas {
             }
             int fimCons = horarioCons + duracaoCons;
             
-            for (Consulta c: consultas){
+            for (Consulta c: todasConsultas){
                 
                 int horarioC = (c.getHoras() * 60) + c.getMinutos();
                 int duracaoC = 0;
@@ -95,7 +104,7 @@ public class RepositorioConsultas {
                 }
                 int fimC = horarioC + duracaoC;
                 if (c.getData().equals(data)){
-                    if (c.getMedico().equals(medico) || c.getPaciente().equals(paciente)) {
+                    if (c.getMedico().equals(medico) || c.getPacienteId() == pacienteId) {
                         if (horarioC < fimCons && fimC > horarioCons) { //verifica sobreposição de horários
                             ocorreColisao = true;
                             break;
@@ -109,8 +118,13 @@ public class RepositorioConsultas {
     }
     //sobrecarga para atualizações:
     public boolean verificaColisaoHorarios(int horas, int minutos, LocalDate data, String medico, String tipoConsulta, Consulta consulta) {
+        List<Consulta> todasConsultas = listarConsultas();
         boolean ocorreColisao = false;
-        if (consultas.isEmpty()){
+        
+        if (consulta == null) {
+            return false;
+        }
+        if (todasConsultas.isEmpty()){
             ocorreColisao = false;
         }
         else{
@@ -127,8 +141,8 @@ public class RepositorioConsultas {
             }
             int fimCons = horarioCons + duracaoCons;
             
-            for (Consulta c: consultas){
-                if (consulta != null && c == consulta) { //se a consulta selecionada foi encontrada na lista:
+            for (Consulta c: todasConsultas){
+                if (c.getIdConsulta() == consulta.getIdConsulta()) { //se a consulta selecionada foi encontrada na lista:
                     continue; //desconsidera as operações dessa consulta específica dentro do loop
                 }
                 int horarioC = (c.getHoras() * 60) + c.getMinutos();
@@ -142,7 +156,7 @@ public class RepositorioConsultas {
                 }
                 int fimC = horarioC + duracaoC;
                 if (c.getData().equals(data)){
-                    if (c.getMedico().equals(medico) || c.getPaciente().equals(consulta.getPaciente())) {
+                    if (c.getMedico().equals(medico) || c.getPacienteId() == consulta.getPacienteId()) {
                         if (horarioC < fimCons && fimC > horarioCons) { //verifica sobreposição de horários
                             ocorreColisao = true;
                             break;
@@ -153,8 +167,5 @@ public class RepositorioConsultas {
         }
         
         return ocorreColisao;
-    }
-    public List<Consulta> listarConsultas(){
-        return new ArrayList<>(consultas); // Retorna uma cópia da lista de consultas
     }
 }
