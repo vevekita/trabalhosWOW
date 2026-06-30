@@ -1,8 +1,10 @@
 package clinica;
 
 import java.time.LocalDate;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Table;
@@ -22,26 +24,39 @@ import javax.persistence.Table;
 public class Consulta {
     // Pojo para representar um objeto do tipo Consulta com data, horas, minutos, 
     // nome do médico, nome do paciente, tipo da consulta.
-    // Este Pojo será mapeado em uma tabela chamada CONSULTAS no banco de dados.
+    // Este Pojo será mapeado em uma tabela chamada Consultas no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private LocalDate data; // Existe uma notação específica, mas tem que ver se dá pra usar sem
+    private int idConsulta;
+    @Column(name = "DATA_CONSULTA", nullable = false)
+    private LocalDate data;
+    @Column(name = "HORAS", nullable = false)
     private int horas;
+    @Column(name = "MINUTOS", nullable = false)
     private int minutos;
+    @Column(length=10, name = "MEDICO", nullable = false)
     private String medico;
-    private Paciente paciente;
+    @ManyToOne
+    @Column(length=100, name = "PACIENTE", nullable = false) // aqui ele deve puxar o paciente todo, mas queremos só o nome
+    private int pacienteId;
+    @Column(length=15, name = "TIPO DE CONSULTA", nullable = false)
     private String tipoConsulta; //consulta normal(1h) ou retorno(30min)
     
     public Consulta() {}
-    public Consulta(LocalDate data, int horas, int minutos, String medico, Paciente paciente, String tipoConsulta) {
+    public Consulta(int idConsulta, LocalDate data, int horas, int minutos, String medico, int pacienteId, String tipoConsulta) {
+        this.idConsulta = idConsulta;
         this.data = data;
         this.horas = horas;
         this.minutos = minutos;
         this.medico = medico;
-        this.paciente = paciente;
+        this.pacienteId = pacienteId;
         this.tipoConsulta = tipoConsulta;
     }
-
+    
+    public void setIdConsulta(int idConsulta) {
+        this.idConsulta = idConsulta;
+    }
+    
     public void setData(LocalDate data) {
         this.data = data;
     }
@@ -58,14 +73,17 @@ public class Consulta {
         this.medico = medico;
     }
 
-    public void setPaciente(Paciente paciente) {
-        this.paciente = paciente;
+    public void setPacienteId(int pacienteId) {
+        this.pacienteId = pacienteId;
     }
 
     public void setTipoConsulta(String tipoConsulta) {
         this.tipoConsulta = tipoConsulta;
     }
-
+    
+    public int getIdConsulta() {
+        return idConsulta;
+    }
     public LocalDate getData() {
         return data;
     }
@@ -82,8 +100,8 @@ public class Consulta {
         return medico;
     }
 
-    public Paciente getPaciente() {
-        return paciente;
+    public int getPacienteId() {
+        return pacienteId;
     }
     
     public String getTipoConsulta() {
