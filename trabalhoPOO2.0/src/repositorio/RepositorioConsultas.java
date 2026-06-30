@@ -37,10 +37,8 @@ public class RepositorioConsultas {
             em.persist(consulta);
             em.getTransaction().commit();
             return true;
-        } else {
-            return false;
         }
-        
+        return false;
     }
 
     public Consulta buscarConsulta(int consultaId) {
