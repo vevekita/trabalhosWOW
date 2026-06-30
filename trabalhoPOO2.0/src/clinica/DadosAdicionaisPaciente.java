@@ -30,7 +30,7 @@ public class DadosAdicionaisPaciente {
     // Este Pojo será mapeado em uma tabela chamada DADOS ADICIONAIS DO PACIENTE no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Paciente paciente;
+    private int pacienteId;
     private boolean fuma;
     private boolean bebe;
     private boolean colesterol;
@@ -40,8 +40,8 @@ public class DadosAdicionaisPaciente {
     private String alergias;
 
     public DadosAdicionaisPaciente() {}
-    public DadosAdicionaisPaciente(Paciente paciente, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
-        this.paciente = paciente;
+    public DadosAdicionaisPaciente(int pacienteId, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
+        this.pacienteId = pacienteId;
         this.fuma = fuma;
         this.bebe = bebe;
         this.colesterol = colesterol;
@@ -50,13 +50,13 @@ public class DadosAdicionaisPaciente {
         this.cirurgias = cirurgias;
         this.alergias = alergias;
     }
-    
-    public Paciente getPaciente() {
-        return paciente;
+
+    public int getPacienteId() {
+        return pacienteId;
     }
 
-    public void setPaciente(Paciente paciente) {
-        this.paciente = paciente;
+    public void setPacienteId(int pacienteId) {
+        this.pacienteId = pacienteId;
     }
 
     public boolean isFuma() {
