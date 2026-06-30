@@ -3,10 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package repositorio;
-import java.util.ArrayList;
-import java.util.List;
 import clinica.DadosAdicionaisPaciente;
-import clinica.Paciente;
+import javax.persistence.EntityManager;
 
 /**
  *
@@ -22,105 +20,41 @@ import clinica.Paciente;
  * - busca indice dados(Busca o indice em que os dados adicionais de um determinado paciente se encontra na lista)
  */
 public class RepositorioDadosAdicionais {
-    private final List<DadosAdicionaisPaciente> dadosAdicionais = new ArrayList<>();
-    
-    public void cadastrarDados(DadosAdicionaisPaciente dados){
-        int index = buscaIndiceDados(dados.getPaciente());
-        
-        if(index >= dadosAdicionais.size()){
-            dadosAdicionais.add(dados);
-        }
-        else{
-            dadosAdicionais.set(index, dados);
-        }
+    private final EntityManager em;
+
+    public RepositorioDadosAdicionais(EntityManager em) {
+        this.em = em;
     }
     
-    private int buscaIndiceDados(Paciente paciente){
-        int index = 0;
-        for(DadosAdicionaisPaciente d: dadosAdicionais){
-            if(d.getPaciente().equals(paciente)){
-                break;
-            }
-            else{
-                index++;
-            }
+    public void adicionarDados(DadosAdicionaisPaciente dados){
+        em.getTransaction().begin();
+        em.persist(dados);
+        em.getTransaction().commit();
+    }
+    
+    public void atualizarDados(int idPaciente, boolean fuma, boolean bebe, boolean colesterol, boolean diabete, boolean doencaCard, String cirurgia, String alergias, DadosAdicionaisPaciente dados) {
+        em.getTransaction().begin();
+        dados.setFuma(fuma);
+        dados.setBebe(bebe);
+        dados.setColesterol(colesterol);
+        dados.setDiabetes(diabete);
+        dados.setDoencaCardiaca(doencaCard);
+        dados.setCirurgias(cirurgia);
+        dados.setAlergias(alergias);
+        em.getTransaction().commit();
+    }
+    
+    public DadosAdicionaisPaciente buscaDadosAdicionais(int pacienteId){
+        return em.find(DadosAdicionaisPaciente.class, pacienteId);
+    }
+    
+    public void removeDadosAdicionais(int pacienteId){
+        em.getTransaction().begin();
+        DadosAdicionaisPaciente dadosAdicionais = em.find(DadosAdicionaisPaciente.class, pacienteId);
+        if (dadosAdicionais != null) {
+            em.remove(dadosAdicionais);
         }
-        
-        return index;
-    }
-    
-    public DadosAdicionaisPaciente buscaDadosAdicionais(Paciente paciente){
-        int index = buscaIndiceDados(paciente);
-        DadosAdicionaisPaciente dados = new DadosAdicionaisPaciente();
-        
-        if(index < dadosAdicionais.size()){
-            dados = dadosAdicionais.get(index);
-        }
-        
-        return dados;
-    }
-    
-    public void removeDadosAdicionais(DadosAdicionaisPaciente dados){
-        dadosAdicionais.remove(dados);
-    }
-    
-    public void atualizaFuma(Paciente paciente, boolean novoFuma){
-        int index = buscaIndiceDados(paciente);
-        
-        if(index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setFuma(novoFuma);
-        }
-    }
-    
-    public void atualizaBebe(Paciente paciente, boolean novoBebe){
-        int index = buscaIndiceDados(paciente);
-        
-        if(index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setBebe(novoBebe);
-        }
-    }
-    
-    public void atualizaColesterol(Paciente paciente, boolean novoColesterol){
-        int index = buscaIndiceDados(paciente);
-        
-        if(index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setColesterol(novoColesterol);
-        }
-    }
-    
-    public void atualizaDiabetes(Paciente paciente, boolean novoDiabetes){
-        int index = buscaIndiceDados(paciente);
-        
-        if(index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setDiabetes(novoDiabetes);
-        }
-    }
-    
-    public void atualizaDoencaCardiaca(Paciente paciente, boolean novoDoencaCardiaca){
-        int index = buscaIndiceDados(paciente);
-        
-        if(index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setDoencaCardiaca(novoDoencaCardiaca);
-        }
-    }
-    
-    public void atualizaCirurgias(Paciente paciente, String novaCirurgia){
-        int index = buscaIndiceDados(paciente);
-        
-        if (index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setCirurgias(novaCirurgia);
-        }
-    }
-    
-    public void atualizaAlergias(Paciente paciente, String novaAlergia){
-        int index = buscaIndiceDados(paciente);
-        
-        if(index < dadosAdicionais.size()){
-            dadosAdicionais.get(index).setAlergias(novaAlergia);
-        }
-    }
-    
-    public List<DadosAdicionaisPaciente> listarDadosAdicionais(){
-        return new ArrayList<>(dadosAdicionais); // Retorna uma cópia da lista de dados adicionais
+        em.getTransaction().commit();
     }
 }
+    

@@ -3,9 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package repositorio;
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
 import clinica.Paciente;
 import java.util.List;
+import javax.persistence.Query;
 
 /**
  *
@@ -18,45 +19,34 @@ import java.util.List;
  * - atualiza x(Atualiza a informação x de determinado paciente na lista, onde x pode ser: Endereço, info de contato ou tipo de convenio)
  */
 public class RepositorioPaciente {
-    private final List<Paciente> pacientes = new ArrayList<>();
+    private final EntityManager em;
+    
+    public RepositorioPaciente(EntityManager em) {
+        this.em = em;
+    }
             
-    public boolean adicionarPaciente(Paciente paciente){
-        if(verificaPacienteNaLista(paciente) == false){
-            pacientes.add(paciente);
-            return true;
-        }
-        else{
-            return false;
-        }
+    public void adicionarPaciente(Paciente pacienteAtual) {
+        em.getTransaction().begin();
+        em.persist(pacienteAtual);
+        em.getTransaction().commit();
     }
     
     public Paciente buscaPaciente(int idPaciente){
-        for (Paciente p : pacientes) {
-            if (p.getDadoIdentificacao() == idPaciente) {
-                return p; 
-            }
-        }
-        return null;
+        return em.find(Paciente.class, idPaciente);
     }
     
-    public void removePaciente(Paciente paciente){
-        pacientes.remove(paciente);
-    }
-    
-    private boolean verificaPacienteNaLista(Paciente paciente){
-        boolean estaPresente = false;
-        
-        for(Paciente p: pacientes){
-            if(p.getDadoIdentificacao() == paciente.getDadoIdentificacao()){
-            estaPresente = true;
-            break;
-            }
+    public void removePaciente(int idPaciente){
+        em.getTransaction().begin();   
+        Paciente paciente = em.find(Paciente.class, idPaciente);
+        if (paciente != null) {
+            em.remove(paciente);
         }
-        
-        return estaPresente;
+        em.getTransaction().commit();
     }
     
     public List<Paciente> listarPacientes(){
-        return new ArrayList<>(pacientes); // Retorna uma cópia da lista de pacientes
+        Query query = em.createQuery("SELECT p FROM Paciente p");
+        List<Paciente> pacientesList = query.getResultList();
+        return pacientesList;
     }
 }
