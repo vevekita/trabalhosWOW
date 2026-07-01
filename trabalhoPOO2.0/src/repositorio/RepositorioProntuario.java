@@ -6,6 +6,8 @@ package repositorio;
 import java.util.ArrayList;
 import java.util.List;
 import clinica.Prontuario;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
  *
@@ -18,51 +20,50 @@ import clinica.Prontuario;
  * - atualiza x(Atualiza a informação x de um determinado prontuario)
  */
 public class RepositorioProntuario {
-    private final List<Prontuario> prontuarios = new ArrayList<>();
-    
-    public void cadastrarProntuario(Prontuario prontuario){
-        prontuarios.add(prontuario);
+    private final EntityManager em;
+
+    public RepositorioProntuario(EntityManager em) {
+        this.em = em;
     }
     
-    public void removeProntuario(Prontuario prontuario){
-        prontuarios.remove(prontuario);
+    public void cadastrarProntuario(Prontuario prontuario){
+        em.getTransaction().begin();
+        em.persist(prontuario);
+        em.getTransaction().commit();
+    }
+    
+    public void atualizarProntuario(Prontuario prontuario) {
+        em.getTransaction().begin();
+        Prontuario prontuarioAtual = em.find(Prontuario.class, prontuario.getIdPaciente());
+        if (prontuarioAtual == null) {
+            em.persist(prontuario);
+        } else {
+            String sintomas = prontuario.getSintomas();
+            String diagnostico = prontuario.getDiagnostico();
+            String prescricao = prontuario.getPrescricao();
+            prontuarioAtual.setSintomas(sintomas);
+            prontuarioAtual.setDiagnostico(diagnostico);
+            prontuarioAtual.setPrescricao(prescricao);
+        }
+        em.getTransaction().commit();
+    }
+    
+    public void removeProntuario(int idPaciente){
+        em.getTransaction().begin();
+        Prontuario prontuarioAtual = em.find(Prontuario.class, idPaciente);
+        if (prontuarioAtual != null) {
+            em.remove(prontuarioAtual);
+        }
+        em.getTransaction().commit();
     }
     
     public Prontuario buscaProntuario(int idPaciente){
-        Prontuario p1 = new Prontuario();
-        
-        for(Prontuario p: prontuarios){
-            if(p.getIdPaciente() == idPaciente){
-                p1 = p;
-                break;
-            }
-            else{
-                p1.setIdPaciente(-1);       /*Marcação lógica de que o Paciente não existe, ou seja, o prontuário não foi encontrado*/
-            }
-        }
-        
-        return p1;
+        return em.find(Prontuario.class, idPaciente);
     }
-    
-    public void atualizaSintomas(Prontuario prontuario, String novosSintomas){
-        int index = prontuarios.indexOf(prontuario);
-        
-        prontuarios.get(index).setSintomas(novosSintomas);
-    }
-    
-    public void atualizaDiagnostico(Prontuario prontuario, String novoDiagnostico){
-        int index = prontuarios.indexOf(prontuario);
-        
-        prontuarios.get(index).setDiagnostico(novoDiagnostico);
-    }
-    
-    public void atualizaPrescricao(Prontuario prontuario, String novaPrescricao){
-        int index = prontuarios.indexOf(prontuario);
-        
-        prontuarios.get(index).setPrescricao(novaPrescricao);
-    }
-    
+
     public List<Prontuario> listarProntuarios(){
-        return new ArrayList<>(prontuarios); // Retorna uma cópia da lista de prontuarios
+        Query query = em.createQuery("SELECT p FROM Prontuario p");
+        List<Prontuario> prontuario = query.getResultList();
+        return prontuario;
     }
 }
