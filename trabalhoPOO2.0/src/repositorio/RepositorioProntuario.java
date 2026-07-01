@@ -60,10 +60,4 @@ public class RepositorioProntuario {
     public Prontuario buscaProntuario(int idPaciente){
         return em.find(Prontuario.class, idPaciente);
     }
-
-    public List<Prontuario> listarProntuarios(){
-        Query query = em.createQuery("SELECT p FROM Prontuario p");
-        List<Prontuario> prontuario = query.getResultList();
-        return prontuario;
-    }
 }
