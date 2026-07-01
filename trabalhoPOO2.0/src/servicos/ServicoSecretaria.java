@@ -200,20 +200,12 @@ public class ServicoSecretaria {
         return consultasAmanhaSemContato;
     }
     
-    public List<Paciente> listarPacientes() {
-        return repositorioPaciente.listarPacientes();
-    }
-    
     public Paciente buscaPaciente(int idPaciente) {
         return repositorioPaciente.buscaPaciente(idPaciente);
     }
     
     public List<Consulta> listarConsultas() {
         return repositorioConsultas.listarConsultas();
-    }
-    
-    public List<Consulta> listarConsultaPessoa(int idPaciente) {
-        return repositorioConsultas.listarConsultasPaciente(idPaciente);
     }
     
     public Consulta buscaConsulta(int idConsulta) {
