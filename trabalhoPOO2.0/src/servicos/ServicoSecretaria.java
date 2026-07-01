@@ -23,33 +23,18 @@ public class ServicoSecretaria {
     }
     
     public void cadastrarPaciente(Paciente paciente){
-        boolean verificacao = repositorioPaciente.adicionarPaciente(paciente);
-        if(verificacao == true){
-            repositorioPaciente.adicionarPaciente(paciente);
-            System.out.println("Paciente cadastrado com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível cadastrar o paciente pois já existe um cadastro de mesmo ID!");
-        }
-        
+        repositorioPaciente.adicionarPaciente(paciente);
     }
     
-    public void removerPaciente(Paciente paciente){
-        int id = paciente.getDadoIdentificacao();
-        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        if(pacienteExistente != null){
-            repositorioPaciente.removePaciente(paciente);
-            System.out.println("Paciente removido com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar o paciente para remoção!");
-        }
+    public void removerPaciente(int id){
+        repositorioPaciente.removePaciente(id);
     }
     
     public void atualizarDataNascimento(int id, String novaDataNascimento){
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
         if(pacienteExistente != null){
             pacienteExistente.setDataNascimento(novaDataNascimento);
+            repositorioPaciente.adicionarPaciente(pacienteExistente);
             System.out.println("Data de nascimento do paciente atualizado com sucesso!");
         }
         else{
@@ -61,6 +46,7 @@ public class ServicoSecretaria {
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
         if(pacienteExistente != null){
             pacienteExistente.setEndereco(novoEndereco);
+            repositorioPaciente.adicionarPaciente(pacienteExistente);
             System.out.println("Endereço do paciente atualizado com sucesso!");
         }
         else{
@@ -72,6 +58,7 @@ public class ServicoSecretaria {
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
         if(pacienteExistente != null){
             pacienteExistente.setTelefone(novoTelefone);
+            repositorioPaciente.adicionarPaciente(pacienteExistente);
             System.out.println("Telefone do paciente atualizado com sucesso!");
         }
         else{
@@ -83,6 +70,7 @@ public class ServicoSecretaria {
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
         if(pacienteExistente != null){
             pacienteExistente.setEmail(novoEmail);
+            repositorioPaciente.adicionarPaciente(pacienteExistente);
             System.out.println("Email do paciente atualizado com sucesso!");
         }
         else{
@@ -94,6 +82,7 @@ public class ServicoSecretaria {
         Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
         if(pacienteExistente != null){
             pacienteExistente.setTipoConvenio(novoTipoConvenio);
+            repositorioPaciente.adicionarPaciente(pacienteExistente);
             System.out.println("Tipo de convênio do paciente atualizado com sucesso!");
         }
         else{
@@ -104,52 +93,44 @@ public class ServicoSecretaria {
     public void cadastrarConsulta(Consulta consulta){
         boolean verificacao = repositorioConsultas.adicionarConsulta(consulta);
         if(verificacao == true){
-            repositorioConsultas.adicionarConsulta(consulta);
             System.out.println("Consulta cadastrada com sucesso!");
-        }
-        else{
+        } else {
             System.out.println("Não foi possível realizar o cadastro da consulta pois já existe uma consulta marcada.");
         }
-        
-        
     }
     
-    public void removerConsulta(Consulta consulta){
-        LocalDate data = consulta.getData();
-        int hora = consulta.getHoras();
-        int minuto = consulta.getMinutos();
-        String medico = consulta.getMedico();
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(data, hora, minuto, medico);
-        if(consultaExistente != null){
-            repositorioConsultas.removeConsulta(consulta);
-            System.out.println("Consulta removida com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar a consulta para remoção!");
-        }
+    public void removerConsulta(int idConsulta){
+        repositorioConsultas.removeConsulta(idConsulta);
     }
     
-    public void atualizarDataConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, LocalDate novaData){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
+    public void atualizarDataConsulta(int idConsulta, LocalDate novaData){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(idConsulta);
         if(consultaExistente != null){
-            if (repositorioConsultas.verificaColisaoHorarios(horaAntiga, minutoAntigo, novaData, medicoAntigo, consultaExistente.getTipoConsulta(), consultaExistente) == false) {
-                consultaExistente.setData(novaData);
+            int horas = consultaExistente.getHoras();
+            int minutos = consultaExistente.getMinutos();
+            String medico = consultaExistente.getMedico();
+            int idPaciente =  consultaExistente.getPacienteId();
+            String tipoConsulta =  consultaExistente.getTipoConsulta();
+            boolean atualizou = repositorioConsultas.atualizarConsulta(idConsulta, horas, minutos, novaData, medico, idPaciente, tipoConsulta);
+            if (atualizou == true) {
                 System.out.println("Data da consulta atualizada com sucesso!");
             } else {
-                System.out.println("Não foi possível atuualizar a data: horario já agendado!");
+                System.out.println("Não foi possível atualizar a data: horario já agendado!");
             }
-            
         } else {
             System.out.println("Não foi possível encontrar a consulta para atualização do dado!");
         }
     }
     
-    public void atualizarHorarioConsulta(LocalDate dataAntiga, int horasAntigas, int minutosAntigos, String medicoAntigo, int horasNovas, int minutosNovos){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horasAntigas, minutosAntigos, medicoAntigo);
+    public void atualizarHorarioConsulta(int idConsulta, int horasNovas, int minutosNovos){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(idConsulta);
         if (consultaExistente != null) {
-            if (repositorioConsultas.verificaColisaoHorarios(horasNovas, minutosNovos, dataAntiga, medicoAntigo, consultaExistente.getTipoConsulta(), consultaExistente) == false) {
-                consultaExistente.setHoras(horasNovas);
-                consultaExistente.setMinutos(minutosNovos);
+            LocalDate data = consultaExistente.getData();
+            String medico = consultaExistente.getMedico();
+            int idPaciente = consultaExistente.getPacienteId();
+            String tipoConsulta = consultaExistente.getTipoConsulta();
+            boolean atualizado = repositorioConsultas.atualizarConsulta(idConsulta, horasNovas, minutosNovos, data, medico, idPaciente, tipoConsulta);
+            if (atualizado == true) {
                 System.out.println("Horário da consulta atualizada com sucesso!");
             } else {
                 System.out.println("Horário da consulta inválido: Já existe uma consulta agendado no horário");
@@ -158,11 +139,16 @@ public class ServicoSecretaria {
             System.out.println("Consulta não encontrada");
         }
     }
-    public void atualizarTipoConsulta(LocalDate dataAntiga, int horaAntiga, int minutoAntigo, String medicoAntigo, String novoTipoConsulta){
-        Consulta consultaExistente = repositorioConsultas.buscarConsulta(dataAntiga, horaAntiga, minutoAntigo, medicoAntigo);
+    public void atualizarTipoConsulta(int idConsulta, String novoTipoConsulta){
+        Consulta consultaExistente = repositorioConsultas.buscarConsulta(idConsulta);
         if(consultaExistente != null){
-            if (repositorioConsultas.verificaColisaoHorarios(horaAntiga, minutoAntigo, dataAntiga, medicoAntigo, novoTipoConsulta, consultaExistente) == false) {
-                consultaExistente.setTipoConsulta(novoTipoConsulta);
+            int horas = consultaExistente.getHoras();
+            int minutos = consultaExistente.getMinutos();
+            LocalDate data = consultaExistente.getData();
+            String medico = consultaExistente.getMedico();
+            int idPaciente = consultaExistente.getPacienteId();
+            boolean atualizado = repositorioConsultas.atualizarConsulta(idConsulta, horas, minutos, data, medico, idPaciente, novoTipoConsulta);
+            if (atualizado == true) {
                 System.out.println("Tipo da consulta atualizada com sucesso!");
             } else {
                 System.out.println("Não foi possível atualizar o tipo de consulta: ocupação de horario reservado!");
@@ -181,8 +167,9 @@ public class ServicoSecretaria {
         
         for(Consulta c : todasConsultas){
             if(c.getData().equals(amanha)){
-                String telefone = c.getPaciente().getTelefone();
-                String email = c.getPaciente().getEmail();
+                Paciente pacienteAtual = repositorioPaciente.buscaPaciente(c.getPacienteId());
+                String telefone = pacienteAtual.getTelefone();
+                String email = pacienteAtual.getEmail();
                 
                 if(telefone != null || email != null){
                     consultasAmanhaContato.add(c);
@@ -201,8 +188,9 @@ public class ServicoSecretaria {
         
         for(Consulta c : todasConsultas){
             if(c.getData().equals(amanha)){
-                String telefone = c.getPaciente().getTelefone();
-                String email = c.getPaciente().getEmail();
+                Paciente pacienteAtual = repositorioPaciente.buscaPaciente(c.getPacienteId());
+                String telefone = pacienteAtual.getTelefone();
+                String email = pacienteAtual.getEmail();
                 
                 if(telefone == null && email == null){
                     consultasAmanhaSemContato.add(c);
@@ -210,5 +198,25 @@ public class ServicoSecretaria {
             }
         }
         return consultasAmanhaSemContato;
+    }
+    
+    public List<Paciente> listarPacientes() {
+        return repositorioPaciente.listarPacientes();
+    }
+    
+    public Paciente buscaPaciente(int idPaciente) {
+        return repositorioPaciente.buscaPaciente(idPaciente);
+    }
+    
+    public List<Consulta> listarConsultas() {
+        return repositorioConsultas.listarConsultas();
+    }
+    
+    public List<Consulta> listarConsultaPessoa(int idPaciente) {
+        return repositorioConsultas.listarConsultasPaciente(idPaciente);
+    }
+    
+    public Consulta buscaConsulta(int idConsulta) {
+        return repositorioConsultas.buscarConsulta(idConsulta);
     }
 }
