@@ -41,7 +41,7 @@ public class RepositorioConsultas {
         return false;
     }
     
-    public boolean atualizarConsultas(int idConsulta, int novasHoras, int novosMinutos, LocalDate novaData, String Medico, int idPaciente, String novoTipo) {
+    public boolean atualizarConsulta(int idConsulta, int novasHoras, int novosMinutos, LocalDate novaData, String Medico, int idPaciente, String novoTipo) {
         Consulta consultaAtual = buscarConsulta(idConsulta);
         if (consultaAtual != null) {
             if (!verificaColisaoHorarios(novasHoras, novosMinutos, novaData, Medico, novoTipo, consultaAtual)) {
