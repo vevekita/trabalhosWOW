@@ -13,11 +13,16 @@ public class RelatorioMedicoFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RelatorioMedicoFrame.class.getName());
 
+    private String nomePaciente;
+    
     /**
      * Creates new form RelatorioMedicoFrame
+     * @param nome
      */
-    public RelatorioMedicoFrame() {
+    public RelatorioMedicoFrame(String nome) {
+        this.nomePaciente = nome;
         initComponents();
+        setVisible(true);
     }
 
     /**
@@ -146,20 +151,20 @@ public class RelatorioMedicoFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
         if(jRadioButton1.isSelected()){
             String medicamentos = jTextField1.getText();
-            ReceitaMedica receita = new ReceitaMedica("Jaja", medicamentos);
+            ReceitaMedica receita = new ReceitaMedica(nomePaciente, medicamentos);
             this.dispose();
         }
         else{
             if(jRadioButton2.isSelected()){
                 String nomeAcompanhante = jTextField2.getText();
                 String diasAfastados = jTextField3.getText();
-                DeclaracaoAcompanhamento declaracao = new DeclaracaoAcompanhamento("Jaja", nomeAcompanhante, diasAfastados);
+                DeclaracaoAcompanhamento declaracao = new DeclaracaoAcompanhamento(nomePaciente, nomeAcompanhante, diasAfastados);
                 this.dispose();
             }
             else{
                 if(jRadioButton3.isSelected()){
                     String diasAfastada = jTextField4.getText();
-                    Atestado atestado = new Atestado("Jaja", diasAfastada);
+                    Atestado atestado = new Atestado(nomePaciente, diasAfastada);
                     this.dispose();
                 }
                 else{
@@ -197,7 +202,7 @@ public class RelatorioMedicoFrame extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new RelatorioMedicoFrame().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new RelatorioMedicoFrame("Jaja").setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
