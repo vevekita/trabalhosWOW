@@ -4,7 +4,6 @@
  */
 package clinica;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -12,42 +11,46 @@ import javax.persistence.GenerationType;
 import javax.persistence.Table;
 
 /**
- * Classe representa uma ficha de um paciente, armazenando as informações de um paciente:
- * -Dado de Identificação (ID)
- * -Data de nascimento
- * -Endereço
- * -telefone
- * -email
- * -Tipo de convênio (Particular ou planoo de saúde)
- * 
+ * Pojo que representa a ficha de um paciente, armazenando os seguintes dados de um paciente:
+ * - Dado de Identificação (ID)
+ * - Data de nascimento
+ * - Endereço
+ * - Telefone
+ * - Email
+ * - Tipo de convênio (Particular ou plano de saúde)
+ * Este pojo será mapeado em uma tabela chamada PACIENTES no banco de dados.
  */
+
 @Entity
 @Table(name="PACIENTES") 
 public class Paciente {
-    // Pojo para representar um objeto do tipo Paciente com dadoIdentificação, nome, dataNascimento, endereco,
-    // telefone, email e tipoConvenio.
-    // Este Pojo será mapeado em uma tabela chamada PACEINTES no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int dadoIdentificacao;
-    @Column(length=100, name = "NOME", nullable = false)
     private String nome;
-    @Column(length=10, name = "DATA DE NASCIMENTO", nullable = false)
     private String dataNascimento;
-    @Column(length=20, name = "ENDEREÇO", nullable = false)
     private String endereco;
-    @Column(length=13, name = "TELEFONE", nullable = true)
     private String telefone;
-    @Column(length=20, name = "EMAIL", nullable = true)
     private String email;
-    @Column(length=15, name = "TIPO DE CONVÊNIO", nullable = false)
-    private String tipoConvenio; //particular ou plano de saúde
-
+    private String tipoConvenio;
+    
+    // Construtores
+    public Paciente() {}
+    public Paciente(int dadoIdentificacao, String nome, String dataNascimento, String endereco, String telefone, String email, String tipoConvenio) {
+        this.dadoIdentificacao = dadoIdentificacao;
+        this.nome = nome;
+        this.dataNascimento = dataNascimento;
+        this.endereco = endereco;
+        this.telefone = telefone;
+        this.email = email;
+        this.tipoConvenio = tipoConvenio;
+    }
+    
     public int getDadoIdentificacao() {
         return dadoIdentificacao;
     }
 
-    public void setDadosIdentificacao(int dadoIdentificacao) {
+    public void setDadoIdentificacao(int dadoIdentificacao) {
         this.dadoIdentificacao = dadoIdentificacao;
     }
 
@@ -98,6 +101,4 @@ public class Paciente {
     public void setTipoConvenio(String tipoConvenio) {
         this.tipoConvenio = tipoConvenio;
     }
-    
-    
 }
