@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
+import javax.swing.JPanel;
 
 /**
  *
@@ -143,6 +144,35 @@ public class RelatorioMedicoFrame extends javax.swing.JFrame {
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         // TODO add your handling code here:
+        if(jRadioButton1.isSelected()){
+            String medicamentos = jTextField1.getText();
+            ReceitaMedica receita = new ReceitaMedica("Jaja", medicamentos);
+            this.dispose();
+        }
+        else{
+            if(jRadioButton2.isSelected()){
+                String nomeAcompanhante = jTextField2.getText();
+                String diasAfastados = jTextField3.getText();
+                DeclaracaoAcompanhamento declaracao = new DeclaracaoAcompanhamento("Jaja", nomeAcompanhante, diasAfastados);
+                this.dispose();
+            }
+            else{
+                if(jRadioButton3.isSelected()){
+                    String diasAfastada = jTextField4.getText();
+                    Atestado atestado = new Atestado("Jaja", diasAfastada);
+                    this.dispose();
+                }
+                else{
+                    if(jRadioButton4.isSelected()){
+                        PacientesDoMes pacientesDoMes = new PacientesDoMes();
+                        this.dispose();
+                    }
+                    else{
+                        this.dispose();
+                    }
+                }
+            }
+        }
     }//GEN-LAST:event_okButtonActionPerformed
 
     /**
