@@ -3,6 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
+import servicos.ServicoMedico;
+import clinica.Paciente;
+import javax.swing.JOptionPane;
+import clinica.DadosAdicionaisPaciente;
 
 /**
  *
@@ -142,6 +146,28 @@ public class ServMedicFrame extends javax.swing.JFrame {
 
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         // TODO add your handling code here:
+        ServicoMedico medico = new ServicoMedico();
+        String idPaciente = jTextField1.getText();
+            int id = Integer.parseInt(idPaciente);
+            Paciente paciente = medico.buscaPaciente(id);
+
+            if(paciente != null){
+                if(Relatorio.isSelected()){
+                    String nomePaciente = medico.buscaPaciente(id).getNome();
+                    RelatorioMedicoFrame relatorio = new RelatorioMedicoFrame(nomePaciente);
+                    this.dispose();
+                }
+                else{
+                    if(dadosAdicionais.isSelected()){
+                        DadosAdicionaisPaciente dados = medico.buscaDadosAdicionais(id);
+                        DadosAdicionaisFrame frame = new DadosAdicionaisFrame(dados);
+                        this.dispose();
+                    }
+                }
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Id não encontrado!");
+            }       
     }//GEN-LAST:event_jToggleButton1ActionPerformed
 
     /**

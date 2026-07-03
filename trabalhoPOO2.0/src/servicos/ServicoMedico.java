@@ -54,6 +54,11 @@ public class ServicoMedico {
         System.out.println("Dados adicionais removidos com sucesso!");
     }
     
+    //busca dados adicionais
+    public DadosAdicionaisPaciente buscaDadosAdicionais(int pacienteId){
+        return repositorioDadosAdicionais.buscaDadosAdicionais(pacienteId);
+    }
+    
     //gerencia Prontuario
     public void cadastraProntuario(Prontuario novoProntuario) {
         repositorioProntuarios.adicionarProntuario(novoProntuario);
@@ -141,4 +146,15 @@ public class ServicoMedico {
         }
         return pacientes;
     }
+    
+    //busca um paciente
+    public Paciente buscaPaciente(int idPaciente) {
+        if(this.repositorioPaciente != null){
+            return repositorioPaciente.buscaPaciente(idPaciente);
+        }
+        else{
+            return null;
+        }
+    }
+    
 }

@@ -4,7 +4,7 @@
  */
 package frames;
 import clinica.DadosAdicionaisPaciente;
-import clinica.Paciente;
+import servicos.ServicoMedico;
 
 /**
  *
@@ -265,6 +265,9 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
             dados.setAlergias(alergias);
         }
         
+        ServicoMedico medico = new ServicoMedico();
+        medico.atualizarDadosAdicionais(dados);
+        
         this.dispose();
     }//GEN-LAST:event_concluirActionPerformed
 
@@ -438,11 +441,11 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
             logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        Paciente p1 = new Paciente();
-        DadosAdicionaisPaciente dadosAdicionais = new DadosAdicionaisPaciente(p1, false, false, false, false, false, "Nenhuma", "Nenhuma");
+        //Paciente p1 = new Paciente();
+        //DadosAdicionaisPaciente dadosAdicionais = new DadosAdicionaisPaciente(p1, false, false, false, false, false, "Nenhuma", "Nenhuma");
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new DadosAdicionaisFrame(dadosAdicionais).setVisible(true));
+        //java.awt.EventQueue.invokeLater(() -> new DadosAdicionaisFrame(dadosAdicionais).setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
