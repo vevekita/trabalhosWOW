@@ -8,21 +8,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Table;
 
 /**
- * Classe que armazena os dados de determinada consulta, como:
- * -Data
- * -Horas
- * -Minutos
- * -Nome do médico
- * -Paciente
- * -Tipo de consulta (normal -> 1 hora ou retorno .> 30 minutos)
- * Essa classe é acessada pela Secretária
+ * Pojo para representar um objeto do tipo Consultalta com os dados:
+ * - Data
+ * - Horas
+ * - Minutos
+ * - Nome do médico
+ * - Paciente
+ * - Tipo de consulta (normal -> 1 hora ou retorno -> 30 minutos)
+ * Essa classe é acessada pela Secretária e será mapeado em uma tabela
+ * chamada CONSULTAS no banco de dados.
  */
+
 @Entity
 @Table(name="CONSULTAS")
 public class Consulta {
-    // Pojo para representar um objeto do tipo Consulta com data, horas, minutos, 
-    // nome do médico, nome do paciente, tipo da consulta.
-    // Este Pojo será mapeado em uma tabela chamada CONSULTAS no banco de dados.
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int idConsulta;
@@ -31,8 +30,9 @@ public class Consulta {
     private int minutos;
     private String medico;
     private int pacienteId;
-    private String tipoConsulta; //consulta normal(1h) ou retorno(30min)
+    private String tipoConsulta;
     
+    // Construtores
     public Consulta() {}
     public Consulta(int idConsulta, LocalDate data, int horas, int minutos, String medico, int pacienteId, String tipoConsulta) {
         this.idConsulta = idConsulta;
