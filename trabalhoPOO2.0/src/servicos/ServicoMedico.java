@@ -7,9 +7,11 @@ import clinica.DadosAdicionaisPaciente;
 import clinica.Prontuario;
 import repositorio.RepositorioDadosAdicionais;
 import repositorio.RepositorioProntuario;
+import repositorio.RepositorioPaciente;
 import clinica.Paciente;
 import clinica.Consulta;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 /**
  * Classe que contém todas as operações que um médico pode fazer no sistema, tais como:
@@ -23,58 +25,29 @@ import java.util.List;
 public class ServicoMedico {
     private RepositorioDadosAdicionais repositorioDadosAdicionais;
     private RepositorioProntuario repositorioProntuarios;
+    private RepositorioPaciente repositorioPaciente;
     
     public ServicoMedico() {}
-    public ServicoMedico(RepositorioDadosAdicionais dadosAdicionais, RepositorioProntuario prontuarios) {
+    public ServicoMedico(RepositorioDadosAdicionais dadosAdicionais, RepositorioProntuario prontuarios, RepositorioPaciente pacientes) {
         this.repositorioDadosAdicionais = dadosAdicionais;
         this.repositorioProntuarios = prontuarios;
+        this.repositorioPaciente = pacientes;
     }
     
     //Gerencia dados adicionais
     public void cadastraDadosAdicionais(DadosAdicionaisPaciente novoDadosAdd) {
-        repositorioDadosAdicionais.cadastrarDados(novoDadosAdd);
+        repositorioDadosAdicionais.adicionarDados(novoDadosAdd);
         System.out.println("Dados adicionais do paciente cadastrados com sucesso!");
     }
     //atualiza os dados adicionais
-    public void atualizaDadosFuma(Paciente paciente, boolean novoFuma) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setFuma(novoFuma);
-        System.out.println("Dado adicional atualizado com sucesso!");
-    }
-    public void atualizaDadosBebe(Paciente paciente, boolean novoBebe) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setBebe(novoBebe);
-        System.out.println("Dado adicional atualizado com sucesso!");
-    }
-    public void atualizaDadosDiabetes(Paciente paciente, boolean novoDiabetes) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setDiabetes(novoDiabetes);
-        System.out.println("Dado adicional atualizado com sucesso!");
-    }
-    public void atualizaDadosColesterol(Paciente paciente, boolean novoColesterol) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setColesterol(novoColesterol);
-        System.out.println("Dado adicional atualizado com sucesso!");
-    }
-    public void atualizaDadosDoencaCardiaca(Paciente paciente, boolean novoDoencaCardiaca) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setDoencaCardiaca(novoDoencaCardiaca);
-        System.out.println("Dado adicional atualizado com sucesso!");
-    }
-    public void atualizaDadosCirurgias(Paciente paciente, String novoCirurgias) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setCirurgias(novoCirurgias);
-        System.out.println("Dado adicional atualizado com sucesso!");
-    }
-    public void atualizaDadosAlergias(Paciente paciente, String novoAlergias) {
-        DadosAdicionaisPaciente dadosExistentes = repositorioDadosAdicionais.buscaDadosAdicionais(paciente);
-        dadosExistentes.setAlergias(novoAlergias);
-        System.out.println("Dado adicional atualizado com sucesso!");
+   
+    public void atualizarDadosAdicionais(DadosAdicionaisPaciente dados) {
+        repositorioDadosAdicionais.atualizarDados(dados);
     }
     
     //remove os dados adicionais
     public void removeDadosAdicionais(DadosAdicionaisPaciente dadoAddRem) {
-        repositorioDadosAdicionais.removeDadosAdicionais(dadoAddRem);
+        repositorioDadosAdicionais.removeDadosAdicionais(dadoAddRem.getPacienteId());
         System.out.println("Dados adicionais removidos com sucesso!");
     }
     
@@ -103,7 +76,7 @@ public class ServicoMedico {
     
     //remove prontuário
     public void removeProntuario(Prontuario prontRem) {
-        repositorioProntuarios.removeProntuario(prontRem);
+        repositorioProntuarios.removeProntuario(prontRem.getIdPaciente());
         System.out.println("Prontuário removido com sucesso!");
     }
     
@@ -146,29 +119,27 @@ public class ServicoMedico {
     }
     
     //geraRelatorio() para acessar todos os clientes do mês
-    public void geraRelatorio(int tipoRelatorio, String medico, List<Consulta> todasConsultas, LocalDate data) {
+    public List<String> geraRelatorio(int tipoRelatorio, List<Consulta> todasConsultas, LocalDate data) {
+        List<String> pacientes = new ArrayList<>();
         if (tipoRelatorio == 3) {
             System.out.println("------------CLIENTES-NO-MÊS------------");
-            System.out.println("MÉDICO: " + medico);
             System.out.println("MÊS E ANO SELECIONADOS: " + data.getMonthValue() + "/" + data.getYear());
             
-            int i = 0; //tipo de contador para a numeração de clientes
             if (todasConsultas == null) {
                 System.out.println("Nenhum Cliente atendido nesse mês");
             } else {
+                System.out.println("PACIENTES");
                 for (Consulta c: todasConsultas) {
-                    if (c.getMedico().equals(medico)) {
-                        if (c.getData().getMonthValue() == data.getMonthValue() && c.getData().getYear() == data.getYear()) {
-                            i += 1;
-                            System.out.println("PACIENTE #" + i + " - " + c.getPaciente().getNome());
-                        }
-                    }
+                    if (c.getData().getMonthValue() == data.getMonthValue() && c.getData().getYear() == data.getYear()) {
+                        Paciente pacienteAtual = repositorioPaciente.buscaPaciente(c.getPacienteId());
+                        pacientes.add(pacienteAtual.getNome());
+                        System.out.println( "ID: "+ c.getPacienteId() + " | NOME: " + pacienteAtual.getNome());
+                    }  
                 }
             }
-            
-            
         } else {
             System.out.println("Relatório inválido! Por favor, verifique o tipo de relatório desejado e suas informações necessárias.");
         }
+        return pacientes;
     }
 }
