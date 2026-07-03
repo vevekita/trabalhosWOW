@@ -1,7 +1,6 @@
 package clinica;
 
 import java.time.LocalDate;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -27,7 +26,6 @@ public class Consulta {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int idConsulta;
-    @Column(name = "DATA_CONSULTA", nullable = false)
     private LocalDate data;
     private int horas;
     private int minutos;
