@@ -4,11 +4,18 @@
  */
 package servicos;
 
+import clinica.Paciente;
 import clinica.Consulta;
+import repositorio.RepositorioPaciente;
 import java.util.List;
 
 public class GerenciadorMensagens {
     /*Recebe a lista das consultas de amanhã que a secretaria gerou que possuem contato*/
+    private final RepositorioPaciente repositorioPaciente;
+    
+    public GerenciadorMensagens(RepositorioPaciente repositorioPaciente) {
+        this.repositorioPaciente = repositorioPaciente;
+    }
     
     public void enviarMensagens(List<Consulta> consultasParaAvisar){
         if(consultasParaAvisar == null || consultasParaAvisar.isEmpty()){
@@ -16,17 +23,20 @@ public class GerenciadorMensagens {
         }
         else{
             for(Consulta c : consultasParaAvisar){
-                String nomePaciente = c.getPaciente().getNome();
-                String medico = c.getMedico();
-                String horario = c.getHoras() + ":" + (c.getMinutos() < 10 ? "0" + c.getMinutos() : c.getMinutos());
-                String telefone = c.getPaciente().getTelefone();
-                String email = c.getPaciente().getEmail();
+                Paciente pacienteAtual = repositorioPaciente.buscaPaciente(c.getPacienteId());
+                if (pacienteAtual != null) {
+                    String nomePaciente = pacienteAtual.getNome();
+                    String medico = c.getMedico();
+                    String horario = c.getHoras() + ":" + (c.getMinutos() < 10 ? "0" + c.getMinutos() : c.getMinutos());
+                    String telefone = pacienteAtual.getTelefone();
+                    String email = pacienteAtual.getEmail();
                 
-                if(telefone != null){ //se tiver telefone envia SMS
-                    System.out.println("(SMS enviado para o numero " + telefone + ") " + nomePaciente + " sua consulta esta marcada para amanha as " + horario + " com o(a) doutor(a) " + medico);
-                }
-                if(email != null){ //se tiver email envia email
-                    System.out.println("(Email enviado para o email " + email + ") " + nomePaciente + " sua consulta esta marcada para amanha as " + horario + " com o(a) doutor(a) " + medico);
+                    if(telefone != null){ //se tiver telefone envia SMS
+                        System.out.println("(SMS enviado para o numero " + telefone + ") " + nomePaciente + " sua consulta esta marcada para amanha as " + horario + " com o(a) doutor(a) " + medico);
+                    }
+                    if(email != null){ //se tiver email envia email
+                        System.out.println("(Email enviado para o email " + email + ") " + nomePaciente + " sua consulta esta marcada para amanha as " + horario + " com o(a) doutor(a) " + medico);
+                    }
                 }
             }
         }
