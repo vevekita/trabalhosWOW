@@ -116,10 +116,12 @@ public class ServicoMedico {
         if (tipoRelatorio == 3) {
             System.out.println("------------CLIENTES-NO-MÊS------------");
             System.out.println("MÊS E ANO SELECIONADOS: " + data.getMonthValue() + "/" + data.getYear());
-            List<Consulta> todasConsultas = repositorioConsultas.listarConsultas();
-            if (todasConsultas == null) {
+            if(this.repositorioConsultas != null){
+                List<Consulta> todasConsultas = repositorioConsultas.listarConsultas();
+                if (todasConsultas == null) {
                 System.out.println("Nenhum Cliente atendido nesse mês");
-            } else {
+                } 
+                else {
                 System.out.println("PACIENTES");
                 for (Consulta c: todasConsultas) {
                     if (c.getData().getMonthValue() == data.getMonthValue() && c.getData().getYear() == data.getYear()) {
@@ -129,9 +131,12 @@ public class ServicoMedico {
                             System.out.println( "ID: "+ c.getPacienteId() + " | NOME: " + pacienteAtual.getNome());
                         }
                     }  
+                }       
                 }
             }
-        } else {
+            
+        } 
+        else {
             System.out.println("Relatório inválido! Por favor, verifique o tipo de relatório desejado e suas informações necessárias.");
         }
         return pacientes;
