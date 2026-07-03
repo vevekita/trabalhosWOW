@@ -26,68 +26,11 @@ public class ServicoSecretaria {
         repositorioPaciente.adicionarPaciente(paciente);
     }
     
+    public void atualizarPaciente(Paciente paciente) {
+        repositorioPaciente.atualizarPaciente(paciente);
+    }
     public void removerPaciente(int id){
         repositorioPaciente.removePaciente(id);
-    }
-    
-    public void atualizarDataNascimento(int id, String novaDataNascimento){
-        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        if(pacienteExistente != null){
-            pacienteExistente.setDataNascimento(novaDataNascimento);
-            repositorioPaciente.adicionarPaciente(pacienteExistente);
-            System.out.println("Data de nascimento do paciente atualizado com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
-        }
-    }
-    
-    public void atualizarNovoEndereco(int id, String novoEndereco){
-        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        if(pacienteExistente != null){
-            pacienteExistente.setEndereco(novoEndereco);
-            repositorioPaciente.adicionarPaciente(pacienteExistente);
-            System.out.println("Endereço do paciente atualizado com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
-        }
-    }
-    
-    public void atualizarTelefone(int id, String novoTelefone){
-        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        if(pacienteExistente != null){
-            pacienteExistente.setTelefone(novoTelefone);
-            repositorioPaciente.adicionarPaciente(pacienteExistente);
-            System.out.println("Telefone do paciente atualizado com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
-        }
-    }
-    
-    public void atualizarEmail(int id, String novoEmail){
-        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        if(pacienteExistente != null){
-            pacienteExistente.setEmail(novoEmail);
-            repositorioPaciente.adicionarPaciente(pacienteExistente);
-            System.out.println("Email do paciente atualizado com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
-        }
-    }
-    
-    public void atualizarTipoConvenio(int id, String novoTipoConvenio){
-        Paciente pacienteExistente = repositorioPaciente.buscaPaciente(id);
-        if(pacienteExistente != null){
-            pacienteExistente.setTipoConvenio(novoTipoConvenio);
-            repositorioPaciente.adicionarPaciente(pacienteExistente);
-            System.out.println("Tipo de convênio do paciente atualizado com sucesso!");
-        }
-        else{
-            System.out.println("Não foi possível encontrar o paciente para atualização do dado!");
-        }
     }
     
     public void cadastrarConsulta(Consulta consulta){
@@ -199,7 +142,7 @@ public class ServicoSecretaria {
         }
         return consultasAmanhaSemContato;
     }
-    
+
     public Paciente buscaPaciente(int idPaciente) {
         return repositorioPaciente.buscaPaciente(idPaciente);
     }
