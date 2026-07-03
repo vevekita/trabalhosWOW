@@ -1,7 +1,16 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package clinica;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
- *Classe dos dados adicionais do Paciente. Ela é acessada somente pelo médico!
- * Essa classe, por complementar a classe Paciente, mas por precisar ter acesso restrito do médico, possui um atributo Paciente a fim de criar uma associação
+ * Pojo para representar um objeto de Dados Adicionais do Paciente com os dados:
+ * - Id do paciente (para identificação)
  * - Fuma (sim ou não)
  * - Bebe (sim ou não)
  * - Colesterol (sim ou não)
@@ -9,9 +18,16 @@ package clinica;
  * - Doença cardíaca (sim ou não)
  * - Se já fez cirurgia (se sim, especificar qual tipo)
  * - Se tem alguma alergia (se sim, especificar do quê)
+ * Essa classe complementa a classe do Paciente, 
+ * mas por precisar ter acesso restrito do médico, possui um atributo pacienteId criando uma associação;
+ * Este pojo será mapeado em uma tabela chamada DADOS ADICIONAIS DO PACIENTE no banco de dados.
  */
+
+@Entity
+@Table(name="DADOS ADICIONAIS DO PACIENTE")
 public class DadosAdicionaisPaciente {
-    private Paciente paciente;
+    @Id
+    private int pacienteId;
     private boolean fuma;
     private boolean bebe;
     private boolean colesterol;
@@ -20,9 +36,10 @@ public class DadosAdicionaisPaciente {
     private String cirurgias;
     private String alergias;
     
+    // Construtores
     public DadosAdicionaisPaciente() {}
-    public DadosAdicionaisPaciente(Paciente paciente, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
-        this.paciente = paciente;
+    public DadosAdicionaisPaciente(int pacienteId, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
+        this.pacienteId = pacienteId;
         this.fuma = fuma;
         this.bebe = bebe;
         this.colesterol = colesterol;
@@ -32,12 +49,12 @@ public class DadosAdicionaisPaciente {
         this.alergias = alergias;
     }
 
-    public Paciente getPaciente() {
-        return paciente;
+    public int getPacienteId() {
+        return pacienteId;
     }
 
-    public void setPaciente(Paciente paciente) {
-        this.paciente = paciente;
+    public void setPacienteId(int pacienteId) {
+        this.pacienteId = pacienteId;
     }
 
     public boolean isFuma() {
@@ -95,5 +112,6 @@ public class DadosAdicionaisPaciente {
     public void setAlergias(String alergias) {
         this.alergias = alergias;
     }
+    
     
 }
