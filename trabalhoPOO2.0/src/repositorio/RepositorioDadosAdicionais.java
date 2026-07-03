@@ -16,8 +16,6 @@ import javax.persistence.EntityManager;
  * - remove dados adicionais
  * - atualiza x (Atualiza as informações do atributo x dos dados adicionais de um determinado paciente)
  * 
- * Além disso, também foi feito um método privado para o auxilio de outros métodos:
- * - busca indice dados(Busca o indice em que os dados adicionais de um determinado paciente se encontra na lista)
  */
 public class RepositorioDadosAdicionais {
     private final EntityManager em;
@@ -32,16 +30,19 @@ public class RepositorioDadosAdicionais {
         em.getTransaction().commit();
     }
     
-    public void atualizarDados(int idPaciente, boolean fuma, boolean bebe, boolean colesterol, boolean diabete, boolean doencaCard, String cirurgia, String alergias, DadosAdicionaisPaciente dados) {
+    public void atualizarDados(DadosAdicionaisPaciente dados) {
         em.getTransaction().begin();
-        dados.setFuma(fuma);
-        dados.setBebe(bebe);
-        dados.setColesterol(colesterol);
-        dados.setDiabetes(diabete);
-        dados.setDoencaCardiaca(doencaCard);
-        dados.setCirurgias(cirurgia);
-        dados.setAlergias(alergias);
-        em.getTransaction().commit();
+        DadosAdicionaisPaciente dadosAtuais = em.find(DadosAdicionaisPaciente.class, dados.getPacienteId());
+        if (dadosAtuais != null) {
+        dadosAtuais.setFuma(dados.isFuma());
+        dadosAtuais.setBebe(dados.isBebe());
+        dadosAtuais.setColesterol(dados.isColesterol());
+        dadosAtuais.setDiabetes(dados.isDiabetes());
+        dadosAtuais.setDoencaCardiaca(dados.isDoencaCardiaca());
+        dadosAtuais.setCirurgias(dados.getCirurgias());
+        dadosAtuais.setAlergias(dados.getAlergias());
+        }
+        em.getTransaction().commit();  
     }
     
     public DadosAdicionaisPaciente buscaDadosAdicionais(int pacienteId){

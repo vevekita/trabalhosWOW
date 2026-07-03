@@ -5,8 +5,6 @@
 package repositorio;
 import javax.persistence.EntityManager;
 import clinica.Paciente;
-import java.util.List;
-import javax.persistence.Query;
 
 /**
  *
@@ -34,15 +32,13 @@ public class RepositorioPaciente {
     public void atualizarPaciente(Paciente paciente) {
         em.getTransaction().begin();
         Paciente pacienteAtual = em.find(Paciente.class, paciente.getDadoIdentificacao());
-        if (pacienteAtual == null) {
-            em.persist(pacienteAtual);
-        } else {
-            pacienteAtual.setNome(pacienteAtual.getNome());
-            pacienteAtual.setDataNascimento(pacienteAtual.getDataNascimento());
-            pacienteAtual.setEndereco(pacienteAtual.getEndereco());
-            pacienteAtual.setTelefone(pacienteAtual.getTelefone());
-            pacienteAtual.setEmail(pacienteAtual.getEmail());
-            pacienteAtual.setTipoConvenio(pacienteAtual.getTipoConvenio());
+        if (pacienteAtual != null) {
+            pacienteAtual.setNome(paciente.getNome());
+            pacienteAtual.setDataNascimento(paciente.getDataNascimento());
+            pacienteAtual.setEndereco(paciente.getEndereco());
+            pacienteAtual.setTelefone(paciente.getTelefone());
+            pacienteAtual.setEmail(paciente.getEmail());
+            pacienteAtual.setTipoConvenio(paciente.getTipoConvenio());
         }
         em.getTransaction().commit();
     }

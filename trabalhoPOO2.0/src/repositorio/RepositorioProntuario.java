@@ -36,12 +36,9 @@ public class RepositorioProntuario {
         em.getTransaction().begin();
         Prontuario prontuarioAtual = em.find(Prontuario.class, prontuario.getIdPaciente());
         if (prontuarioAtual != null) {
-            String sintomas = prontuario.getSintomas();
-            String diagnostico = prontuario.getDiagnostico();
-            String prescricao = prontuario.getPrescricao();
-            prontuarioAtual.setSintomas(sintomas);
-            prontuarioAtual.setDiagnostico(diagnostico);
-            prontuarioAtual.setPrescricao(prescricao);
+            prontuarioAtual.setSintomas(prontuario.getSintomas());
+            prontuarioAtual.setDiagnostico(prontuario.getDiagnostico());
+            prontuarioAtual.setPrescricao(prontuario.getPrescricao());
         }
         em.getTransaction().commit();
     }
