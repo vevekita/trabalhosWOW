@@ -31,6 +31,22 @@ public class RepositorioPaciente {
         em.getTransaction().commit();
     }
     
+    public void atualizarPaciente(Paciente paciente) {
+        em.getTransaction().begin();
+        Paciente pacienteAtual = em.find(Paciente.class, paciente.getDadoIdentificacao());
+        if (pacienteAtual == null) {
+            em.persist(pacienteAtual);
+        } else {
+            pacienteAtual.setNome(pacienteAtual.getNome());
+            pacienteAtual.setDataNascimento(pacienteAtual.getDataNascimento());
+            pacienteAtual.setEndereco(pacienteAtual.getEndereco());
+            pacienteAtual.setTelefone(pacienteAtual.getTelefone());
+            pacienteAtual.setEmail(pacienteAtual.getEmail());
+            pacienteAtual.setTipoConvenio(pacienteAtual.getTipoConvenio());
+        }
+        em.getTransaction().commit();
+    }
+            
     public Paciente buscaPaciente(int idPaciente){
         return em.find(Paciente.class, idPaciente);
     }
@@ -42,11 +58,5 @@ public class RepositorioPaciente {
             em.remove(paciente);
         }
         em.getTransaction().commit();
-    }
-    
-    public List<Paciente> listarPacientes(){
-        Query query = em.createQuery("SELECT p FROM Paciente p");
-        List<Paciente> pacientesList = query.getResultList();
-        return pacientesList;
     }
 }
