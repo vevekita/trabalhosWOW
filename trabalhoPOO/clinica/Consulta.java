@@ -1,36 +1,49 @@
 package clinica;
 
 import java.time.LocalDate;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Table;
+
 /**
- * Classe que armazena os dados de determinada consulta, como:
- * -Data
- * -Horas
- * -Minutos
- * -Nome do médico
- * -Paciente
- * -Tipo de consulta (normal -> 1 hora ou retorno .> 30 minutos)
- * Essa classe é acessada pela Secretária
+ * Pojo para representar um objeto do tipo Consultalta com os dados:
+ * - Data
+ * - Horas
+ * - Minutos
+ * - Nome do médico
+ * - Paciente
+ * - Tipo de consulta (normal -> 1 hora ou retorno -> 30 minutos)
+ * Essa classe é acessada pela Secretária e será mapeado em uma tabela
+ * chamada CONSULTAS no banco de dados.
  */
+
+@Entity
+@Table(name="CONSULTAS")
 public class Consulta {
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private int idConsulta;
     private LocalDate data;
     private int horas;
     private int minutos;
     private String medico;
-    private Paciente paciente;
-    private String tipoConsulta; //consulta normal(1h) ou retorno(30min)
+    private int pacienteId;
+    private String tipoConsulta;
     
-    public Consulta() {
-        
-    }
-    public Consulta(LocalDate data, int horas, int minutos, String medico, Paciente paciente, String tipoConsulta) {
+    // Construtores
+    public Consulta() {}
+    public Consulta(int idConsulta, LocalDate data, int horas, int minutos, String medico, int pacienteId, String tipoConsulta) {
+        this.idConsulta = idConsulta;
         this.data = data;
         this.horas = horas;
         this.minutos = minutos;
         this.medico = medico;
-        this.paciente = paciente;
+        this.pacienteId = pacienteId;
         this.tipoConsulta = tipoConsulta;
     }
-
+    
     public void setData(LocalDate data) {
         this.data = data;
     }
@@ -47,14 +60,17 @@ public class Consulta {
         this.medico = medico;
     }
 
-    public void setPaciente(Paciente paciente) {
-        this.paciente = paciente;
+    public void setPacienteId(int pacienteId) {
+        this.pacienteId = pacienteId;
     }
 
     public void setTipoConsulta(String tipoConsulta) {
         this.tipoConsulta = tipoConsulta;
     }
-
+    
+    public int getIdConsulta() {
+        return idConsulta;
+    }
     public LocalDate getData() {
         return data;
     }
@@ -71,8 +87,8 @@ public class Consulta {
         return medico;
     }
 
-    public Paciente getPaciente() {
-        return paciente;
+    public int getPacienteId() {
+        return pacienteId;
     }
     
     public String getTipoConsulta() {
