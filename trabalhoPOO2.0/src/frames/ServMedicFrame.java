@@ -160,8 +160,14 @@ public class ServMedicFrame extends javax.swing.JFrame {
                 else{
                     if(dadosAdicionais.isSelected()){
                         DadosAdicionaisPaciente dados = medico.buscaDadosAdicionais(id);
-                        DadosAdicionaisFrame frame = new DadosAdicionaisFrame(dados);
+                        DadosAdicionaisFrame frame = new DadosAdicionaisFrame(dados, medico);
                         this.dispose();
+                    }
+                    else{
+                        if(Prontuario.isSelected()){
+                            ProntuarioFrame frame = new ProntuarioFrame(id, medico);
+                            this.dispose();
+                        }
                     }
                 }
             }

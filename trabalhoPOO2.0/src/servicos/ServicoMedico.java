@@ -77,6 +77,11 @@ public class ServicoMedico {
         System.out.println("Prontuário removido com sucesso!");
     }
     
+    //busca prontuario
+    public Prontuario buscaProntuario(int idPaciente){
+        return repositorioProntuarios.buscaProntuario(idPaciente);
+    }
+    
     //Gera relatórios médicos:
     //geraRelatorio() para receita -> infoAdicional inclue informações básicas do medicamento(ex: "sertralina 50g").
     public void geraRelatorio(int tipoRelatorio, String medico, Paciente paciente, String infoAdicional) {

@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
+import clinica.Prontuario;
+import servicos.ServicoMedico;
 
 /**
  *
@@ -11,12 +13,18 @@ package frames;
 public class ProntuarioFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ProntuarioFrame.class.getName());
-
+    private int idPaciente;
+    private ServicoMedico medico;
+    
     /**
      * Creates new form ProntuarioFrame
+     * @param id
+     * @param medico
      */
-    public ProntuarioFrame() {
+    public ProntuarioFrame(int id, ServicoMedico medico) {
         initComponents();
+        this.idPaciente = id;
+        this.medico = medico;
     }
 
     /**
@@ -56,6 +64,7 @@ public class ProntuarioFrame extends javax.swing.JFrame {
         prescricao.setText("insira Prescrição...");
 
         concluir.setText("Concluir");
+        concluir.addActionListener(this::concluirActionPerformed);
 
         excluirDados.setBackground(new java.awt.Color(255, 0, 0));
         excluirDados.setText("Excluir dados");
@@ -132,6 +141,21 @@ public class ProntuarioFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_excluirDadosActionPerformed
 
+    private void concluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_concluirActionPerformed
+        // TODO add your handling code here:
+        String sintomasPaciente = sintomas.getText();
+        String diagnosticoProntuario = diagnostico.getText();
+        String prescricaoProntuario = prescricao.getText();
+        Prontuario novoProntuario = new Prontuario(idPaciente,sintomasPaciente, diagnosticoProntuario, prescricaoProntuario);
+        
+        if(medico.buscaProntuario(idPaciente) != null){
+            medico.atualizaProntuario(novoProntuario);
+        }
+        else{
+            medico.cadastraProntuario(novoProntuario);
+        }
+    }//GEN-LAST:event_concluirActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -152,9 +176,11 @@ public class ProntuarioFrame extends javax.swing.JFrame {
             logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        ServicoMedico medico = new ServicoMedico();
+        int id = 1;
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new ProntuarioFrame().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new ProntuarioFrame(id, medico).setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
