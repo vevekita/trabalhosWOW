@@ -44,8 +44,9 @@ public class RepositorioConsultas {
     public boolean atualizarConsulta(int idConsulta, int novasHoras, int novosMinutos, LocalDate novaData, String Medico, int idPaciente, String novoTipo) {
         Consulta consultaAtual = buscarConsulta(idConsulta);
         if (consultaAtual != null) {
-            if (!verificaColisaoHorarios(novasHoras, novosMinutos, novaData, Medico, novoTipo, consultaAtual)) {
+            if (verificaColisaoHorarios(novasHoras, novosMinutos, novaData, Medico, novoTipo, consultaAtual) == false) {
                 em.getTransaction().begin();
+                
                 consultaAtual.setHoras(novasHoras);
                 consultaAtual.setMinutos(novosMinutos);
                 consultaAtual.setData(novaData);
