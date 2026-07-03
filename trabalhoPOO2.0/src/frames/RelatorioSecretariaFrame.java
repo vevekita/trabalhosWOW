@@ -4,6 +4,7 @@
  */
 package frames;
 import servicos.ServicoSecretaria;
+import servicos.GerenciadorMensagens;
 /**
  *
  * @author Cliente
@@ -37,6 +38,7 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         jButton1 = new javax.swing.JButton();
         filtrar = new javax.swing.JButton();
+        mensagem = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -60,17 +62,19 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
         filtrar.setText("Filtrar");
         filtrar.addActionListener(this::filtrarActionPerformed);
 
+        mensagem.setBackground(new java.awt.Color(51, 204, 255));
+        mensagem.setText("Enviar Mensagem");
+        mensagem.addActionListener(this::mensagemActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jSeparator1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(comContato)
                             .addComponent(semContato)
@@ -81,6 +85,8 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(mensagem)
+                .addGap(18, 18, 18)
                 .addComponent(jButton1)
                 .addGap(21, 21, 21))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -107,7 +113,9 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(mensagem))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
@@ -117,6 +125,10 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
     private void filtrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filtrarActionPerformed
        
     }//GEN-LAST:event_filtrarActionPerformed
+
+    private void mensagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mensagemActionPerformed
+        
+    }//GEN-LAST:event_mensagemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -151,6 +163,7 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
     private javax.swing.JList<String> jList1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JButton mensagem;
     private javax.swing.JRadioButton semContato;
     private javax.swing.ButtonGroup temContato;
     // End of variables declaration//GEN-END:variables
