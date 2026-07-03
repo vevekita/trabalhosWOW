@@ -8,6 +8,7 @@ import clinica.Prontuario;
 import repositorio.RepositorioDadosAdicionais;
 import repositorio.RepositorioProntuario;
 import repositorio.RepositorioPaciente;
+import repositorio.RepositorioConsultas;
 import clinica.Paciente;
 import clinica.Consulta;
 import java.time.LocalDate;
@@ -26,9 +27,11 @@ public class ServicoMedico {
     private RepositorioDadosAdicionais repositorioDadosAdicionais;
     private RepositorioProntuario repositorioProntuarios;
     private RepositorioPaciente repositorioPaciente;
+    private RepositorioConsultas repositorioConsultas;
     
     public ServicoMedico() {}
-    public ServicoMedico(RepositorioDadosAdicionais dadosAdicionais, RepositorioProntuario prontuarios, RepositorioPaciente pacientes) {
+    public ServicoMedico(RepositorioDadosAdicionais dadosAdicionais, RepositorioProntuario prontuarios, RepositorioPaciente pacientes, RepositorioConsultas consultas) {
+        this.repositorioConsultas = consultas;
         this.repositorioDadosAdicionais = dadosAdicionais;
         this.repositorioProntuarios = prontuarios;
         this.repositorioPaciente = pacientes;
@@ -53,25 +56,14 @@ public class ServicoMedico {
     
     //gerencia Prontuario
     public void cadastraProntuario(Prontuario novoProntuario) {
-        repositorioProntuarios.cadastrarProntuario(novoProntuario);
+        repositorioProntuarios.adicionarProntuario(novoProntuario);
         System.out.println("Prontuário cadastrado com sucesso!");
     }
     
     //atualiza dados do prontuário
-    public void atualizaProntSintomas(int idPaciente, String novoSintoma) {
-        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
-        prontuarioExistente.setSintomas(novoSintoma);
-        System.out.println("Sintomas do paciente atualizados!");
-    }
-    public void atualizaDiagnostico(int idPaciente, String novoDiagnostico) {
-        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
-        prontuarioExistente.setDiagnostico(novoDiagnostico);
-        System.out.println("Diagnóstico do paciente atualizado!");
-    }
-    public void atualizaProntPrescricao(int idPaciente, String novoPrescricao) {
-        Prontuario prontuarioExistente = repositorioProntuarios.buscaProntuario(idPaciente);
-        prontuarioExistente.setPrescricao(novoPrescricao);
-        System.out.println("Prescrição médica do paciente atualizado!");
+    public void atualizaProntuario(Prontuario novoPront) {
+        repositorioProntuarios.atualizarProntuario(novoPront);
+        System.out.println("Prontuário atualizado com sucesso!");
     }
     
     //remove prontuário
@@ -119,12 +111,12 @@ public class ServicoMedico {
     }
     
     //geraRelatorio() para acessar todos os clientes do mês
-    public List<String> geraRelatorio(int tipoRelatorio, List<Consulta> todasConsultas, LocalDate data) {
+    public List<String> geraRelatorio(int tipoRelatorio, LocalDate data) {
         List<String> pacientes = new ArrayList<>();
         if (tipoRelatorio == 3) {
             System.out.println("------------CLIENTES-NO-MÊS------------");
             System.out.println("MÊS E ANO SELECIONADOS: " + data.getMonthValue() + "/" + data.getYear());
-            
+            List<Consulta> todasConsultas = repositorioConsultas.listarConsultas();
             if (todasConsultas == null) {
                 System.out.println("Nenhum Cliente atendido nesse mês");
             } else {
@@ -132,8 +124,10 @@ public class ServicoMedico {
                 for (Consulta c: todasConsultas) {
                     if (c.getData().getMonthValue() == data.getMonthValue() && c.getData().getYear() == data.getYear()) {
                         Paciente pacienteAtual = repositorioPaciente.buscaPaciente(c.getPacienteId());
-                        pacientes.add(pacienteAtual.getNome());
-                        System.out.println( "ID: "+ c.getPacienteId() + " | NOME: " + pacienteAtual.getNome());
+                        if (pacienteAtual != null) {
+                            pacientes.add(pacienteAtual.getNome());
+                            System.out.println( "ID: "+ c.getPacienteId() + " | NOME: " + pacienteAtual.getNome());
+                        }
                     }  
                 }
             }
