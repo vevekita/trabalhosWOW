@@ -7,6 +7,7 @@ package frames;
 import clinica.Consulta;
 import clinica.Paciente;
 import java.util.List;
+import javax.swing.JOptionPane;
 import servicos.ServicoSecretaria;
 
 /**
@@ -24,14 +25,6 @@ public class ServSecretFrame extends javax.swing.JFrame {
     public ServSecretFrame() {
         initComponents();
         setVisible(true);
-    }
-    private void carregaPacientesComboBox() {
-        pacientes.removeAllItems();
-        List<Paciente> listaPacientes = servicoAtual.listarPacientes();
-        for (Paciente p: listaPacientes) {
-            String idString = String.valueOf(p.getDadoIdentificacao());
-            pacientes.addItem(idString); //só vai exibir o id dos pacientes. depois, no botão de concluir, deve procurar no BD o paciente a partir do id
-        }
     }
 
     /**
@@ -152,21 +145,34 @@ public class ServSecretFrame extends javax.swing.JFrame {
 
     private void okActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okActionPerformed
         if(dadosPaciente.isSelected()) { //se o botão de gerenciar dados do paciente está acionada
-            if(criarPaciente.isSelected()) { //para criar os dados de um paciente
-                PacienteFrame novoPacienteFrame = new PacienteFrame(servicoAtual, null);
-                novoPacienteFrame.setVisible(true);
-            } else { //para editar os dados de um paciente
-            String idPaciente = (String) pacientes.getSelectedItem();
-            if (idPaciente == null) {
+            if(jTextField1.getText().equals("")) { 
+                JOptionPane.showMessageDialog(this, "Voce deve preencher o campo acima!");
                 return;
             }
-            int idInt = Integer.parseInt(idPaciente);
-            Paciente pacienteAtual = servicoAtual.buscaPaciente(idInt);
-            PacienteFrame editarPacienteFrame = new PacienteFrame(servicoAtual, pacienteAtual);
-            editarPacienteFrame.setVisible(true);
-            } 
+        String idPaciente = jTextField1.getText();
+        int idInt = Integer.parseInt(idPaciente);
+        if (dadosPaciente.isSelected()) {
+            if (idInt == 0) { //cria um novo paciente
+                PacienteFrame novoPacienteFrame = new PacienteFrame(servicoAtual, null);
+                novoPacienteFrame.setVisible(true);
+            } else { //para editar os dados de um paciente existente
+                Paciente pacienteAtual = servicoAtual.buscaPaciente(idInt);
+                if (pacienteAtual != null) { 
+                    PacienteFrame atualizarPacienteFrame = new PacienteFrame(servicoAtual, null);
+                    atualizarPacienteFrame.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Paciente não encontrado!");
+                }
+            }
         } else if (consulta.isSelected()) { //se o botão de gerenciar consultas está acionado
-            ConsultaFrame consultaFrame = new ConsultaFrame(servicoAtual, )
+            if (idInt == 0) { //a verificação barra se o ID do paciente encolvido com a consulta for inválido
+                JOptionPane.showMessageDialog(this, "Insira um ID válido!");
+            } else {
+                Paciente pacienteAtual = servicoAtual.buscaPaciente(idInt);
+                if (pacienteAtual != null) {
+                    ConsultaFrame consultaFrame = new ConsultaFrame(servicoAtual, pacienteAtual);
+                }
+            }
         }
     }//GEN-LAST:event_okActionPerformed
 
