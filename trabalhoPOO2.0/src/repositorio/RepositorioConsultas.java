@@ -40,6 +40,25 @@ public class RepositorioConsultas {
         }
         return false;
     }
+    
+    public boolean atualizarConsultas(int idConsulta, int novasHoras, int novosMinutos, LocalDate novaData, String Medico, int idPaciente, String novoTipo) {
+        Consulta consultaAtual = buscarConsulta(idConsulta);
+        if (consultaAtual != null) {
+            if (!verificaColisaoHorarios(novasHoras, novosMinutos, novaData, Medico, novoTipo, consultaAtual)) {
+                em.getTransaction().begin();
+                consultaAtual.setHoras(novasHoras);
+                consultaAtual.setMinutos(novosMinutos);
+                consultaAtual.setData(novaData);
+                consultaAtual.setMedico(Medico);
+                consultaAtual.setPacienteId(idPaciente);
+                consultaAtual.setTipoConsulta(novoTipo);
+                
+                em.getTransaction().commit(); 
+                return true;
+            }
+        }
+        return false;
+    }
 
     public Consulta buscarConsulta(int consultaId) {
         return em.find(Consulta.class, consultaId);
@@ -57,16 +76,9 @@ public class RepositorioConsultas {
     
     public List<Consulta> listarConsultas() { //lista todas as consultas
         Query query = em.createQuery("SELECT c FROM Consulta c");
-        List<Consulta> consultas = query.getResultList();
-        return consultas;
+        return query.getResultList();
     }
     
-    public List<Consulta> listarConsultasPaciente(int idPaciente) { //lista todas as consultas de um determinado paciente
-        Query query = em.createQuery("SELECT c FROM Consulta c WHERE c.paciente.dadoIdentificado =:id");
-        query.setParameter("id", idPaciente);
-        List<Consulta> consultasPessoa = query.getResultList();
-        return consultasPessoa;
-    }
     //sobrecarga paa cadastro:
     public boolean verificaColisaoHorarios(int horas, int minutos, LocalDate data, String medico, int pacienteId, String tipoConsulta){
         boolean ocorreColisao = false;
