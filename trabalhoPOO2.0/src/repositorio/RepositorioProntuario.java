@@ -26,7 +26,7 @@ public class RepositorioProntuario {
         this.em = em;
     }
     
-    public void cadastrarProntuario(Prontuario prontuario){
+    public void adicionarProntuario(Prontuario prontuario){
         em.getTransaction().begin();
         em.persist(prontuario);
         em.getTransaction().commit();
@@ -35,9 +35,8 @@ public class RepositorioProntuario {
     public void atualizarProntuario(Prontuario prontuario) {
         em.getTransaction().begin();
         Prontuario prontuarioAtual = em.find(Prontuario.class, prontuario.getIdPaciente());
-        if (prontuarioAtual == null) {
+        if (prontuarioAtual != null) {
             em.persist(prontuario);
-        } else {
             String sintomas = prontuario.getSintomas();
             String diagnostico = prontuario.getDiagnostico();
             String prescricao = prontuario.getPrescricao();
