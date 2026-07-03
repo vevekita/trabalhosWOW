@@ -9,8 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- *Classe dos dados adicionais do Paciente. Ela é acessada somente pelo médico!
- * Essa classe, por complementar a classe Paciente, mas por precisar ter acesso restrito do médico, possui um atributo Paciente a fim de criar uma associação
+ * Pojo para representar um objeto de Dados Adicionais do Paciente com os dados:
+ * - Id do paciente (para identificação)
  * - Fuma (sim ou não)
  * - Bebe (sim ou não)
  * - Colesterol (sim ou não)
@@ -18,16 +18,16 @@ import javax.persistence.Table;
  * - Doença cardíaca (sim ou não)
  * - Se já fez cirurgia (se sim, especificar qual tipo)
  * - Se tem alguma alergia (se sim, especificar do quê)
+ * Essa classe complementa a classe do Paciente, 
+ * mas por precisar ter acesso restrito do médico, possui um atributo pacienteId criando uma associação;
+ * Este pojo será mapeado em uma tabela chamada DADOS ADICIONAIS DO PACIENTE no banco de dados.
  */
 
 @Entity
 @Table(name="DADOS ADICIONAIS DO PACIENTE")
 public class DadosAdicionaisPaciente {
-    // Pojo para representar um objeto do tipo DadosAdicionaisPaciente com nome do paciente,
-    // se fuma, se bebe, tipo de colesterol, se tem diabetes, se tem doença cardiaca, se tem cirurgias e se tem alergias.
-    // Este Pojo será mapeado em uma tabela chamada DADOS ADICIONAIS DO PACIENTE no banco de dados.
     @Id
-    private int pacienteId; //dados adicionais do paciente vão usar o id do paciente como identificação
+    private int pacienteId;
     private boolean fuma;
     private boolean bebe;
     private boolean colesterol;
@@ -35,7 +35,8 @@ public class DadosAdicionaisPaciente {
     private boolean doencaCardiaca;
     private String cirurgias;
     private String alergias;
-
+    
+    // Construtores
     public DadosAdicionaisPaciente() {}
     public DadosAdicionaisPaciente(int pacienteId, boolean fuma, boolean bebe, boolean colesterol, boolean diabetes,boolean doencaCardiaca, String cirurgias, String alergias){
         this.pacienteId = pacienteId;
