@@ -21,7 +21,7 @@ import javax.persistence.Persistence;
  */
 public class Main {
     public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("TrabalhoPU");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("sample");
         EntityManager em = emf.createEntityManager();
         
         RepositorioConsultas repoConsultas = new RepositorioConsultas(em);
@@ -32,7 +32,7 @@ public class Main {
         ServicoSecretaria servicoSecretaria = new ServicoSecretaria(repoPaciente, repoConsultas);
         ServicoMedico servicoMedico = new ServicoMedico(repoDados, repoProntuario, repoPaciente, repoConsultas);
         
-        LoginFrame telaLogin = new LoginFrame();
+        LoginFrame telaLogin = new LoginFrame(servicoMedico, servicoSecretaria);
         telaLogin.setLocationRelativeTo(null);
         telaLogin.setVisible(true);
             

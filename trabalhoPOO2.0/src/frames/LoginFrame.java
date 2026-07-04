@@ -5,6 +5,8 @@
 package frames;
 
 import javax.swing.JOptionPane;
+import servicos.ServicoMedico;
+import servicos.ServicoSecretaria;
 
 /**
  *
@@ -13,12 +15,17 @@ import javax.swing.JOptionPane;
 public class LoginFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoginFrame.class.getName());
-
+    private ServicoMedico medico;
+    private ServicoSecretaria secretaria;
+    
     /**
      * Creates new form MedicoFrame
      */
-    public LoginFrame() {
+    public LoginFrame(ServicoMedico medico, ServicoSecretaria secretaria) {
+        this.medico = medico;
+        this.secretaria = secretaria;
         initComponents();
+        setVisible(true);
     }
 
     /**
@@ -106,12 +113,12 @@ public class LoginFrame extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         if(jRadioButton1.isSelected()){
-            ServMedicFrame sm = new ServMedicFrame();
+            ServMedicFrame sm = new ServMedicFrame(medico);
             this.dispose();
         }
         else{
             if(jRadioButton2.isSelected()){
-                ServSecretFrame sc = new ServSecretFrame();
+                ServSecretFrame sc = new ServSecretFrame(secretaria);
                 this.dispose();
             }
             else{
@@ -142,7 +149,7 @@ public class LoginFrame extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new LoginFrame().setVisible(true));
+        //java.awt.EventQueue.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

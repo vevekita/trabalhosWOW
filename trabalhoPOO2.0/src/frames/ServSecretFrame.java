@@ -22,7 +22,8 @@ public class ServSecretFrame extends javax.swing.JFrame {
     /**
      * Creates new form SecretariaServFrame
      */
-    public ServSecretFrame() {
+    public ServSecretFrame(ServicoSecretaria servicoAtual) {
+        this.servicoAtual = servicoAtual;
         initComponents();
         setVisible(true);
     }
@@ -240,7 +241,7 @@ public class ServSecretFrame extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new ServSecretFrame().setVisible(true));
+        //java.awt.EventQueue.invokeLater(() -> new ServSecretFrame().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

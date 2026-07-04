@@ -15,11 +15,14 @@ import clinica.DadosAdicionaisPaciente;
 public class ServMedicFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ServMedicFrame.class.getName());
-
+    private ServicoMedico medico;
+    
     /**
      * Creates new form MedicoServFrame
+     * @param medico
      */
-    public ServMedicFrame() {
+    public ServMedicFrame(ServicoMedico medico) {
+        this.medico = medico;
         initComponents();
         setVisible(true);
     }
@@ -146,7 +149,6 @@ public class ServMedicFrame extends javax.swing.JFrame {
 
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         // TODO add your handling code here:
-        ServicoMedico medico = new ServicoMedico();
         String idPaciente = jTextField1.getText();
             int id = Integer.parseInt(idPaciente);
             Paciente paciente = medico.buscaPaciente(id);
@@ -198,7 +200,7 @@ public class ServMedicFrame extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new ServMedicFrame().setVisible(true));
+        //java.awt.EventQueue.invokeLater(() -> new ServMedicFrame().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
