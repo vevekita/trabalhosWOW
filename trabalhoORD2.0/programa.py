@@ -68,20 +68,29 @@ def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedReader)
         escrevePagina(filhoDpro, novaPag, btree)
         return chavePro, filhoDpro, True
     
-def insereNaArvore(chave: tuple[int, int], raiz: int, btree:io.BufferedWriter) -> int:
+def insereNaArvore(chave: tuple[int, int], raiz: int, btree: io.BufferedRandom): # Adicionado parametro btree
     '''Função gerenciadora. Ela le as chaves a serem armazenadas na árvore-B e chama a função de insereChave()
     Se houver divisão na raiz atual, ela cria a página que será a nova raiz, inserindo a chave promovida e 
     atualizando o seus filhos, além do RRN da raiz'''
-    chavePro, filhoDpro, promocao = insereChave(chave, raiz, btree)
+    
+    chavePro, filhoDpro, promocao = insereChave(chave, raiz, btree) # Adicionado parametro btree
     if promocao:
-        pNova:Pagina = Pagina()
-        pNova.chaves[0] = chavePro #nova chave raiz
-        pNova.filhos[0] = raiz #filho esquerdo
-        pNova.filhos[1] = filhoDpro #filho direito
+        pNova = Pagina()
+        pNova.chaves[0] = chavePro # nova chave raiz
+        pNova.filhos[0] = raiz # filho esquerdo
+        pNova.filhos[1] = filhoDpro # filho direito
         pNova.numChaves += 1
-        raiz = novoRRN(btree) #RRN da nova raiz
-        escrevePagina(raiz, pNova, btree)
-        return raiz
+
+        # Novo RRN para escrever na página raiz
+        nRaizRrn = novoRRN(btree)
+        escrevePagina(nRaizRrn, pNova, btree)
+
+        # Atualização do cabeçalho do arquivo com o RRN da raiz nova
+        btree.seek(0)
+        btree.write(pack(FORMATO_HEADER, nRaizRrn))
+        return nRaizRrn
+    
+    return raiz
 
 #funções auxiliares da função *insere*
 def ler_pagina(rrn: int, btree: io.BufferedReader) -> Pagina:
