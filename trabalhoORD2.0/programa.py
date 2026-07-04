@@ -34,7 +34,7 @@ def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedRandom):
         if achou:
             return True, rrn, pos
         else:
-            return buscaNaArvore(chave, pag.filhos[pos])
+            return buscaNaArvore(chave, pag.filhos[pos], btree)
 
 def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
     '''Realiza a busca de uma chave em determinada página.'''
@@ -65,10 +65,15 @@ def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedRandom)
     if not promo: #se não houver promoção
         return NULO, NULO, False
     else: #se houver promoção
-        chavePro, filhoDpro, pag, novaPag = divide(chavePro, filhoDpro, pag, btree)
-        escrevePagina(rrnAtual, pag, btree)
-        escrevePagina(filhoDpro, novaPag, btree)
-        return chavePro, filhoDpro, True
+        if pag.numChaves < MAX_CHAVES: #se existe espaço para inserir a chave
+            insereChavePromo(chavePro, filhoDpro, pag)
+            escrevePagina(rrnAtual, pag, btree)
+            return NULO, NULO, False
+        else: #se não existe espaço na página
+            chavePro, filhoDpro, pag, novaPag = divide(chavePro, filhoDpro, pag, btree)
+            escrevePagina(rrnAtual, pag, btree) #escreve a página atual no arquivo
+            escrevePagina(filhoDpro, novaPag, btree) #escreve a nova página no arquivo
+            return chavePro, filhoDpro, True
     
 def insereNaArvore(chave: tuple[int, int], raiz: int, btree: io.BufferedRandom): # Adicionado parametro btree
     '''Função gerenciadora. Ela le as chaves a serem armazenadas na árvore-B e chama a função de insereChave()
@@ -136,7 +141,8 @@ def escrevePagina(rrn: int, pag: Pagina, btree: io.BufferedRandom):
 
 def insereChavePromo(chave: tuple[int, int], filhoD: int, pag: Pagina):
     '''Função auxiliar que insere uma chave (e seu filho direito) em determinada página da árvore-B,
-    empurrandos os elementos maiores para a direita para abrir espaço à chave a ser inserida.'''
+    empurrandos os elementos maiores para a direita para abrir espaço à chave a ser inserida em seu 
+    devido lugar.'''
     if pag.numChaves == MAX_CHAVES:
         pag.chaves.append((NULO, NULO))
         pag.filhos.append(NULO)
@@ -190,17 +196,16 @@ def principal():
     try:
         arqArvb = open('btree.dat', 'r+b')
         bytes_raiz = arqArvb.read(SIZEOF_HEADER)
-        raiz = unpack('i', bytes_raiz)[0]
+        raiz = unpack(FORMATO_HEADER, bytes_raiz)[0]
     except FileNotFoundError:
         arqArvb = open('btree.dat', 'w+b')
         raiz = 0
-        bytes_raiz = pack('i', raiz)
+        bytes_raiz = pack(FORMATO_HEADER, raiz)
         arqArvb.write(bytes_raiz)
         pag = Pagina()
         escrevePagina(raiz, pag, arqArvb)
         
     with open('games.dat', 'rb') as entrada: #processo de construir os índices
-        chave_reg: tuple[int, int]= ()
         offset = 0
         tam_bytes = entrada.read(SIZEOF_TAMEG) #lê o indicador de tamanho de um registro de jogo
         tam_int = unpack(FORMATO_TAMREG, tam_bytes)[0]
