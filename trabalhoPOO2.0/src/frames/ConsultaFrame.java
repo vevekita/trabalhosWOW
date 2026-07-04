@@ -17,6 +17,7 @@ public class ConsultaFrame extends javax.swing.JFrame {
     private final ServicoSecretaria servicoAtual;
     private final Paciente pacienteAtual;
     private final Consulta consultaAtual;
+    private Consulta consultaCarregada = null;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ConsultaFrame.class.getName());
 
     /**
@@ -82,6 +83,10 @@ public class ConsultaFrame extends javax.swing.JFrame {
         concluir = new javax.swing.JButton();
         excluir = new javax.swing.JButton();
         data = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        idInserir = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -115,10 +120,31 @@ public class ConsultaFrame extends javax.swing.JFrame {
 
         data.setText("dd/mm/aaaa");
 
+        jLabel5.setText("ID da consulta para editar:");
+
+        jTextField1.setText("insira o ID da consulta...");
+
+        jLabel8.setText("(se quiser criar, digite 0)");
+
+        idInserir.setBackground(new java.awt.Color(204, 204, 204));
+        idInserir.setText("inserir ID");
+        idInserir.addActionListener(this::idInserirActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(6, 6, 6)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(idInserir))
+                    .addComponent(jLabel8))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
@@ -162,7 +188,15 @@ public class ConsultaFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addGap(17, 17, 17)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(idInserir))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(data, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -208,7 +242,7 @@ public class ConsultaFrame extends javax.swing.JFrame {
             return;
         }
        
-        if (consultaAtual != null) {
+        if (this.consultaCarregada != null) {
             servicoAtual.atualizarDataConsulta(consultaAtual.getIdConsulta(), dataLD);
             servicoAtual.atualizarHorarioConsulta(consultaAtual.getIdConsulta(), horasInt, minInt);
             servicoAtual.atualizarTipoConsulta(consultaAtual.getIdConsulta(), tipo);
@@ -242,6 +276,41 @@ public class ConsultaFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_normalActionPerformed
 
+    private void idInserirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idInserirActionPerformed
+        String input = jTextField1.getText();
+        if (input.equals("0")) { //se o input indica a criação de uma nova consulta
+            consultaCarregada = null; 
+            data.setText("dd/mm/aaaa");
+            horas.setText("horas");
+            minutos.setText("minutos");
+            ConsultaType.clearSelection(); // Desmarca os RadioButtons
+            excluir.setEnabled(false);
+        } else {
+            int idConsulta = Integer.parseInt(input);
+            Consulta encontrada = servicoAtual.buscaConsulta(idConsulta);
+            if (encontrada != null) {
+                this.consultaCarregada = encontrada;
+                if (consultaCarregada.getData() != null) {
+                    LocalDate d = consultaCarregada.getData();
+                    data.setText(d.getDayOfMonth() + "/" + d.getMonthValue() + "/" + d.getYear());
+                }
+                horas.setText(String.valueOf(consultaCarregada.getHoras()));
+                minutos.setText(String.valueOf(consultaCarregada.getMinutos()));
+                
+                if ("normal".equals(consultaCarregada.getTipoConsulta())) {
+                    normal.setSelected(true);
+                } else {
+                    retorno.setSelected(true);
+                }
+                
+                excluir.setEnabled(true); 
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Consulta não foi encontrada!");
+                excluir.setEnabled(false);
+            }
+        }
+    }//GEN-LAST:event_idInserirActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -273,12 +342,16 @@ public class ConsultaFrame extends javax.swing.JFrame {
     private javax.swing.JTextField data;
     private javax.swing.JButton excluir;
     private javax.swing.JTextField horas;
+    private javax.swing.JButton idInserir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField minutos;
     private javax.swing.JRadioButton normal;
     private javax.swing.JRadioButton retorno;
