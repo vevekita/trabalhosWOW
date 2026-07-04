@@ -240,14 +240,56 @@ def executa_operacoes(arquivo_operacoes: str):
     except FileNotFoundError as e:
         print(f'Erro: {e}')
 
-    # As buscas deverão ser realizadas no índice que está armazenado no arquivo btree.dat. Uma vez localizada a chave
-    # no índice, o byte-offset do registro correspondente deverá ser recuperado e o registro deverá ser acessado de forma
-    # direta no arquivo games.dat.
-    # As inserções sempre acontecerão no fim do arquivo games.dat e, complementarmente, as informações do novo
-    # registro (chave e byte-offset) deverão ser inseridas no índice do arquivo btree.dat. Não será permitida a inserção de
-    # registros com chave duplicada. Dessa forma, antes de realizar uma inserção, o índice deverá ser consultado e uma
-    # mensagem de erro deverá ser dada caso se identifique a duplicação.
+    with open('games.dat', 'r+b') as arq_jogos, open('btree.dat', 'r+b') as arq_btree, open(arquivo_operacoes, 'r') as arq_operacoes:
+        arq_btree.seek(0)
+        raiz = unpack(FORMATO_HEADER, arq_btree.read(SIZEOF_HEADER))[0]
+        for linha in arq_operacoes:
+            linha = linha.strip()
+            partes = linha.split(' ', 1)
+            operacao = partes[0]
+            argumento = partes[1]
 
+            if operacao == 'b':
+                id_buscado = int(argumento)
+                print(f'Busca pelo registro de chave "{id_buscado}"')
+                achou, rrn_pag, pos = buscaNaArvore((id_buscado, 0), raiz, arq_btree)
+
+                if achou:
+                    pag = ler_pagina(rrn_pag, arq_btree)
+                    offset_registro = pag.chaves[pos][1]
+
+                    arq_jogos.seek(offset_registro)
+                    tam_bytes = arq_jogos.read(2)
+                    tam_int = int.from_bytes(tam_bytes,'little')
+                    registro = arq_jogos.read(tam_int).decode()
+
+                    print(f'{id_buscado} | {registro} ({tam_int} bytes - offset {offset_registro})')
+                else:
+                    print(f'Erro: chave {id_buscado} não encontrada')
+                print()
+
+            elif operacao == 'i':
+                campos = argumento.split(sep='|')
+                id_insercao = int(campos[0])
+                print(f'Inserção do registro de chave "{id_insercao}"')
+                achou, _, _ = buscaNaArvore((id_insercao, 0), raiz, arq_btree)
+                if achou:
+                    print(f'Erro: chave "{id_insercao}" duplicada')
+                    print()
+                else:
+                    arq_jogos.seek(0, os.SEEK_END)
+                    offset_novo_registro = arq_jogos.tell()
+                    registro_bytes = argumento.encode()
+                    tam_registro = len(registro_bytes)
+
+                    arq_jogos.write(tam_registro.to_bytes(2, 'little'))
+                    arq_jogos.write(registro_bytes)
+
+                    raiz = insereNaArvore((id_insercao, offset_novo_registro), raiz, arq_btree)
+
+                    print(f'{argumento} ({tam_registro} bytes - offset {offset_novo_registro})')
+                    print()
+    print(f'As operações do arquivo "{arquivo_operacoes}" foram executadas com sucesso!')
 
 def imprime():
     try:
