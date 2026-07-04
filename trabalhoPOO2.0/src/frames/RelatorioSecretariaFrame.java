@@ -5,13 +5,24 @@
 package frames;
 import servicos.ServicoSecretaria;
 import servicos.GerenciadorMensagens;
+import clinica.Consulta;
+import java.util.List;
+import javax.swing.JOptionPane;
+import repositorio.RepositorioPaciente;
+
 /**
  *
  * @author Cliente
  */
 public class RelatorioSecretariaFrame extends javax.swing.JFrame {
-    
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RelatorioSecretariaFrame.class.getName());
+    private ServicoSecretaria servicoSecretaria;
+    private RepositorioPaciente repositorioPaciente; // Para passar ao gerenciador
+    
+    public RelatorioSecretariaFrame(ServicoSecretaria servicoSecretaria){
+        initComponents();
+        this.servicoSecretaria = servicoSecretaria;
+    }
 
     /**
      * Creates new form RelatorioSecretariaFrame
@@ -127,7 +138,17 @@ public class RelatorioSecretariaFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_filtrarActionPerformed
 
     private void mensagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mensagemActionPerformed
+        // Ao clicar no botão de enviar mensagem, chama a função de enviarMensagens() do GerenciadorMensagens.
+        List<Consulta> consultasDiaSeguinte = this.servicoSecretaria.gerarRelatorioComContato();
         
+        if(consultasDiaSeguinte == null || consultasDiaSeguinte.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Não há consultas agendadas para enviar mensagens.");
+            return;
+        }
+
+        GerenciadorMensagens gerenciador = new GerenciadorMensagens(this.repositorioPaciente);
+        gerenciador.enviarMensagens(consultasDiaSeguinte);
+        JOptionPane.showMessageDialog(this, "Processo de envio de notificações concluído!");
     }//GEN-LAST:event_mensagemActionPerformed
 
     /**
