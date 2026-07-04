@@ -21,8 +21,6 @@ class Pagina:
         self.chaves: list[tuple[int, int]] = [(NULO, NULO)] * (ORDEM-1)
         self.filhos: list[int] = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
-
-
 def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedReader):
     '''Busca uma chave na árvore-B. Retorna se a ocorrência acontece ou não (True | False). 
     Se ocorre, retorna também o rrn e a posição na página do rrn'''
@@ -69,6 +67,21 @@ def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedReader)
         escrevePagina(rrnAtual, pag, btree)
         escrevePagina(filhoDpro, novaPag, btree)
         return chavePro, filhoDpro, True
+    
+def insereNaArvore(chave: tuple[int, int], raiz: int, btree:io.BufferedWriter) -> int:
+    '''Função gerenciadora. Ela le as chaves a serem armazenadas na árvore-B e chama a função de insereChave()
+    Se houver divisão na raiz atual, ela cria a página que será a nova raiz, inserindo a chave promovida e 
+    atualizando o seus filhos, além do RRN da raiz'''
+    chavePro, filhoDpro, promocao = insereChave(chave, raiz, btree)
+    if promocao:
+        pNova:Pagina = Pagina()
+        pNova.chaves[0] = chavePro #nova chave raiz
+        pNova.filhos[0] = raiz #filho esquerdo
+        pNova.filhos[1] = filhoDpro #filho direito
+        pNova.numChaves += 1
+        raiz = novoRRN(btree) #RRN da nova raiz
+        escrevePagina(raiz, pNova, btree)
+        return raiz
 
 #funções auxiliares da função *insere*
 def ler_pagina(rrn: int, btree: io.BufferedReader) -> Pagina:
@@ -160,9 +173,14 @@ def novoRRN(btree: io.BufferedReader) -> int:
     offset = btree.tell()
     return (offset - SIZEOF_HEADER) // SIZEOF_PAG
 
-def pincipal():
+def principal():
     '''função responsável por abrir ou criar o arquivo da árvore-B e chamar a inserção'''  
-    if 
+    try:
+        arqArvb = open('btree.dat', 'r + b')
+        bytes_raiz = arqArvb.read(SIZEOF_HEADER)
+
+    except FileNotFoundError as e:
+        print(f'Erro: {e}')
 
 def constroi_indices():
     with open('games.dat', 'rb') as entrada, open('btree,dat', 'r + b') as saida:
