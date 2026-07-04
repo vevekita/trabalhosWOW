@@ -13,6 +13,8 @@ MAX_CHAVES = ORDEM - 1
 MAX_FILHOS = ORDEM
 FORMATO_PAG = f'i {MAX_CHAVES*2}i {MAX_FILHOS}i'
 SIZEOF_PAG = calcsize(FORMATO_PAG)
+FORMATO_TAMREG = 'h' #um inteiro de 2 bytes
+SIZEOF_TAMEG = calcsize(FORMATO_TAMREG)
 
 @dataclass
 class Pagina:
@@ -183,13 +185,39 @@ def novoRRN(btree: io.BufferedReader) -> int:
     return (offset - SIZEOF_HEADER) // SIZEOF_PAG
 
 def principal():
-    '''função responsável por abrir ou criar o arquivo da árvore-B e chamar a inserção'''  
+    '''Função com caráter gerenciador de arquivos, ela é responsável por abrir ou 
+    criar o arquivo da árvore-B e chamar a inserção'''  
     try:
-        arqArvb = open('btree.dat', 'r + b')
+        arqArvb = open('btree.dat', 'r+b')
         bytes_raiz = arqArvb.read(SIZEOF_HEADER)
-
-    except FileNotFoundError as e:
-        print(f'Erro: {e}')
+        raiz = unpack('i', bytes_raiz)[0]
+    except FileNotFoundError:
+        arqArvb = open('btree.dat', 'w+b')
+        raiz = 0
+        bytes_raiz = pack('i', raiz)
+        arqArvb.write(bytes_raiz)
+        pag = Pagina()
+        escrevePagina(raiz, pag, arqArvb)
+        
+    with open('games.dat', 'rb') as entrada: #processo de construir os índices
+        chave_reg: tuple[int, int]= ()
+        offset = 0
+        tam_bytes = entrada.read(SIZEOF_TAMEG) #lê o indicador de tamanho de um registro de jogo
+        tam_int = unpack(FORMATO_TAMREG, tam_bytes)[0]
+        while tam_int > 0:
+            reg_bytes = entrada.read(tam_int)
+            reg_str = reg_bytes.decode()
+            campos = reg_str.split('|')
+            id = int(campos[0])
+            chave_reg = (id, offset)
+            raiz = insereNaArvore(chave_reg, raiz, arqArvb) #colocando a chave (no formato de tupla) na árvore-B
+            offset = entrada.tell()
+            tam_bytes = entrada.read(SIZEOF_TAMEG)
+            tam_int = unpack(FORMATO_TAMREG, tam_bytes)[0]
+    raiz_bytes = pack(SIZEOF_HEADER, raiz)
+    arqArvb.seek(0) #vai para o começo do aquivo da arvore-B 
+    arqArvb.write(raiz_bytes) #escreve a raiz no cabeçario
+    arqArvb.close()
 
 def constroi_indices():
     with open('games.dat', 'rb') as entrada, open('btree,dat', 'r + b') as saida:
