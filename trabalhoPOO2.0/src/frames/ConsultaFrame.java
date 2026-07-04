@@ -3,24 +3,26 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
+
 import clinica.Consulta;
 import servicos.ServicoSecretaria;
-import java.util.List;
 import clinica.Paciente;
 import java.time.LocalDate;
+
 /**
  *
  * @author Cliente
  */
 public class ConsultaFrame extends javax.swing.JFrame {
     private final ServicoSecretaria servicoAtual;
-    private Paciente pacienteAtual;
-    private Consulta consultaAtual;
+    private final Paciente pacienteAtual;
+    private final Consulta consultaAtual;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ConsultaFrame.class.getName());
 
     /**
      * Creates new form ConsultaFrame
      * @param servicoAtual
+     * @param pacienteAtual
      * @param consultaAtual
      */
     public ConsultaFrame(ServicoSecretaria servicoAtual, Paciente pacienteAtual, Consulta consultaAtual) {
@@ -28,32 +30,32 @@ public class ConsultaFrame extends javax.swing.JFrame {
         this.servicoAtual = servicoAtual;
         this.pacienteAtual = pacienteAtual;
         this.consultaAtual = consultaAtual;
-        carregaConsultaPaciente();
-        if (this.consultaAtual != null) {
-            
+        if (this.consultaAtual != null) { //se a consulta existe, entra na interface já editando
+            marcarCamposEditar();
         }
-    }
-    // metodos auxiliares
-    private void carregaConsultaPaciente() {
-        consultas.removeAllItems();
-        List<Consulta> consultasPaciente = servicoAtual.listarConsultas();
         
     }
+
+    private ConsultaFrame() {
+        initComponents();
+        this.servicoAtual = null;
+        this.consultaAtual = null;
+        this.pacienteAtual = null;
+    }
+    
     private void marcarCamposEditar() {
-        int horaInt = consultaAtual.getHoras();
-        String horaStr = String.valueOf(horaInt);
-        horas.setText(horaStr);
+        if (consultaAtual.getData() != null) {
+            LocalDate d = consultaAtual.getData();
+            data.setText(d.getDayOfMonth() + "/" + d.getMonthValue() + "/" + d.getYear());
+        }
+        horas.setText(String.valueOf(consultaAtual.getHoras()));
+        minutos.setText(String.valueOf(consultaAtual.getMinutos()));
         
-        int minInt = consultaAtual.getMinutos();
-        String minStr = String.valueOf(minInt);
-        minutos.setText(minStr);
-        
-        LocalDate dataLD = consultaAtual.getData();
-        data.setText(dataLD.toString());
-        
-        int idInt = consultaAtual.getPacienteId().getDadoIdentificacao();
-        String idString = String.valueOf(idInt);
-        pacientes.setSelectedItem(idString);
+        if ("normal".equals(consultaAtual.getTipoConsulta())) {
+            normal.setSelected(true);
+        } else {
+            retorno.setSelected(true);
+        }
     }
     
     
@@ -80,9 +82,6 @@ public class ConsultaFrame extends javax.swing.JFrame {
         concluir = new javax.swing.JButton();
         excluir = new javax.swing.JButton();
         data = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -114,31 +113,12 @@ public class ConsultaFrame extends javax.swing.JFrame {
         excluir.setText("Excluir dados");
         excluir.addActionListener(this::excluirActionPerformed);
 
-        data.setText("dd/mm/aa");
-
-        jLabel5.setText("ID da consulta para editar:");
-
-        jTextField1.setText("insira o ID da consulta...");
-
-        jLabel8.setText("(se quiser criar, deixe vazio)");
+        data.setText("dd/mm/aaaa");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jLabel5))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel8))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
@@ -182,13 +162,7 @@ public class ConsultaFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jLabel1)
-                .addGap(17, 17, 17)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(data, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -217,28 +191,38 @@ public class ConsultaFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void concluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_concluirActionPerformed
-        if (consultaAtual == null) {
-            consultaAtual = new Consulta();
-        }
-        
-        String dataInput = data.getText();
-        LocalDate dataLD = LocalDate.parse(dataInput);
-        String horasInput = horas.getText();
-        int horasInt = Integer.parseInt(horasInput);
-        String minInput = minutos.getText();
-        int minInt = Integer.parseInt(minInput);
-        String idPaciente = (String) pacientes.getSelectedItem();
-        int idInt = Integer.parseInt(idPaciente);
-        Paciente pacienteAtual = servicoAtual.buscaPaciente(idInt);
-        consultaAtual.setData(dataLD);
-        consultaAtual.setHoras(horasInt);
-        consultaAtual.setMinutos(minInt);
-        consultaAtual.setPacienteId(pacienteAtual);
+        String[] dataPartes = data.getText().split("/");
+        int dia = Integer.parseInt(dataPartes[0]);
+        int mes = Integer.parseInt(dataPartes[1]);
+        int ano = Integer.parseInt(dataPartes[2]);
+        LocalDate dataLD = LocalDate.of(ano, mes, dia);
+        int horasInt = Integer.parseInt(horas.getText());
+        int minInt = Integer.parseInt(minutos.getText());
+        String tipo;
         if (normal.isSelected()) {
-            consultaAtual.setTipoConsulta("normal");
-        } else if (retorno.isSelected()) {
-            consultaAtual.setTipoConsulta("retorno");
+            tipo = "normal";
+        } else if (retorno.isSelected()){
+            tipo = "retorno";
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Selecione o tipo da consulta!");
+            return;
         }
+       
+        if (consultaAtual != null) {
+            servicoAtual.atualizarDataConsulta(consultaAtual.getIdConsulta(), dataLD);
+            servicoAtual.atualizarHorarioConsulta(consultaAtual.getIdConsulta(), horasInt, minInt);
+            servicoAtual.atualizarTipoConsulta(consultaAtual.getIdConsulta(), tipo);
+        } else {
+            Consulta novaConsulta = new Consulta();
+            novaConsulta.setData(dataLD);
+            novaConsulta.setHoras(horasInt);
+            novaConsulta.setMinutos(minInt);
+            novaConsulta.setTipoConsulta(tipo);
+            novaConsulta.setPacienteId(pacienteAtual.getDadoIdentificacao());
+            novaConsulta.setMedico(consultaAtual.getMedico());
+            servicoAtual.cadastrarConsulta(novaConsulta);
+        }
+        this.dispose();
     }//GEN-LAST:event_concluirActionPerformed
 
     private void excluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_excluirActionPerformed
@@ -247,10 +231,10 @@ public class ConsultaFrame extends javax.swing.JFrame {
         VerificaDados.setVisible(true);
         
         if(VerificaDados.isConfirmou()) {
+            servicoAtual.removerPaciente(consultaAtual.getIdConsulta());
+            this.setVisible(false);
             this.dispose();
-            String idPaciente = (String) pacientes.getSelectedItem();
-            int idInt = Integer.parseInt(idPaciente);
-            servicoAtual.removerPaciente(idInt);
+            
         }
     }//GEN-LAST:event_excluirActionPerformed
 
@@ -293,11 +277,8 @@ public class ConsultaFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField minutos;
     private javax.swing.JRadioButton normal;
     private javax.swing.JRadioButton retorno;
