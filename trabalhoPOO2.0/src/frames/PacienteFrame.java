@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package frames;
+import servicos.ServicoSecretaria;
+import clinica.Paciente;
 
 /**
  *
@@ -11,11 +13,17 @@ package frames;
 public class PacienteFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PacienteFrame.class.getName());
+    private Paciente paciente;
+    private ServicoSecretaria secretaria;
 
     /**
      * Creates new form PacientesFrame
+     * @param paciente
+     * @param secretaria
      */
-    public PacienteFrame() {
+    public PacienteFrame(ServicoSecretaria secretaria, Paciente paciente) {
+        this.paciente = paciente;
+        this.secretaria = secretaria;
         initComponents();
     }
 
@@ -77,6 +85,7 @@ public class PacienteFrame extends javax.swing.JFrame {
         convenio.setText("insira convênio...");
 
         jButton1.setText("Concluir");
+        jButton1.addActionListener(this::jButton1ActionPerformed);
 
         excluir.setBackground(new java.awt.Color(255, 0, 0));
         excluir.setText("Excluir dados");
@@ -180,6 +189,50 @@ public class PacienteFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_excluirActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        String nome = jTextField1.getText();
+        String dataNasc = dataNascimento.getText();
+        String enderecoPaciente = endereço.getText();
+        String telefoneContato = telefone.getText();
+        String emailContato = email.getText();
+        String tipoConvenio = convenio.getText();
+        Paciente novoPaciente = new Paciente();
+        
+        
+        if(paciente != null){
+            novoPaciente.setDadoIdentificacao(paciente.getDadoIdentificacao());
+            novoPaciente.setDataNascimento(dataNasc);
+            novoPaciente.setNome(nome);
+            novoPaciente.setEndereco(enderecoPaciente);
+            novoPaciente.setTipoConvenio(tipoConvenio);
+            if(!"insira telefone...".equals(telefoneContato)){
+                novoPaciente.setTelefone(telefoneContato);
+            }
+            if(!"insira e-mail...".equals(emailContato)){
+                novoPaciente.setEmail(emailContato);
+            }
+            secretaria.atualizarPaciente(novoPaciente);
+        }
+        else{
+            int id = 1;
+            while(secretaria.buscaPaciente(id) != null){
+                id++;
+            }
+            novoPaciente.setDadoIdentificacao(id);
+            novoPaciente.setNome(nome);
+            novoPaciente.setDataNascimento(dataNasc);
+            novoPaciente.setEndereco(enderecoPaciente);
+            if(!"insira telefone...".equals(telefoneContato)){
+                novoPaciente.setTelefone(telefoneContato);
+            }
+            if(!"insira e-mail...".equals(emailContato)){
+                novoPaciente.setEmail(emailContato);
+            }
+            secretaria.cadastrarPaciente(novoPaciente);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -202,7 +255,7 @@ public class PacienteFrame extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new PacienteFrame().setVisible(true));
+        //java.awt.EventQueue.invokeLater(() -> new PacienteFrame().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
