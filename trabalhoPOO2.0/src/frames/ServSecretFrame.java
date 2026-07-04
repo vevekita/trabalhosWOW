@@ -175,7 +175,7 @@ public class ServSecretFrame extends javax.swing.JFrame {
             }
 
         } else if (consulta.isSelected()) { // Se o botão de gerenciar consultas está acionado
-            ConsultaFrame consultaFrame = new ConsultaFrame(servicoAtual);
+            ConsultaFrame consultaFrame = new ConsultaFrame(servicoAtual, null, null);
             consultaFrame.setLocationRelativeTo(null);
             consultaFrame.setVisible(true);
 
