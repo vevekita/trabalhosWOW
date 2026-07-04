@@ -14,13 +14,15 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DadosAdicionaisFrame.class.getName());
     private DadosAdicionaisPaciente dados;
+    private ServicoMedico medico;
     
     /**
      * Creates new form DadosAdicionaisFrame
      * @param dados
      */
-    public DadosAdicionaisFrame(DadosAdicionaisPaciente dados) {
+    public DadosAdicionaisFrame(DadosAdicionaisPaciente dados, ServicoMedico medico) {
         this.dados = dados;
+        this.medico = medico;
         initComponents();
         setVisible(true);
     }
@@ -265,7 +267,6 @@ public class DadosAdicionaisFrame extends javax.swing.JFrame {
             dados.setAlergias(alergias);
         }
         
-        ServicoMedico medico = new ServicoMedico();
         medico.atualizarDadosAdicionais(dados);
         
         this.dispose();
