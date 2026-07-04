@@ -23,7 +23,7 @@ class Pagina:
         self.chaves: list[tuple[int, int]] = [(NULO, NULO)] * (ORDEM-1)
         self.filhos: list[int] = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
-def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedReader):
+def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedRandom):
     '''Busca uma chave na árvore-B. Retorna se a ocorrência acontece ou não (True | False). 
     Se ocorre, retorna também o rrn e a posição na página do rrn'''
     if rrn == NULO:
