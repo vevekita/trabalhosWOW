@@ -32,7 +32,7 @@ public class Main {
         ServicoSecretaria servicoSecretaria = new ServicoSecretaria(repoPaciente, repoConsultas);
         ServicoMedico servicoMedico = new ServicoMedico(repoDados, repoProntuario, repoPaciente, repoConsultas);
         
-        LoginFrame telaLogin = new LoginFrame(servicoSecretaria, servicoMedico);
+        LoginFrame telaLogin = new LoginFrame();
         telaLogin.setLocationRelativeTo(null);
         telaLogin.setVisible(true);
             
