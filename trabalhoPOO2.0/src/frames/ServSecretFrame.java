@@ -144,7 +144,48 @@ public class ServSecretFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void okActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okActionPerformed
-        if(dadosPaciente.isSelected()) { //se o botão de gerenciar dados do paciente está acionada
+        if(dadosPaciente.isSelected()) {    
+            try {
+                // Pega o texto do campo de texto e remove espaços em branco
+                String idTexto = jTextField1.getText().trim();
+
+                // Se o usuário não digitou nada ou manteve o texto padrão, assume 0 (Criar)
+                if (idTexto.isEmpty() || idTexto.equals("insira o Id...")) {
+                    idTexto = "0";
+                }
+
+                int idInt = Integer.parseInt(idTexto);
+
+                if (idInt == 0) { // Para criar os dados de um novo paciente (Se digitar 0)
+                    PacienteFrame novoPacienteFrame = new PacienteFrame(servicoAtual, null);
+                    novoPacienteFrame.setLocationRelativeTo(null);
+                    novoPacienteFrame.setVisible(true);
+                } else { // Para editar os dados de um paciente existente
+                    Paciente pacienteAtual = servicoAtual.buscaPaciente(idInt);
+                    if (pacienteAtual == null) {
+                        javax.swing.JOptionPane.showMessageDialog(this, "Paciente com ID " + idInt + " não encontrado no sistema.", "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    PacienteFrame editarPacienteFrame = new PacienteFrame(servicoAtual, pacienteAtual);
+                    editarPacienteFrame.setLocationRelativeTo(null);
+                    editarPacienteFrame.setVisible(true);
+                }
+            } catch (NumberFormatException e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Por favor, insira um número de ID válido ou 0 para criar.", "Erro de Entrada", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+
+        } else if (consulta.isSelected()) { // Se o botão de gerenciar consultas está acionado
+            ConsultaFrame consultaFrame = new ConsultaFrame(servicoAtual);
+            consultaFrame.setLocationRelativeTo(null);
+            consultaFrame.setVisible(true);
+
+        } else if (relatorio.isSelected()) {
+            // Precisa passar o servicoAtual para que a tela de relatório consiga buscar os dados
+            RelatorioSecretariaFrame relatorioFrame = new RelatorioSecretariaFrame(this.servicoAtual);
+            relatorioFrame.setLocationRelativeTo(null);
+            relatorioFrame.setVisible(true);
+        }
+        /*if(dadosPaciente.isSelected()) { //se o botão de gerenciar dados do paciente está acionada
             if(jTextField1.getText().equals("")) { 
                 JOptionPane.showMessageDialog(this, "Voce deve preencher o campo acima!");
                 return;
@@ -173,7 +214,8 @@ public class ServSecretFrame extends javax.swing.JFrame {
                     ConsultaFrame consultaFrame = new ConsultaFrame(servicoAtual, pacienteAtual);
                 }
             }
-        }
+        }*/
+        
     }//GEN-LAST:event_okActionPerformed
 
     /**
