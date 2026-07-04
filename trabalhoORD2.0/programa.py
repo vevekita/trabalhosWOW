@@ -46,7 +46,7 @@ def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
     else:
         return False, pos
 
-def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedReader):
+def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedRandom):
     '''Função que insere uma chave em uma página, percorrendo recursivamente pelas páginas 
     filhas até encontrar um ponteiro nulo e insere, de forma válida (utilizando métodos de 
     divisão e promoção se necessários), a chave'''
@@ -95,7 +95,7 @@ def insereNaArvore(chave: tuple[int, int], raiz: int, btree: io.BufferedRandom):
     return raiz
 
 #funções auxiliares da função *insere*
-def ler_pagina(rrn: int, btree: io.BufferedReader) -> Pagina:
+def ler_pagina(rrn: int, btree: io.BufferedRandom) -> Pagina:
     '''Função auxiliar para a busca e inserção de uma chave em um arquivo com uma árvore-B. 
     Ela busca pegar os registros de determinado rrn no arquivo onde fica a árvore-B e colocar eles conforme as propriedades de uma Pagina'''
     offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
@@ -121,7 +121,7 @@ def ler_pagina(rrn: int, btree: io.BufferedReader) -> Pagina:
 
     return pag
 
-def escrevePagina(rrn: int, pag: Pagina, btree: io.BufferedWriter):
+def escrevePagina(rrn: int, pag: Pagina, btree: io.BufferedRandom):
     '''Registra os dados presentes em determinada página no arquivo 'btree.dat' '''
     offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
     btree.seek(offset)
@@ -178,7 +178,7 @@ def divide(chave: tuple[int, int], filhoD: int, pag: Pagina, btree: io.BufferedR
 
     return chavePro, filhoDpro, pAtual, pNova
 
-def novoRRN(btree: io.BufferedReader) -> int:
+def novoRRN(btree: io.BufferedRandom) -> int:
     '''Função auxiliar que encontra o RRN de uma nova página adicionada na árvore-B'''
     btree.seek(0, os.SEEK_END)
     offset = btree.tell()
@@ -218,20 +218,6 @@ def principal():
     arqArvb.seek(0) #vai para o começo do aquivo da arvore-B 
     arqArvb.write(raiz_bytes) #escreve a raiz no cabeçario
     arqArvb.close()
-
-def constroi_indices():
-    with open('games.dat', 'rb') as entrada, open('btree,dat', 'r + b') as saida:
-        offset = 0 # ou poderia ser entrada.tell()?
-        tam_bytes = entrada.read(2)
-        tam_int = int.from_bytes(tam_bytes, 'little')
-        while tam_int > 0:
-            reg = entrada.read(tam_int)
-            reg_str = reg.decode()
-            campos = reg_str.split('|')
-            id = int(campos[0])
-            offset = entrada.tell()
-            tam_bytes = entrada.read(2)
-            tam_int = int.from_bytes(tam_bytes, 'little')
 
 def executa_operacoes(arquivo_operacoes: str):
     try:
@@ -310,7 +296,7 @@ def main():
     flag = argv[1]
 
     if flag == "-b":
-        constroi_indices()
+        principal()
     elif flag == "-e":
         if len(argv) < 3:
             raise TypeError('Número incorreto de argumentos\nModo de uso: python programa.py -e arquivo_operacoes')
