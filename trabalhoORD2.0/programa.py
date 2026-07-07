@@ -5,7 +5,7 @@ import io
 import os
 
 # Variáveis Globais
-ORDEM: int = 5
+ORDEM: int = 5 # Qualquer ordem
 NULO: int = -1
 FORMATO_HEADER = 'i'
 SIZEOF_HEADER = calcsize(FORMATO_HEADER)
@@ -23,7 +23,7 @@ class Pagina:
         self.chaves: list[tuple[int, int]] = [(NULO, NULO)] * (ORDEM-1)
         self.filhos: list[int] = [NULO] * ORDEM # Referência ao RRN das páginas filhas (esquerda e direita)
 
-def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedRandom):
+def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedRandom): 
     '''Busca uma chave na árvore-B. Retorna se a ocorrência acontece ou não (True | False). 
     Se ocorre, retorna também o rrn e a posição na página do rrn.'''
     if rrn == NULO:
@@ -41,7 +41,7 @@ def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
     pos = 0
     while pos < pag.numChaves and chave[0] > pag.chaves[pos][0]:
         pos += 1
-    if pos < pag.numChaves and chave[0] == pag.chaves[pos][0]:
+    if pos < pag.numChaves and chave[0] == pag.chaves[pos][0]: 
         return True, pos
     else:
         return False, pos
@@ -74,35 +74,11 @@ def insereChave(chave: tuple[int, int], rrnAtual: int, btree: io.BufferedRandom)
             escrevePagina(rrnAtual, pag, btree) # Escreve a página atual no arquivo
             escrevePagina(filhoDpro, novaPag, btree) # Escreve a nova página no arquivo
             return chavePro, filhoDpro, True
-    
-def insereNaArvore(chave: tuple[int, int], raiz: int, btree: io.BufferedRandom):
-    '''Função gerenciadora. Ela lê as chaves a serem armazenadas na árvore-B e chama a função de insereChave().
-    Se houver divisão na raiz atual, ela cria a página que será a nova raiz, inserindo a chave promovida e 
-    atualizando o seus filhos, além do RRN da raiz.'''
-    
-    chavePro, filhoDpro, promocao = insereChave(chave, raiz, btree)
-    if promocao:
-        pNova = Pagina()
-        pNova.chaves[0] = chavePro # Nova chave raiz
-        pNova.filhos[0] = raiz # Filho esquerdo
-        pNova.filhos[1] = filhoDpro # Filho direito
-        pNova.numChaves += 1
 
-        # Novo RRN para escrever na página raiz
-        nRaizRrn = novoRRN(btree)
-        escrevePagina(nRaizRrn, pNova, btree)
-
-        # Atualização do cabeçalho do arquivo com o RRN da raiz nova
-        btree.seek(0)
-        btree.write(pack(FORMATO_HEADER, nRaizRrn))
-        return nRaizRrn
-    
-    return raiz
-
-#funções auxiliares da função *insere*
+# FUNÇÕES AUXILIARES PARA A FUNÇÃO INSERE (tem mais a buscaNaPagina())
 def ler_pagina(rrn: int, btree: io.BufferedRandom) -> Pagina:
     '''Função auxiliar para a busca e inserção de uma chave em um arquivo com uma árvore-B. 
-    Ela busca pegar os registros de determinado rrn no arquivo onde fica a árvore-B e colocar eles conforme as propriedades de uma Pagina'''
+    Ela busca pegar os registros de determinado rrn no arquivo onde fica a árvore-B e colocar eles conforme as propriedades de uma Pagina.'''
     offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
     btree.seek(offset)
     pag_bytes = btree.read(SIZEOF_PAG)
@@ -112,6 +88,7 @@ def ler_pagina(rrn: int, btree: io.BufferedRandom) -> Pagina:
     chaves: tuple = pag_str[1:(1 + (MAX_CHAVES * 2))]
     pag = Pagina() # Cria uma página
     pag.numChaves = num_chaves
+
     i = 0
     id_atual = NULO
     offset_atual = NULO
@@ -119,9 +96,9 @@ def ler_pagina(rrn: int, btree: io.BufferedRandom) -> Pagina:
         id_atual: int = chaves[i]
         offset_atual: int = chaves[i + 1]
         indice: int = i // 2 # Inclui um id e um offset respectivos como parte de um único índice, então define-se o índice como a metade inteira (arredondada para baixo) do indice da chave tratada individualmente
-        pag.chaves[indice] = (id_atual, offset_atual) #colocando os valores das chaves na página no formato certo
+        pag.chaves[indice] = (id_atual, offset_atual)
         i += 2 # Pula de 2 em 2 pois cada elemento vai ser uma tupla
-        
+    
     for n in range(MAX_FILHOS): # Colocando os valores dos ids das páginas filhas na página atual
         pag.filhos[n] = list_filhos[n] # Substitui valor vazio inicialmente definido pela criação do objeto Página em um indice i por um elemento da lista de filhos remetente ao mesmo índice
 
@@ -142,8 +119,7 @@ def escrevePagina(rrn: int, pag: Pagina, btree: io.BufferedRandom):
 
 def insereChavePromo(chave: tuple[int, int], filhoD: int, pag: Pagina):
     '''Função auxiliar que insere uma chave (e seu filho direito) em determinada página da árvore-B,
-    empurrando os elementos maiores para a direita para abrir espaço à chave a ser inserida em seu 
-    devido lugar.'''
+    empurrando os elementos maiores para a direita para abrir espaço à chave a ser inserida em seu devido lugar.'''
     if pag.numChaves == MAX_CHAVES:
         pag.chaves.append((NULO, NULO))
         pag.filhos.append(NULO)
@@ -158,8 +134,8 @@ def insereChavePromo(chave: tuple[int, int], filhoD: int, pag: Pagina):
 
 def divide(chave: tuple[int, int], filhoD: int, pag: Pagina, btree: io.BufferedRandom):
     '''Divide uma página em duas páginas (uma delas sendo a página em si). 
-    Ela lida com páginas com overflow (estouradas)'''
-    insereChavePromo(chave, filhoD, pag) #Insere temporariamente (a página está com overflow agora)
+    Ela lida com páginas com overflow (estouradas).'''
+    insereChavePromo(chave, filhoD, pag) #insere temporariamente (a página está com overflow agora)
     meio = ORDEM // 2
     chavePro = pag.chaves[meio]
     filhoDpro = novoRRN(btree)
@@ -184,12 +160,36 @@ def divide(chave: tuple[int, int], filhoD: int, pag: Pagina, btree: io.BufferedR
     pNova.numChaves = novaQtdChaves
 
     return chavePro, filhoDpro, pAtual, pNova
-
+    
 def novoRRN(btree: io.BufferedRandom) -> int:
     '''Função auxiliar que encontra o RRN de uma nova página adicionada na árvore-B.'''
     btree.seek(0, os.SEEK_END)
     offset = btree.tell()
     return (offset - SIZEOF_HEADER) // SIZEOF_PAG
+
+def insereNaArvore(chave: tuple[int, int], raiz: int, btree: io.BufferedRandom):
+    '''Função gerenciadora. Ela lê as chaves a serem armazenadas na árvore-B e chama a função de insereChave().
+    Se houver divisão na raiz atual, ela cria a página que será a nova raiz, inserindo a chave promovida e 
+    atualizando o seus filhos, além do RRN da raiz.'''
+
+    chavePro, filhoDpro, promocao = insereChave(chave, raiz, btree)
+    if promocao:
+        pNova = Pagina()
+        pNova.chaves[0] = chavePro # Nova chave raiz
+        pNova.filhos[0] = raiz # Filho esquerdo
+        pNova.filhos[1] = filhoDpro # Filho direito
+        pNova.numChaves += 1
+
+        # Novo RRN para escrever na página raiz
+        nRaizRrn = novoRRN(btree)
+        escrevePagina(nRaizRrn, pNova, btree)
+
+        # Atualização do cabeçalho do arquivo com o RRN da raiz nova
+        btree.seek(0)
+        btree.write(pack(FORMATO_HEADER, nRaizRrn))
+        return nRaizRrn
+    
+    return raiz
 
 def constroi_indices():
     '''Função com caráter gerenciador de arquivos, ela é responsável por abrir ou 
@@ -219,7 +219,7 @@ def constroi_indices():
     arqArvb.seek(0) # Vai para o começo do aquivo da árvore-B 
     arqArvb.write(raiz_bytes) # Escreve a raiz no cabeçalho
     arqArvb.close()
-
+            
 def executa_operacoes(arquivo_operacoes: str):
     try:
         open('games.dat', 'rb').close()
@@ -250,7 +250,7 @@ def executa_operacoes(arquivo_operacoes: str):
                     tam_int = int.from_bytes(tam_bytes,'little')
                     registro = arq_jogos.read(tam_int).decode()
 
-                    print(f'{id_buscado} | {registro} ({tam_int} bytes - offset {offset_registro})')
+                    print(f'{registro} ({tam_int} bytes - offset {offset_registro})')
                 else:
                     print(f'Erro: chave {id_buscado} não encontrada')
                 print()
@@ -278,6 +278,7 @@ def executa_operacoes(arquivo_operacoes: str):
 
                     print(f'{argumento} ({tam_registro} bytes - offset {offset_novo_registro})')
                     print()
+
     print(f'As operações do arquivo "{arquivo_operacoes}" foram executadas com sucesso!')
 
 def imprime():
