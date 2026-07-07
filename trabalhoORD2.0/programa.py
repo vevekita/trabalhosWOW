@@ -288,6 +288,69 @@ def imprime():
     except FileNotFoundError as e:
         print(f'Erro: {e}')
 
+    with open('btree.dat', 'rb') as arq_btree:
+        arq_btree.seek(0) # RRN da raiz atual guardada no cabeçalho
+        raiz_atual = unpack(FORMATO_HEADER, arq_btree.read(SIZEOF_HEADER))[0]
+        rrn_contador = 0
+
+        while True:
+            offset = SIZEOF_HEADER + (rrn_contador * SIZEOF_PAG) # Cálculo do deslocamento da página baseado no RRN atual
+            arq_btree.seek(offset)
+
+            pag_bytes = arq_btree.read(SIZEOF_PAG)
+            if len(pag_bytes) < SIZEOF_PAG:
+                break # Fim do arquivo
+
+            pag_str = unpack(FORMATO_PAG, pag_bytes)
+            num_chaves = pag_str[0]
+
+            if num_chaves == 0 and rrn_contador != raiz_atual:
+                break
+            
+            chaves = pag_str[1:(1 + (MAX_CHAVES * 2))]
+            lista_filhos = pag_str[(1 + (MAX_CHAVES * 2)):]
+
+            lista_ids = []
+            lista_offsets = []
+            for i in range(0, len(chaves), 2):
+                lista_ids.append(chaves[i])
+                lista_offsets.append(chaves[i + 1])
+
+            if rrn_contador == raiz_atual:
+                print('-------------------- Raiz --------------------')
+            
+            chaves_prontas = ''
+            for id in range(len(lista_ids)):
+                if id == 0:
+                    chaves_prontas += str(lista_ids[id])
+                else:
+                    chaves_prontas += ' | ' + str(lista_ids[id])
+            
+            offsets_prontos = ''
+            for offset in range(len(lista_offsets)):
+                if offset == 0:
+                    offsets_prontos += str(lista_offsets[offset])
+                else:
+                    offsets_prontos += ' | ' + str(lista_offsets[offset])
+            
+            filhos_prontos = ''
+            for filho in range(len(lista_filhos)):
+                if filho == 0:
+                    filhos_prontos += str(lista_filhos[filho])
+                else:
+                    filhos_prontos += ' | ' + str(lista_filhos[filho])
+            
+            print(f'Página {rrn_contador}: ')
+            print(f'Chaves = {chaves_prontas}')
+            print(f'Offsets = {offsets_prontos}')
+            print(f'Filhos = {filhos_prontos}')
+
+            if rrn_contador == raiz_atual:
+                print('----------------------------------------------')
+
+            print()
+            rrn_contador += 1
+
     # Sempre que ativada, essa funcionalidade apresentará na tela o conteúdo de todas as páginas da árvore-B armazenada
     # no arquivo btree.dat. Para cada página da árvore deverá ser informado: (a) o seu RRN; (b) os valores das chaves; (c)
     # os valores dos byte-offsets dos registros associados às chaves; e (d) os RRNs das páginas filhas. As páginas devem ser
