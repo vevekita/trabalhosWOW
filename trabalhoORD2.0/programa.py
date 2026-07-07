@@ -39,9 +39,9 @@ def buscaNaArvore(chave: tuple[int, int], rrn: int, btree: io.BufferedRandom):
 def buscaNaPagina(chave: tuple[int, int], pag: Pagina) -> tuple[bool, int]:
     '''Realiza a busca de uma chave em determinada página.'''
     pos = 0
-    while pos < pag.numChaves and chave > pag.chaves[pos]:
+    while pos < pag.numChaves and chave[0] > pag.chaves[pos][0]:
         pos += 1
-    if pos < pag.numChaves and chave == pag.chaves[pos]:
+    if pos < pag.numChaves and chave[0] == pag.chaves[pos][0]:
         return True, pos
     else:
         return False, pos
@@ -130,7 +130,7 @@ def escrevePagina(rrn: int, pag: Pagina, btree: io.BufferedRandom):
     '''Registra os dados presentes em determinada página no arquivo 'btree.dat' '''
     offset: int = SIZEOF_HEADER + (rrn * SIZEOF_PAG)
     btree.seek(offset)
-    pag_bytes = pack(FORMATO_PAG, pag.numChaves)
+    pag_bytes = pack('i', pag.numChaves)
 
     for i in range(MAX_CHAVES): #transforma a lista de tuplas em só uma lista de inteiros
         chave_tupla = pag.chaves[i]
@@ -195,20 +195,20 @@ def principal():
     criar o arquivo da árvore-B e chamar a inserção'''  
     try:
         arqArvb = open('btree.dat', 'r+b')
-        bytes_raiz = arqArvb.read(SIZEOF_HEADER)
-        raiz = unpack(FORMATO_HEADER, bytes_raiz)[0]
+        raiz_bytes = arqArvb.read(SIZEOF_HEADER)
+        raiz = int.from_bytes(raiz_bytes, 'little')
     except FileNotFoundError:
         arqArvb = open('btree.dat', 'w+b')
         raiz = 0
-        bytes_raiz = pack(FORMATO_HEADER, raiz)
-        arqArvb.write(bytes_raiz)
+        raiz_bytes = pack(FORMATO_HEADER, raiz)
+        arqArvb.write(raiz_bytes)
         pag = Pagina()
         escrevePagina(raiz, pag, arqArvb)
         
     with open('games.dat', 'rb') as entrada: #processo de construir os índices
         offset = 0
         tam_bytes = entrada.read(SIZEOF_TAMEG) #lê o indicador de tamanho de um registro de jogo
-        tam_int = unpack(FORMATO_TAMREG, tam_bytes)[0]
+        tam_int = int.from_bytes(tam_bytes, 'little')
         while tam_int > 0:
             reg_bytes = entrada.read(tam_int)
             reg_str = reg_bytes.decode()
@@ -218,8 +218,8 @@ def principal():
             raiz = insereNaArvore(chave_reg, raiz, arqArvb) #colocando a chave (no formato de tupla) na árvore-B
             offset = entrada.tell()
             tam_bytes = entrada.read(SIZEOF_TAMEG)
-            tam_int = unpack(FORMATO_TAMREG, tam_bytes)[0]
-    raiz_bytes = pack(SIZEOF_HEADER, raiz)
+            tam_int = int.from_bytes(tam_bytes, 'little')
+    raiz_bytes = pack(FORMATO_HEADER, raiz)
     arqArvb.seek(0) #vai para o começo do aquivo da arvore-B 
     arqArvb.write(raiz_bytes) #escreve a raiz no cabeçario
     arqArvb.close()
@@ -277,6 +277,8 @@ def executa_operacoes(arquivo_operacoes: str):
                     arq_jogos.write(registro_bytes)
 
                     raiz = insereNaArvore((id_insercao, offset_novo_registro), raiz, arq_btree)
+                    arq_btree.seek(0) #vai pro começo do arquivo
+                    arq_btree.write(pack(FORMATO_HEADER, raiz)) #reescreve a raiz, atualizando ela
 
                     print(f'{argumento} ({tam_registro} bytes - offset {offset_novo_registro})')
                     print()
@@ -350,12 +352,11 @@ def imprime():
 
             print()
             rrn_contador += 1
-
+            
     # Sempre que ativada, essa funcionalidade apresentará na tela o conteúdo de todas as páginas da árvore-B armazenada
     # no arquivo btree.dat. Para cada página da árvore deverá ser informado: (a) o seu RRN; (b) os valores das chaves; (c)
     # os valores dos byte-offsets dos registros associados às chaves; e (d) os RRNs das páginas filhas. As páginas devem ser
     # apresentadas pela ordem do seu RRN e a página raiz deve ser devidamente identificada.
-
 
 def main():
     if len(argv) < 2:
@@ -373,4 +374,4 @@ def main():
         imprime()
 
 if __name__ == '__main__':
-    main
+    main()
