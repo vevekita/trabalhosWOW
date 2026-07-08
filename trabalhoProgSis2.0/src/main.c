@@ -6,10 +6,13 @@
 #include "ponyBehind.h"
 
 #define GRAVITY 0
-
 #define GOOD_APPLE 0
 #define BAD_APPLE 1
+#define MENU 0
+#define JOGO 1
+#define FIM 2
 
+int jogo = MENU;
 int timer = 3600;
 int score = 0;
 int frame = 0;
@@ -32,7 +35,6 @@ int pget(int x, int y) {
 }
 
 int x, y; // posição do jogador
-int esquerda = 0;
 
 void spawn_fruit() {
     fruit.x = rand()%153;
@@ -55,6 +57,13 @@ void start () {
 void update () {
     frame++;
     
+    if (jogo == MENU) { //se está no modo de menu/começo do jogo
+        *DRAW_COLORS = 0x1;
+        rect(0, 0, 160, 160); 
+        text("aperte [ENTER] para começar o jogo", 45, 62);
+
+    }
+    //aqui tudo entra dentro do if jogo = JOGO. Também tem o if jogo = FIM
     if (fruit.stop>0) { //faz contagem regressiva para a maçã não cair
         fruit.stop--;
     } else {
@@ -71,6 +80,7 @@ void update () {
     blit(background_jogo, 0, 0, background_jogoWidth, background_jogoHeight, background_jogoFlags);
     
     if (timer <= 0) {
+        jogo = FIM;
         *DRAW_COLORS = 0x12;
         rect(35, 50, 92, 30);
         *DRAW_COLORS = 0x0001;
@@ -84,15 +94,14 @@ void update () {
     //parte do input
     srand((unsigned int)frame);
     int dx = 0; // deslocamento, permite mais de uma tecla pressionada
-    
+    int esquerda = 0;
     uint8_t gamepad = *GAMEPAD1;
     if (gamepad & BUTTON_LEFT)  { 
         dx -= 1;
         esquerda = 1;
     }
     if (gamepad & BUTTON_RIGHT) { 
-        dx += 1;
-        esquerda = 0; 
+        dx += 1; 
     }
     x += dx;
     
@@ -111,21 +120,11 @@ void update () {
     int spriteX = frameAtual * 16;
     int spriteY = 0;
 
-    uint32_t flags_desenho = BLIT_2BPP;
-    if (esquerda) {
-        flags_desenho |= BLIT_FLIP_X;
-    }
-    
     //applejack (pony)
     *DRAW_COLORS = 0x0024;
-    blitSub(ponyBehind, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyBehindWidth, flags_desenho);
-
+    blitSub(ponyBehind, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyBehindWidth, BLIT_2BPP);
     *DRAW_COLORS = 0x0123;
-    blitSub(pony, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyWidth, flags_desenho);
-    // *DRAW_COLORS = 0x0024;
-    // blitSub(ponyBehind, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyBehindWidth, BLIT_2BPP);
-    // *DRAW_COLORS = 0x0123;
-    // blitSub(pony, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyWidth, BLIT_2BPP);
+    blitSub(pony, x, y, 16, 16, (uint32_t)spriteX, (uint32_t)spriteY, ponyWidth, BLIT_2BPP);
     
     if (x < fruit.x + 5 && x + 5 > fruit.x && y < fruit.y + 5 && y + 5 > fruit.y) { //se colidiu
         if (fruit.type == GOOD_APPLE) {
