@@ -13,7 +13,7 @@
 #define FIM 2
 
 int jogo = MENU;
-int timer = 3600;
+int timer = 2400;
 int score = 0;
 int frame = 0;
 struct point {
@@ -21,6 +21,7 @@ struct point {
     int32_t y;
     int type;
     int stop;
+    int speed;
 };
 struct point fruit;
 int velocity_apple = 0;
@@ -37,13 +38,22 @@ int pget(int x, int y) {
 }
 
 int x, y; // posição do jogador
-int esquerda = 0;
+int esquerda;
 
 void spawn_fruit() {
     fruit.x = rand()%153;
     fruit.y = (rand() % 41) + 30;
     fruit.type = rand()%2;
     fruit.stop = 40;
+    if (fruit.y <= 42) {
+        fruit.speed = 1;
+    }
+    else if (fruit.y <= 60) {
+        fruit.speed = 2;
+    }
+    else {
+        fruit.speed = 3;
+    }
 }
 
 void start () {
@@ -107,11 +117,14 @@ void update () {
         if (fruit.stop>0) { //faz contagem regressiva para a maçã não cair
             fruit.stop--;
         } else {
-            if (frame % 2 == 0) {
+            if (frame % fruit.speed == 0) {
                 fruit.y++;  
             }
         }
         if (fruit.y > 110) { //se a maçã cair no chão
+            if (fruit.type == 0) {
+                timer = timer - 120;
+            }
             spawn_fruit(); //spawna outra fruta
         }
 
@@ -192,8 +205,6 @@ void update () {
         *DRAW_COLORS = 0x12;
         rect(0, 125, 160, 35);
 
-        char textScore[11] = "SCORE:0000";
-        char textTime[9] = "TIME:000";
         textScore[9] = (char)('0' + score % 10);
         textScore[8] = (char)('0' + ((score / 10) % 10));
         textScore[7] = (char)('0' + ((score / 100) % 10));
@@ -233,10 +244,10 @@ void update () {
 
         uint8_t gamepad = *GAMEPAD1;
         if (gamepad & BUTTON_2) {
-            timer = 3600;
+            jogo = MENU;
+            timer = 2400;
             score = 0;
             spawn_fruit();
-            jogo = MENU;
         }
     }
     
