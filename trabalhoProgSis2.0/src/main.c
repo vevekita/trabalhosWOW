@@ -37,7 +37,7 @@ int pget(int x, int y) {
 }
 
 int x, y; // posição do jogador
-int esquerda;
+int esquerda = 0;
 
 void spawn_fruit() {
     fruit.x = rand()%153;
