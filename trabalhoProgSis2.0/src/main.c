@@ -224,11 +224,11 @@ void update () {
         blit(background_jogo, 0, 0, background_jogoWidth, background_jogoHeight, background_jogoFlags);
 
         *DRAW_COLORS = 0x13;
-        rect(20, 50, 120, 100);
+        rect(17, 50, 125, 100);
         *DRAW_COLORS = 0x2;
-        text("GAME OVER", 46, 64);
+        text("CONGRATULATIONS", 20, 64);
         *DRAW_COLORS = 0x0004;
-        text("GAME OVER", 45, 62);
+        text("CONGRATULATIONS", 20, 62);
         *DRAW_COLORS = 0x0001;
         text(textScore, 42, 85);
 
