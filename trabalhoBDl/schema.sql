@@ -74,6 +74,7 @@ CREATE TABLE pedido(
 CREATE TABLE contem(
 	idPedido INTEGER NOT NULL,
 	idCard INTEGER NOT NULL,
+	quantidade INTEGER NOT NULL,
 	FOREIGN KEY (idPedido) references pedido(id_pedido),
 	FOREIGN KEY (idCard) references card(id_card)
 	);
