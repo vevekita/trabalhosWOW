@@ -378,3 +378,19 @@ pub fn move_examples() {
   // jogador que não está na partida
   check.eq(move(p, 3, Baixo), p)
 }
+
+// ----------------------------------------------------------------------
+// Imagens
+// ----------------------------------------------------------------------
+
+/// Peça Branca: círculo branco com contorno preto.
+fn imagem_peca_branca() -> Image {
+  let raio = lado_casa * 2 / 5
+  sobrepor(image.circle(raio, stroke.black), image.circle(raio, fill.white))
+}
+
+/// Peça Preta: círculo preto com contorno branco.
+fn imagem_peca_preta() -> Image {
+  let raio = lado_casa * 2 / 5
+  sobrepor(image.circle(raio, stroke.white), image.circle(raio, fill.black))
+}
