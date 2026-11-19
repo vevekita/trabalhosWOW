@@ -37,6 +37,7 @@ import sgleam/image.{type Image}
 import sgleam/key
 import sgleam/mworld
 import sgleam/random.{type Generator}
+import sgleam/stroke
 import sgleam/style
 
 // ----------------------------------------------------------------------
@@ -52,7 +53,7 @@ const lado_casa = 40
 /// Quantidade de tiques por segundo.
 const tiques_por_segundo = 10
 
-/// Duração da partida, em tiques (60 segundos).
+/// Duração da partida, em tiques (180 segundos).
 const duracao = 1800
 
 /// Largura da tela, em pixels.
@@ -66,20 +67,20 @@ const altura = 480
 // ----------------------------------------------------------------------
 
 pub type Cor {
-   Brancas
-   Pretas
+  Brancas
+  Pretas
 }
 
 /// Uma casa da grade. *lin* e *col* estão entre 0 e `tamanho - 1`; a casa
 /// Posicao(0, 0) fica no canto superior esquerdo.
 pub type Posicao {
-   Posicao(linha: Int, coluna: Int)
+  Posicao(linha: Int, coluna: Int)
 }
 
 // Uma peça do jogo. *jogador* define a cor da peça e posição define a posição 
 // que ela está.
 pub type Peca {
-   Peca(jogador: Cor, posicao: Posicao)
+  Peca(jogador: Cor, posicao: Posicao)
 }
 
 // Um jogador do jogo. *contador* representa a quantidade de peças que esse jogador comeu,
@@ -87,31 +88,43 @@ pub type Peca {
 // posição está o cursor do jogador e *selecionada* define a casa que o jogador selecionou 
 // para se mover
 pub type Jogador {
-   Jogador(contador: Int, cor: Cor, cursor: Posicao, selecionada: Option(Posicao))
+  Jogador(
+    contador: Int,
+    cor: Cor,
+    cursor: Posicao,
+    selecionada: Option(Posicao),
+  )
 }
 
 // Uma partida em andamento. *tiques_restantes* é a quantidade de tiques restantes
 // para o final da partida  
 
 pub type Partida {
-   Partida(jogadores: List(Jogador), pecas: List(Peca), vez: Cor, tiques_restantes: Int)
+  Partida(
+    jogadores: List(Jogador),
+    pecas: List(Peca),
+    vez: Cor,
+    tiques_restantes: Int,
+  )
 }
 
 // Resultado de uma partida
 pub type Resultado {
-   Vitoria
-   Derrota
-   Empate
+  Vitoria
+  Derrota
+  Empate
 }
 
-pub type Estado{
-  Abertura(jogadores: List(Jogador))
+pub type Estado {
+  Abertura
   EmPartida(partida: Partida)
   Resultado(jogadores: List(Jogador), resultado: Resultado)
 }
 
 /// A direção de um movimento.
 pub type Direcao {
+  Cima
+  Baixo
   Esquerda
   Direita
 }
@@ -130,17 +143,27 @@ pub fn smain() {
 /// Cria o estado inicial com o gerador de *env*, as imagens das frutas e a
 /// quantidade de *jogadores*.
 fn inicio(env: Env, jogadores: List(mworld.Player)) -> Estado {
-  Abertura(env.random(env), carrega_imagens(), list.length(jogadores))
+  Abertura
 }
 
 /// Desenha o *estado* do ponto de vista de *jogador*.
 fn desenha(estado: Estado, jogador: mworld.Player) -> Image {
-  tela(estado, mworld.player_index(jogador))
+  let cor = case mworld.player_index(jogador) {
+    1 -> Brancas
+    2 -> Pretas
+    _ -> Brancas
+  }
+  tela(estado, cor)
 }
 
 /// Trata o *evento* de tecla pressionada por *jogador*.
 fn tecla(estado: Estado, jogador: mworld.Player, evento: key.Event) -> Estado {
-  trata_tecla(estado, mworld.player_index(jogador), evento)
+  let cor = case mworld.player_index(jogador) {
+    1 -> Brancas
+    2 -> Pretas
+    _ -> Brancas
+  }
+  trata_tecla(estado, cor, evento)
 }
 
 // ----------------------------------------------------------------------
@@ -164,7 +187,7 @@ pub fn sequencia_examples() {
 
 /// Devolve True se a casa é escura (só as casas escuras são usadas no jogo).
 pub fn casa_escura(pos: Posicao) -> Bool {
-  { pos.lin + pos.col } % 2 == 1
+  { pos.linha + pos.coluna } % 2 == 1
 }
 
 pub fn casa_escura_examples() {
@@ -206,8 +229,8 @@ pub fn pecas_iniciais() -> List(Peca) {
 pub fn pecas_iniciais_examples() {
   let pecas = pecas_iniciais()
   check.eq(list.length(pecas), 24)
-  check.eq(list.length(list.filter(pecas, fn(p) { p.dono == Brancas })), 12)
-  check.eq(list.length(list.filter(pecas, fn(p) { p.dono == Pretas })), 12)
+  check.eq(list.length(list.filter(pecas, fn(p) { p.jogador == Brancas })), 12)
+  check.eq(list.length(list.filter(pecas, fn(p) { p.jogador == Pretas })), 12)
 }
 
 /// Devolve a peça que está na posição dada, se houver.
@@ -228,7 +251,10 @@ pub fn peca_em_examples() {
 
 /// Devolve True se a posição está dentro do tabuleiro.
 pub fn dentro_do_tabuleiro(pos: Posicao) -> Bool {
-  pos.lin >= 0 && pos.lin < tamanho && pos.col >= 0 && pos.col < tamanho
+  pos.linha >= 0
+  && pos.linha < tamanho
+  && pos.coluna >= 0
+  && pos.coluna < tamanho
 }
 
 pub fn dentro_do_tabuleiro_examples() {
@@ -254,20 +280,38 @@ pub fn casa_livre_examples() {
 /// sem pontos e sem frutas na grade.
 pub fn nova_partida() -> Partida {
   Partida(
-    jogadores: [Jogador(0, Brancas, Posicao(0, 0), None),
-      Jogador(0, Pretas, Posicao(0,0), None)],
-    pecas: [Peca(Pretas, Posicao(0, 1)), Peca(Pretas, Posicao(0, 3)),
-    Peca(Pretas, Posicao(0, 5)), Peca(Pretas, Posicao(0, 7)), Peca(Pretas, Posicao(1, 0)),
-    Peca(Pretas, Posicao(1, 2)), Peca(Pretas, Posicao(1, 4)), Peca(Pretas, Posicao(1, 6)),
-    Peca(Pretas, Posicao(2, 1)), Peca(Pretas, Posicao(2, 3)), Peca(Pretas, Posicao(2, 5)),
-    Peca(Pretas, Posicao(2, 7)),
-    Peca(Pretas, Posicao(15, 0)), Peca(Pretas, Posicao(15, 2)),
-    Peca(Pretas, Posicao(15, 4)), Peca(Pretas, Posicao(15, 6)), Peca(Pretas, Posicao(14, 1)),
-    Peca(Pretas, Posicao(14, 3)), Peca(Pretas, Posicao(14, 5)), Peca(Pretas, Posicao(14, 7)),
-    Peca(Pretas, Posicao(13, 0)), Peca(Pretas, Posicao(13, 2)), Peca(Pretas, Posicao(13, 4)),
-    Peca(Pretas, Posicao(13, 6))],
-    vez: Brancas
-    tiques_restantes: duracao
+    jogadores: [
+      Jogador(0, Brancas, Posicao(0, 0), None),
+      Jogador(0, Pretas, Posicao(0, 0), None),
+    ],
+    pecas: [
+      Peca(Brancas, Posicao(0, 1)),
+      Peca(Brancas, Posicao(0, 3)),
+      Peca(Brancas, Posicao(0, 5)),
+      Peca(Brancas, Posicao(0, 7)),
+      Peca(Brancas, Posicao(1, 0)),
+      Peca(Brancas, Posicao(1, 2)),
+      Peca(Brancas, Posicao(1, 4)),
+      Peca(Brancas, Posicao(1, 6)),
+      Peca(Brancas, Posicao(2, 1)),
+      Peca(Brancas, Posicao(2, 3)),
+      Peca(Brancas, Posicao(2, 5)),
+      Peca(Brancas, Posicao(2, 7)),
+      Peca(Pretas, Posicao(7, 0)),
+      Peca(Pretas, Posicao(7, 2)),
+      Peca(Pretas, Posicao(7, 4)),
+      Peca(Pretas, Posicao(7, 6)),
+      Peca(Pretas, Posicao(6, 1)),
+      Peca(Pretas, Posicao(6, 3)),
+      Peca(Pretas, Posicao(6, 5)),
+      Peca(Pretas, Posicao(6, 7)),
+      Peca(Pretas, Posicao(5, 0)),
+      Peca(Pretas, Posicao(5, 2)),
+      Peca(Pretas, Posicao(5, 4)),
+      Peca(Pretas, Posicao(5, 6)),
+    ],
+    vez: Brancas,
+    tiques_restantes: duracao,
   )
 }
 
@@ -275,23 +319,43 @@ pub fn nova_partida_examples() {
   check.eq(
     nova_partida(),
     Partida(
-      [Jogador(0, Brancas, Posicao(0, 0), None),
-      Jogador(0, Pretas, Posicao(0,0), None)],
-      [Peca(Pretas, Posicao(0, 1)), Peca(Pretas, Posicao(0, 3)),
-      Peca(Pretas, Posicao(0, 5)), Peca(Pretas, Posicao(0, 7)), Peca(Pretas, Posicao(1, 0)),
-      Peca(Pretas, Posicao(1, 2)), Peca(Pretas, Posicao(1, 4)), Peca(Pretas, Posicao(1, 6)),
-      Peca(Pretas, Posicao(2, 1)), Peca(Pretas, Posicao(2, 3)), Peca(Pretas, Posicao(2, 5)),
-      Peca(Pretas, Posicao(2, 7)),
-      Peca(Pretas, Posicao(15, 0)), Peca(Pretas, Posicao(15, 2)),
-      Peca(Pretas, Posicao(15, 4)), Peca(Pretas, Posicao(15, 6)), Peca(Pretas, Posicao(14, 1)),
-      Peca(Pretas, Posicao(14, 3)), Peca(Pretas, Posicao(14, 5)), Peca(Pretas, Posicao(14, 7)),
-      Peca(Pretas, Posicao(13, 0)), Peca(Pretas, Posicao(13, 2)), Peca(Pretas, Posicao(13, 4)),
-      Peca(Pretas, Posicao(13, 6))],
-      Brancas, 1800)
+      [
+        Jogador(0, Brancas, Posicao(0, 0), None),
+        Jogador(0, Pretas, Posicao(0, 0), None),
+      ],
+      [
+        Peca(Brancas, Posicao(0, 1)),
+        Peca(Brancas, Posicao(0, 3)),
+        Peca(Brancas, Posicao(0, 5)),
+        Peca(Brancas, Posicao(0, 7)),
+        Peca(Brancas, Posicao(1, 0)),
+        Peca(Brancas, Posicao(1, 2)),
+        Peca(Brancas, Posicao(1, 4)),
+        Peca(Brancas, Posicao(1, 6)),
+        Peca(Brancas, Posicao(2, 1)),
+        Peca(Brancas, Posicao(2, 3)),
+        Peca(Brancas, Posicao(2, 5)),
+        Peca(Brancas, Posicao(2, 7)),
+        Peca(Pretas, Posicao(7, 0)),
+        Peca(Pretas, Posicao(7, 2)),
+        Peca(Pretas, Posicao(7, 4)),
+        Peca(Pretas, Posicao(7, 6)),
+        Peca(Pretas, Posicao(6, 1)),
+        Peca(Pretas, Posicao(6, 3)),
+        Peca(Pretas, Posicao(6, 5)),
+        Peca(Pretas, Posicao(6, 7)),
+        Peca(Pretas, Posicao(5, 0)),
+        Peca(Pretas, Posicao(5, 2)),
+        Peca(Pretas, Posicao(5, 4)),
+        Peca(Pretas, Posicao(5, 6)),
+      ],
+      Brancas,
+      1800,
+    ),
   )
   check.eq(nova_partida().jogadores, [
     Jogador(0, Brancas, Posicao(0, 0), None),
-    Jogador(0, Pretas, Posicao(0, 0), None)
+    Jogador(0, Pretas, Posicao(0, 0), None),
   ])
 }
 
@@ -1138,13 +1202,13 @@ fn fundo_escuro() -> Image {
 }
 
 /// Peça Branca: círculo branco com contorno preto.
-fn imagem_peca_branca() -> Image {
+fn imagem_peca_brancas() -> Image {
   let raio = lado_casa * 2 / 5
   sobrepor(image.circle(raio, stroke.black), image.circle(raio, fill.white))
 }
 
 /// Peça Preta: círculo preto com contorno branco.
-fn imagem_peca_preta() -> Image {
+fn imagem_peca_pretas() -> Image {
   let raio = lado_casa * 2 / 5
   sobrepor(image.circle(raio, stroke.white), image.circle(raio, fill.black))
 }
@@ -1166,6 +1230,20 @@ fn imagem_vazia() -> Image {
   image.empty
 }
 
+/// Empilha as *imagens*, a primeira no topo.
+pub fn empilha(imagens: List(Image)) -> Image {
+  list.fold(imagens, image.empty, image.above)
+}
+
+/// Devolve a cor do jogador *numero*.
+pub fn cor(jogador: Cor) -> Color {
+  case jogador {
+    Pretas -> color.red
+    Brancas -> color.blue
+    _ -> color.purple
+  }
+}
+
 // ----------------------------------------------------------------------
 // Desenhos
 // ----------------------------------------------------------------------
@@ -1179,16 +1257,13 @@ pub fn desenhar_peca(dono: Cor) -> Image {
 }
 
 /// Desenha uma casa com a peça que está nela (se houver).
-pub fn desenhar_casa(
-  pos: Posicao,
-  pecas: List(Peca),
-) -> Image {
+pub fn desenhar_casa(pos: Posicao, pecas: List(Peca)) -> Image {
   let fundo = case casa_escura(pos) {
     True -> fundo_escuro()
     False -> fundo_claro()
   }
   let com_peca = case peca_em(pecas, pos) {
-    Some(peca) -> sobrepor(desenhar_peca(peca.dono), fundo)
+    Some(peca) -> sobrepor(desenhar_peca(peca.jogador), fundo)
     None -> fundo
   }
 }
@@ -1213,31 +1288,195 @@ pub fn ordem_de_visao_examples() {
 pub fn desenhar_linha(
   lin: Int,
   colunas: List(Int),
-  pecas: List(Peca)
+  pecas: List(Peca),
 ) -> Image {
   colunas
-  |> list.map(fn(col) {
-    desenhar_casa(
-      Posicao(lin, col),
-      pecas
-    )
-  })
+  |> list.map(fn(col) { desenhar_casa(Posicao(lin, col), pecas) })
   |> list.fold(imagem_vazia(), ao_lado)
 }
 
 /// Desenha o tabuleiro inteiro do ponto de vista de `jogador`.
-pub fn desenhar_tabuleiro(
-  pecas: List(Peca),
-  jogador: Cor,
-) -> Image {
+pub fn desenhar_tabuleiro(pecas: List(Peca), jogador: Cor) -> Image {
   let ordem = ordem_de_visao(jogador)
   ordem
-  |> list.map(fn(lin) {
-    desenhar_linha(
-      lin,
-      ordem,
-      pecas
-    )
-  })
+  |> list.map(fn(lin) { desenhar_linha(lin, ordem, pecas) })
   |> list.fold(imagem_vazia(), empilhar)
+}
+
+/// Desenha a tela do *estado* para o jogador *jogador*.
+pub fn tela(estado: Estado, jogador: Cor) -> Image {
+  let conteudo = case estado {
+    Abertura -> tela_abertura(jogador)
+    EmPartida(partida) -> tela_partida(partida, jogador)
+    Resultado(jogadores, resultado) -> tela_resultado(jogadores, jogador)
+  }
+  image.overlay(conteudo, image.rectangle(largura, altura, fill.white))
+}
+
+/// Desenha a tela de abertura para o jogador *jogador*.
+pub fn tela_abertura(jogador: Cor) -> Image {
+  empilha([
+    texto("Damas :D", 32),
+    texto(" ", 16),
+    texto("Pegue mais peças que o adversário em 180 segundos.", 16),
+    texto("Use as setas para mover o seu cursor.", 16),
+    texto(" ", 16),
+    image.beside(
+      case jogador {
+        Brancas -> texto("Você jogará com as brancas ", 20)
+        Pretas -> texto("Você jogará com as pretas", 20)
+      },
+      image.square(lado_casa / 2, style.fill(cor(jogador))),
+    ),
+    texto(" ", 16),
+    texto("Pressione Enter para começar", 20),
+  ])
+}
+
+/// Desenha a tela da *partida* para o jogador *jogador*: o cabeçalho com os
+/// pontos, o tempo e os jogadores.
+pub fn tela_partida(partida: Partida, jogador: Cor) -> Image {
+  image.above(
+    cabecalho(partida, jogador),
+    desenhar_tabuleiro(partida.pecas, jogador),
+  )
+}
+
+/// Desenha o cabeçalho da *partida* para o jogador *jogador*: os pontos do
+/// jogador em destaque, os pontos dos outros e o tempo restante.
+pub fn cabecalho(partida: Partida, jogador: Cor) -> Image {
+  let #(meus, outros) =
+    list.partition(partida.jogadores, fn(j) { j.cor == jogador })
+  let meus_pontos = list.fold(meus, 0, fn(soma, j) { soma + j.contador })
+  let placar_outros =
+    list.map(outros, fn(j) {
+      image.text(
+        "  Adversário: " <> int.to_string(j.contador),
+        16,
+        case jogador {
+          Brancas -> style.fill(cor(jogador))
+          Pretas -> style.fill(cor(jogador))
+        },
+      )
+    })
+  empilha([
+    image.text("Você: " <> int.to_string(meus_pontos), 28, case jogador {
+      Brancas -> style.fill(cor(jogador))
+      Pretas -> style.fill(cor(jogador))
+    }),
+    list.fold(placar_outros, image.empty, image.beside),
+    texto(
+      "Tempo: "
+        <> int.to_string(segundos_restantes(partida.tiques_restantes))
+        <> " s",
+      16,
+    ),
+  ])
+}
+
+/// Devolve a quantidade de segundos que faltam para a partida terminar
+/// quando já se passaram *tiques* tiques, arredondada para cima.
+pub fn segundos_restantes(tiques_restantes: Int) -> Int {
+  { tiques_restantes + tiques_por_segundo - 1 } / tiques_por_segundo
+}
+
+pub fn segundos_restantes_examples() {
+  check.eq(segundos_restantes(0), 60)
+  check.eq(segundos_restantes(1), 60)
+  check.eq(segundos_restantes(10), 59)
+  check.eq(segundos_restantes(599), 1)
+}
+
+/// Desenha a tela de resultado dos *jogadores* para o jogador *jogador*.
+pub fn tela_resultado(jogadores: List(Jogador), jogador: Cor) -> Image {
+  let placar =
+    list.map(jogadores, fn(j) {
+      image.text(
+        "Jogador "
+          <> cor_str(jogador)
+          <> ": "
+          <> int.to_string(j.contador)
+          <> " peças coletadas",
+        20,
+        style.fill(cor(jogador)),
+      )
+    })
+  empilha(
+    list.flatten([
+      [texto(mensagem_resultado(jogadores, jogador), 32), texto(" ", 16)],
+      placar,
+      [texto(" ", 16), texto("Pressione Enter para jogar novamente", 20)],
+    ]),
+  )
+}
+
+/// Produz uma imagem com o texto *s* em preto, com tamanho *tamanho_fonte*.
+pub fn texto(s: String, tamanho_fonte: Int) -> Image {
+  image.text(s, tamanho_fonte, fill.black)
+}
+
+/// Devolve a cor *cor* em string
+pub fn cor_str(cor: Cor) {
+  case cor {
+    Pretas -> "Pretas"
+    Brancas -> "Brancas"
+  }
+}
+
+// ----------------------------------------------------------------------
+// Resultado
+// ----------------------------------------------------------------------
+
+/// Devolve o vencedor da lista de jogadores *jogadores*. Retorna None caso seja empate
+pub fn vencedor(jogadores: List(Jogador)) -> Option(Cor) {
+  case jogadores {
+    [brancas, pretas] ->
+      case brancas.contador > pretas.contador {
+        True -> Some(Brancas)
+        False ->
+          case pretas.contador > brancas.contador {
+            True -> Some(Pretas)
+            False -> None
+          }
+      }
+    [] | [_] | [_, _, _, ..] -> None
+  }
+}
+
+pub fn vencedor_examples() {
+  let p = Posicao(0, 0)
+  check.eq(
+    vencedor([Jogador(1, Brancas, p, None), Jogador(2, Pretas, p, None)]),
+    Some(Pretas),
+  )
+  check.eq(
+    vencedor([Jogador(5, Brancas, p, None), Jogador(2, Pretas, p, None)]),
+    Some(Brancas),
+  )
+  check.eq(
+    vencedor([Jogador(1, Brancas, p, None), Jogador(1, Pretas, p, None)]),
+    None,
+  )
+}
+
+/// Produz a mensagem de resultado para o jogador *jogador*: "Você venceu!"
+/// se ele é o único com a maior pontuação, "Empate!" se ele divide a maior
+/// pontuação com outros, e "Você perdeu!" caso contrário.
+pub fn mensagem_resultado(jogadores: List(Jogador), jogador: Cor) -> String {
+  let vs = vencedor(jogadores)
+  case vs {
+    None -> "Empate!"
+    Some(cor) ->
+      case jogador == cor {
+        True -> "Voce Venceu!"
+        False -> "Voce Perdeu!"
+      }
+  }
+}
+
+pub fn mensagem_resultado_examples() {
+  let p = Posicao(0, 0)
+  let js = [Jogador(1, Brancas, p, None), Jogador(2, Pretas, p, None)]
+  check.eq(mensagem_resultado(js, Pretas), "Voce Venceu")
+  check.eq(mensagem_resultado(js, Brancas), "Voce Perdeu!")
 }
