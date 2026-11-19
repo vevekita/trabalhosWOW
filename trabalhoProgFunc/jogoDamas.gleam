@@ -228,7 +228,7 @@ pub fn peca_em_examples() {
 
 /// Devolve True se a posição está dentro do tabuleiro.
 pub fn dentro_do_tabuleiro(pos: Posicao) -> Bool {
-  pos.lin >= 0 && pos.lin < dimensao && pos.col >= 0 && pos.col < dimensao
+  pos.lin >= 0 && pos.lin < tamanho && pos.col >= 0 && pos.col < tamanho
 }
 
 pub fn dentro_do_tabuleiro_examples() {
