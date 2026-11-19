@@ -471,6 +471,16 @@ pub fn move_examples() {
 // Imagens
 // ----------------------------------------------------------------------
 
+/// Fundo de uma casa clara.
+fn fundo_claro() -> Image {
+  image.rectangle(lado_casa, lado_casa, fill.beige)
+}
+
+/// Fundo de uma casa escura.
+fn fundo_escuro() -> Image {
+  image.rectangle(lado_casa, lado_casa, fill.brown)
+}
+
 /// Peça Branca: círculo branco com contorno preto.
 fn imagem_peca_branca() -> Image {
   let raio = lado_casa * 2 / 5
@@ -481,4 +491,97 @@ fn imagem_peca_branca() -> Image {
 fn imagem_peca_preta() -> Image {
   let raio = lado_casa * 2 / 5
   sobrepor(image.circle(raio, stroke.white), image.circle(raio, fill.black))
+}
+
+/// Coloca `topo` sobre `fundo`, alinhados pelo centro.
+fn sobrepor(topo: Image, fundo: Image) -> Image {
+  image.overlay(topo, fundo)
+}
+
+fn ao_lado(esquerda: Image, direita: Image) -> Image {
+  image.beside(esquerda, direita)
+}
+
+fn empilhar(cima: Image, baixo: Image) -> Image {
+  image.above(cima, baixo)
+}
+
+fn imagem_vazia() -> Image {
+  image.empty
+}
+
+// ----------------------------------------------------------------------
+// Desenhos
+// ----------------------------------------------------------------------
+
+/// Desenha uma peça (sem a casa).
+pub fn desenhar_peca(dono: Cor) -> Image {
+  case dono {
+    Brancas -> imagem_peca_brancas()
+    Pretas -> imagem_peca_pretas()
+  }
+}
+
+/// Desenha uma casa com a peça que está nela (se houver).
+pub fn desenhar_casa(
+  pos: Posicao,
+  pecas: List(Peca),
+) -> Image {
+  let fundo = case casa_escura(pos) {
+    True -> fundo_escuro()
+    False -> fundo_claro()
+  }
+  let com_peca = case peca_em(pecas, pos) {
+    Some(peca) -> sobrepor(desenhar_peca(peca.dono), fundo)
+    None -> fundo
+  }
+}
+
+/// Índices de linha ou coluna na ordem em que o jogador os vê: as Brancas
+/// veem o tabuleiro como ele é; as Pretas o veem girado em 180 graus, então
+/// a ordem é invertida (tanto nas linhas quanto nas colunas).
+pub fn ordem_de_visao(jogador: Cor) -> List(Int) {
+  let normal = sequencia(0, tamanho - 1)
+  case jogador {
+    Brancas -> normal
+    Pretas -> list.reverse(normal)
+  }
+}
+
+pub fn ordem_de_visao_examples() {
+  check.eq(ordem_de_visao(Brancas), [0, 1, 2, 3, 4, 5, 6, 7])
+  check.eq(ordem_de_visao(Pretas), [7, 6, 5, 4, 3, 2, 1, 0])
+}
+
+/// Desenha uma linha do tabuleiro, percorrendo as colunas na ordem dada.
+pub fn desenhar_linha(
+  lin: Int,
+  colunas: List(Int),
+  pecas: List(Peca)
+) -> Image {
+  colunas
+  |> list.map(fn(col) {
+    desenhar_casa(
+      Posicao(lin, col),
+      pecas
+    )
+  })
+  |> list.fold(imagem_vazia(), ao_lado)
+}
+
+/// Desenha o tabuleiro inteiro do ponto de vista de `jogador`.
+pub fn desenhar_tabuleiro(
+  pecas: List(Peca),
+  jogador: Cor,
+) -> Image {
+  let ordem = ordem_de_visao(jogador)
+  ordem
+  |> list.map(fn(lin) {
+    desenhar_linha(
+      lin,
+      ordem,
+      pecas
+    )
+  })
+  |> list.fold(imagem_vazia(), empilhar)
 }
