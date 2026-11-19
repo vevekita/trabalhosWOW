@@ -162,6 +162,39 @@ pub fn sequencia_examples() {
   check.eq(sequencia(0, 4), [0, 1, 2, 3, 4])
 }
 
+/// Devolve True se a casa é escura (só as casas escuras são usadas no jogo).
+pub fn casa_escura(pos: Posicao) -> Bool {
+  { pos.lin + pos.col } % 2 == 1
+}
+
+pub fn casa_escura_examples() {
+  check.eq(casa_escura(Posicao(0, 0)), False)
+  check.eq(casa_escura(Posicao(0, 1)), True)
+  check.eq(casa_escura(Posicao(1, 0)), True)
+  check.eq(casa_escura(Posicao(7, 7)), False)
+}
+
+/// Produz as peças de um jogador, uma para cada casa escura das linhas dadas.
+pub fn pecas_nas_linhas(jogador: Cor, linhas: List(Int)) -> List(Peca) {
+  linhas
+  |> list.flat_map(fn(lin) {
+    sequencia(0, tamanho - 1)
+    |> list.map(fn(col) { Posicao(lin, col) })
+    |> list.filter(casa_escura)
+    |> list.map(fn(pos) { Peca(jogador, pos) })
+  })
+}
+
+pub fn pecas_nas_linhas_examples() {
+  check.eq(pecas_nas_linhas(Pretas, [0]), [
+    Peca(Pretas, Posicao(0, 1)),
+    Peca(Pretas, Posicao(0, 3)),
+    Peca(Pretas, Posicao(0, 5)),
+    Peca(Pretas, Posicao(0, 7)),
+  ])
+  check.eq(pecas_nas_linhas(Brancas, []), [])
+}
+
 /// Cria uma partida para *num_jogadores* jogadores, cada um no seu canto,
 /// sem pontos e sem frutas na grade.
 pub fn nova_partida() -> Partida {
