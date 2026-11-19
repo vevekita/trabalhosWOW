@@ -195,6 +195,61 @@ pub fn pecas_nas_linhas_examples() {
   check.eq(pecas_nas_linhas(Brancas, []), [])
 }
 
+/// Posição inicial: Pretas nas linhas 0 a 2 (topo), Brancas nas linhas 5 a 7.
+pub fn pecas_iniciais() -> List(Peca) {
+  list.append(
+    pecas_nas_linhas(Pretas, [0, 1, 2]),
+    pecas_nas_linhas(Brancas, [5, 6, 7]),
+  )
+}
+
+pub fn pecas_iniciais_examples() {
+  let pecas = pecas_iniciais()
+  check.eq(list.length(pecas), 24)
+  check.eq(list.length(list.filter(pecas, fn(p) { p.dono == Brancas })), 12)
+  check.eq(list.length(list.filter(pecas, fn(p) { p.dono == Pretas })), 12)
+}
+
+/// Devolve a peça que está na posição dada, se houver.
+pub fn peca_em(pecas: List(Peca), pos: Posicao) -> Option(Peca) {
+  case list.find(pecas, fn(p) { p.posicao == pos }) {
+    Ok(peca) -> Some(peca)
+    Error(_) -> None
+  }
+}
+
+pub fn peca_em_examples() {
+  let pecas = pecas_iniciais()
+  check.eq(peca_em(pecas, Posicao(0, 1)), Some(Peca(Pretas, Posicao(0, 1))))
+  check.eq(peca_em(pecas, Posicao(7, 0)), Some(Peca(Brancas, Posicao(7, 0))))
+  check.eq(peca_em(pecas, Posicao(3, 2)), None)
+  check.eq(peca_em([], Posicao(0, 1)), None)
+}
+
+/// Devolve True se a posição está dentro do tabuleiro.
+pub fn dentro_do_tabuleiro(pos: Posicao) -> Bool {
+  pos.lin >= 0 && pos.lin < dimensao && pos.col >= 0 && pos.col < dimensao
+}
+
+pub fn dentro_do_tabuleiro_examples() {
+  check.eq(dentro_do_tabuleiro(Posicao(0, 0)), True)
+  check.eq(dentro_do_tabuleiro(Posicao(7, 7)), True)
+  check.eq(dentro_do_tabuleiro(Posicao(-1, 3)), False)
+  check.eq(dentro_do_tabuleiro(Posicao(3, 8)), False)
+}
+
+/// Devolve True se a posição está dentro do tabuleiro e sem peça.
+pub fn casa_livre(pecas: List(Peca), pos: Posicao) -> Bool {
+  dentro_do_tabuleiro(pos) && peca_em(pecas, pos) == None
+}
+
+pub fn casa_livre_examples() {
+  let pecas = pecas_iniciais()
+  check.eq(casa_livre(pecas, Posicao(3, 2)), True)
+  check.eq(casa_livre(pecas, Posicao(0, 1)), False)
+  check.eq(casa_livre(pecas, Posicao(8, 1)), False)
+}
+
 /// Cria uma partida para *num_jogadores* jogadores, cada um no seu canto,
 /// sem pontos e sem frutas na grade.
 pub fn nova_partida() -> Partida {
