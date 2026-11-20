@@ -6,13 +6,12 @@
  *   stb_image_write.h  (gravacao do PNG de saida, opcional)
  *   Download: https://github.com/nothings/stb
  *
- * Compilar: gcc -O2 -pthread imagem.c -o imagem -lm
+ * Compilar: gcc -pthread imagem.c -o imagem -lm
  * Usar:     ./imagem <seq|par> <arquivo.png> <num_threads> [repeticoes] [saida.png]
  * Exemplo:  ./imagem seq imagens/foto.png 1 5
  *           ./imagem par imagens/foto.png 4 5 resultado.png
  *
- * Saida (CSV): versao,arquivo,largura,altura,threads,execucao,tempo_s,resultado
- *   resultado = "ref" (sequencial) ou "IGUAL"/"DIFERENTE" (paralelo vs sequencial)
+ * Saida (CSV): versao,arquivo,largura,altura,threads,execucao,tempo_s
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,8 +124,7 @@ int main(int argc, char **argv) {
 
     size_t bytes = (size_t)W * H;
     out = malloc(bytes);
-    unsigned char *ref = eh_seq ? NULL : malloc(bytes);
-    if (!out || (!eh_seq && !ref)) {
+    if (!out) {
         fprintf(stderr, "Sem memoria.\n");
         return 1;
     }
@@ -135,23 +133,14 @@ int main(int argc, char **argv) {
     const char *base = strrchr(arquivo, '/');
     base = base ? base + 1 : arquivo;
 
-    if (eh_seq) {
-        for (int r = 1; r <= reps; r++) {
-            memcpy(out, in, bytes);   /* bordas = entrada; fora da medicao */
+    for (int r = 1; r <= reps; r++) {
+        memcpy(out, in, bytes);   /* bordas = entrada; fora da medicao */
+        if (eh_seq) {
             double tempo = rodar_seq();
-            printf("seq,%s,%d,%d,1,%d,%.6f,ref\n", base, W, H, r, tempo);
-        }
-    } else {
-        /* Referencia sequencial calculada uma vez, fora da medicao */
-        memcpy(out, in, bytes);
-        filtrar_linhas(1, H - 1);
-        memcpy(ref, out, bytes);
-
-        for (int r = 1; r <= reps; r++) {
-            memcpy(out, in, bytes);
+            printf("seq,%s,%d,%d,1,%d,%.6f\n", base, W, H, r, tempo);
+        } else {
             double tempo = rodar_par(nt);
-            int igual = (memcmp(out, ref, bytes) == 0);
-            printf("par,%s,%d,%d,%d,%d,%.6f,%s\n", base, W, H, nt, r, tempo, igual ? "IGUAL" : "DIFERENTE");
+            printf("par,%s,%d,%d,%d,%d,%.6f\n", base, W, H, nt, r, tempo);
         }
     }
 
@@ -162,6 +151,5 @@ int main(int argc, char **argv) {
 
     stbi_image_free(in);
     free(out);
-    free(ref);
     return 0;
 }
