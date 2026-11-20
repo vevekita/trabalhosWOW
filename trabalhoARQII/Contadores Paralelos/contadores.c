@@ -5,7 +5,7 @@
  * Usar:     ./contadores <seq|A|B> <num_threads> [repeticoes]
  * Exemplo:  ./contadores A 4 5
  *
- * Saida (CSV): versao,threads,execucao,tempo_s
+ * Saida (CSV): versao,threads,execucao,tempo_s,total
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,86 +13,99 @@
 #include <pthread.h>
 #include <time.h>
 
-#define TOTAL 100000000LL   /* 100 milhoes de incrementos */
+#define TOTAL_INCREMENTOS 100000000LL   /* 100 milhoes de incrementos */
 
 static long long contador_compartilhado = 0;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t trava_contador = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct {
-    long long inicio;   /* primeiro incremento desta thread */
-    long long fim;      /* ultimo + 1 */
-    long long local;    /* resultado parcial (versao B) */
-} Arg;
+    long long indice_inicio;    /* primeiro incremento desta thread */
+    long long indice_fim;       /* ultimo incremento + 1 */
+    long long resultado_local;  /* resultado parcial (versao B) */
+} DadosThread;
 
-/* Tempo em segundos, com relogio monotonico */
-static double agora(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec + ts.tv_nsec / 1e9;
+/* Retorna o tempo atual em segundos */
+static double obter_tempo_atual(void) {
+    struct timespec relogio;
+    clock_gettime(CLOCK_MONOTONIC, &relogio);
+    return relogio.tv_sec + relogio.tv_nsec / 1e9;
 }
 
-/* ---------- Sequencial ---------- */
-static double rodar_seq(void) {
-    double t0 = agora();
-    long long c = 0;
-    for (long long i = 0; i < TOTAL; i++)
-        c++;
-    double t1 = agora();
-    return t1 - t0;
+/* ---------- Versao Sequencial ---------- */
+static double executar_sequencial(long long *total_final) {
+    double tempo_inicio = obter_tempo_atual();
+    long long contador_local = 0;
+    for (long long i = 0; i < TOTAL_INCREMENTOS; i++) {
+        contador_local++;
+    }
+    double tempo_fim = obter_tempo_atual();
+    *total_final = contador_local;
+    return tempo_fim - tempo_inicio;
 }
 
-/* ---------- Versao A: contador compartilhado + mutex ---------- */
-static void *thread_a(void *p) {
-    Arg *a = (Arg *)p;
-    long long inicio = a->inicio, fim = a->fim;   /* copia para variaveis locais */
+/* ---------- Versao A: contador compartilhado protegido por mutex ---------- */
+static void *tarefa_contador_mutex(void *parametro) {
+    DadosThread *dados = (DadosThread *)parametro;
+    long long inicio = dados->indice_inicio;
+    long long fim = dados->indice_fim;
+
     for (long long i = inicio; i < fim; i++) {
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&trava_contador);
         contador_compartilhado++;
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&trava_contador);
     }
     return NULL;
 }
 
 /* ---------- Versao B: contador local por thread ---------- */
-static void *thread_b(void *p) {
-    Arg *a = (Arg *)p;
-    long long inicio = a->inicio, fim = a->fim;
-    long long c = 0;              /* contador local (pilha da thread) */
-    for (long long i = inicio; i < fim; i++)
-        c++;
-    a->local = c;                 /* escreve o resultado uma unica vez */
+static void *tarefa_contador_local(void *parametro) {
+    DadosThread *dados = (DadosThread *)parametro;
+    long long inicio = dados->indice_inicio;
+    long long fim = dados->indice_fim;
+    long long contador_local = 0;
+
+    for (long long i = inicio; i < fim; i++) {
+        contador_local++;
+    }
+    dados->resultado_local = contador_local;
     return NULL;
 }
 
-/* Executa a versao paralela. modo: 'A' ou 'B'. Retorna o tempo em segundos. */
-static double rodar_par(char modo, int nt) {
-    pthread_t th[nt];
-    Arg args[nt];
-    long long bloco = TOTAL / nt;
+/* Executa a versao paralela ('A' ou 'B') e retorna o tempo total em segundos */
+static double executar_paralelo(char modo, int num_threads, long long *total_final) {
+    pthread_t threads[num_threads];
+    DadosThread dados_threads[num_threads];
+    long long tamanho_bloco = TOTAL_INCREMENTOS / num_threads;
 
     contador_compartilhado = 0;
 
-    double t0 = agora();   /* inclui criacao, distribuicao, join e soma final */
+    double tempo_inicio = obter_tempo_atual();
 
-    for (int t = 0; t < nt; t++) {
-        args[t].inicio = (long long)t * bloco;
-        args[t].fim    = (t == nt - 1) ? TOTAL : (long long)(t + 1) * bloco;
-        args[t].local  = 0;
-        pthread_create(&th[t], NULL, (modo == 'A') ? thread_a : thread_b, &args[t]);
+    for (int id = 0; id < num_threads; id++) {
+        dados_threads[id].indice_inicio   = (long long)id * tamanho_bloco;
+        dados_threads[id].indice_fim      = (id == num_threads - 1) ? TOTAL_INCREMENTOS : (long long)(id + 1) * tamanho_bloco;
+        dados_threads[id].resultado_local = 0;
+
+        void *(*funcao_thread)(void *) = (modo == 'A') ? tarefa_contador_mutex : tarefa_contador_local;
+        pthread_create(&threads[id], NULL, funcao_thread, &dados_threads[id]);
     }
-    for (int t = 0; t < nt; t++)
-        pthread_join(th[t], NULL);
 
-    long long total = 0;
+    for (int id = 0; id < num_threads; id++) {
+        pthread_join(threads[id], NULL);
+    }
+
+    long long soma_total = 0;
     if (modo == 'A') {
-        total = contador_compartilhado;
+        soma_total = contador_compartilhado;
     } else {
-        for (int t = 0; t < nt; t++)
-            total += args[t].local;
+        for (int id = 0; id < num_threads; id++) {
+            soma_total += dados_threads[id].resultado_local;
+        }
     }
 
-    double t1 = agora();
-    return t1 - t0;
+    double tempo_fim = obter_tempo_atual();
+    *total_final = soma_total;
+    return tempo_fim - tempo_inicio;
 }
 
 int main(int argc, char **argv) {
@@ -102,19 +115,28 @@ int main(int argc, char **argv) {
     }
 
     const char *versao = argv[1];
-    int nt = atoi(argv[2]);
-    int reps = (argc >= 4) ? atoi(argv[3]) : 5;
+    int num_threads = atoi(argv[2]);
+    int repeticoes = (argc >= 4) ? atoi(argv[3]) : 5;
 
-    if (nt < 1 || reps < 1 || (strcmp(versao, "seq") != 0 && strcmp(versao, "A") != 0 && strcmp(versao, "B") != 0)) {
+    int versao_valida = (strcmp(versao, "seq") == 0 || strcmp(versao, "A") == 0 || strcmp(versao, "B") == 0);
+    if (num_threads < 1 || repeticoes < 1 || !versao_valida) {
         fprintf(stderr, "Parametros invalidos.\n");
         return 1;
     }
 
-    int eh_seq = (strcmp(versao, "seq") == 0);
+    for (int exec = 1; exec <= repeticoes; exec++) {
+        long long total_obtido = 0;
+        double tempo_execucao;
 
-    for (int r = 1; r <= reps; r++) {
-        double tempo = eh_seq ? rodar_seq() : rodar_par(versao[0], nt);
-        printf("%s,%d,%d,%.6f\n", versao, eh_seq ? 1 : nt, r, tempo);
+        if (strcmp(versao, "seq") == 0) {
+            tempo_execucao = executar_sequencial(&total_obtido);
+        } else {
+            tempo_execucao = executar_paralelo(versao[0], num_threads, &total_obtido);
+        }
+
+        int threads_usadas = (strcmp(versao, "seq") == 0) ? 1 : num_threads;
+        printf("%s,%d,%d,%.6f,%lld\n",
+               versao, threads_usadas, exec, tempo_execucao, total_obtido);
     }
     return 0;
 }
