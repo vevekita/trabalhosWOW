@@ -1,15 +1,9 @@
 /*
  * Filtro de media 3x3 em imagem em escala de cinza: sequencial e paralelo (pthreads)
  *
- * Depende de duas bibliotecas de um unico arquivo .h (colocar na mesma pasta):
- *   stb_image.h        (leitura de PNG)
- *   stb_image_write.h  (gravacao do PNG de saida, opcional)
- *   Download: https://github.com/nothings/stb
- *
- * Compilar: gcc -pthread imagem.c -o imagem -lm
- * Usar:     ./imagem <seq|par> <arquivo.png> <num_threads> [repeticoes] [saida.png]
- * Exemplo:  ./imagem seq imagens/foto.png 1 5
- *           ./imagem par imagens/foto.png 4 5 resultado.png
+ * Depende de stb_image.h e stb_image_write.h na mesma pasta.
+ * Compilar: gcc -O2 -pthread filtro.c -o filtro -lm
+ * Usar:     ./filtro <seq|par> <arquivo.png> <num_threads> [repeticoes] [saida.png]
  *
  * Saida (CSV): versao,arquivo,largura,altura,threads,execucao,tempo_s
  */
@@ -25,70 +19,74 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-static int W, H;                 /* largura e altura */
-static unsigned char *in, *out;  /* imagem de entrada e de saida (W*H bytes) */
+static int largura, altura;
+static unsigned char *imagem_entrada, *imagem_saida;
 
 typedef struct {
-    int linha_ini;   /* primeira linha da imagem desta thread */
-    int linha_fim;   /* ultima linha + 1 */
-} Arg;
+    int linha_inicio;   /* primeira linha da imagem desta thread */
+    int linha_fim;      /* ultima linha + 1 */
+} DadosThread;
 
-/* Tempo em segundos, com relogio monotonico */
-static double agora(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec + ts.tv_nsec / 1e9;
+/* Retorna o tempo atual em segundos */
+static double obter_tempo_atual(void) {
+    struct timespec relogio;
+    clock_gettime(CLOCK_MONOTONIC, &relogio);
+    return relogio.tv_sec + relogio.tv_nsec / 1e9;
 }
 
-/* Aplica o filtro de media 3x3 nas linhas [ini, fim) da imagem.
- * Le de 'in' (incluindo linhas vizinhas) e escreve so em 'out' nas proprias linhas.
- * Linhas/colunas de borda nao sao calculadas (permanecem iguais a entrada). */
-static void filtrar_linhas(int ini, int fim) {
-    for (int y = ini; y < fim; y++) {
-        for (int x = 1; x < W - 1; x++) {
-            int soma = 0;
-            for (int dy = -1; dy <= 1; dy++)
-                for (int dx = -1; dx <= 1; dx++)
-                    soma += in[(y + dy) * W + (x + dx)];
-            out[y * W + x] = (unsigned char)(soma / 9);   /* divisao inteira */
+/* Aplica o filtro de media 3x3 nas linhas [linha_inicio, linha_fim).
+ * Pixels das bordas nao sao alterados. */
+static void aplicar_filtro_linhas(int linha_inicio, int linha_fim) {
+    for (int linha = linha_inicio; linha < linha_fim; linha++) {
+        for (int coluna = 1; coluna < largura - 1; coluna++) {
+            int soma_vizinhos = 0;
+            for (int desloc_y = -1; desloc_y <= 1; desloc_y++) {
+                for (int desloc_x = -1; desloc_x <= 1; desloc_x++) {
+                    soma_vizinhos += imagem_entrada[(linha + desloc_y) * largura + (coluna + desloc_x)];
+                }
+            }
+            imagem_saida[linha * largura + coluna] = (unsigned char)(soma_vizinhos / 9);
         }
     }
 }
 
-static void *thread_filtro(void *p) {
-    Arg *a = (Arg *)p;
-    filtrar_linhas(a->linha_ini, a->linha_fim);
+static void *tarefa_filtro(void *parametro) {
+    DadosThread *dados = (DadosThread *)parametro;
+    aplicar_filtro_linhas(dados->linha_inicio, dados->linha_fim);
     return NULL;
 }
 
-static double rodar_seq(void) {
-    double t0 = agora();
-    filtrar_linhas(1, H - 1);
-    double t1 = agora();
-    return t1 - t0;
+static double executar_sequencial(void) {
+    double tempo_inicio = obter_tempo_atual();
+    aplicar_filtro_linhas(1, altura - 1);
+    double tempo_fim = obter_tempo_atual();
+    return tempo_fim - tempo_inicio;
 }
 
-static double rodar_par(int nt) {
-    pthread_t th[nt];
-    Arg args[nt];
-    int interiores = H - 2;            /* linhas que realmente sao filtradas: 1 .. H-2 */
-    int base = interiores / nt, resto = interiores % nt;
-    int linha = 1;
+static double executar_paralelo(int num_threads) {
+    pthread_t threads[num_threads];
+    DadosThread dados_threads[num_threads];
+    int linhas_internas = altura - 2;   /* exclui primeira e ultima linha (bordas) */
+    int linhas_base = linhas_internas / num_threads;
+    int linhas_extras = linhas_internas % num_threads;
+    int linha_atual = 1;
 
-    double t0 = agora();   /* inclui criacao, distribuicao e join */
+    double tempo_inicio = obter_tempo_atual();
 
-    for (int t = 0; t < nt; t++) {
-        int qtd = base + (t < resto ? 1 : 0);
-        args[t].linha_ini = linha;
-        args[t].linha_fim = linha + qtd;
-        linha += qtd;
-        pthread_create(&th[t], NULL, thread_filtro, &args[t]);
+    for (int id = 0; id < num_threads; id++) {
+        int qtd_linhas = linhas_base + (id < linhas_extras ? 1 : 0);
+        dados_threads[id].linha_inicio = linha_atual;
+        dados_threads[id].linha_fim    = linha_atual + qtd_linhas;
+        linha_atual += qtd_linhas;
+        pthread_create(&threads[id], NULL, tarefa_filtro, &dados_threads[id]);
     }
-    for (int t = 0; t < nt; t++)
-        pthread_join(th[t], NULL);
 
-    double t1 = agora();
-    return t1 - t0;
+    for (int id = 0; id < num_threads; id++) {
+        pthread_join(threads[id], NULL);
+    }
+
+    double tempo_fim = obter_tempo_atual();
+    return tempo_fim - tempo_inicio;
 }
 
 int main(int argc, char **argv) {
@@ -98,58 +96,59 @@ int main(int argc, char **argv) {
     }
 
     const char *versao = argv[1];
-    const char *arquivo = argv[2];
-    int nt = atoi(argv[3]);
-    int reps = (argc >= 5) ? atoi(argv[4]) : 5;
-    const char *saida = (argc >= 6) ? argv[5] : NULL;
-    int eh_seq = (strcmp(versao, "seq") == 0);
+    const char *caminho_arquivo = argv[2];
+    int num_threads = atoi(argv[3]);
+    int repeticoes = (argc >= 5) ? atoi(argv[4]) : 5;
+    const char *arquivo_saida = (argc >= 6) ? argv[5] : NULL;
+    int modo_sequencial = (strcmp(versao, "seq") == 0);
 
-    if (nt < 1 || reps < 1 || (!eh_seq && strcmp(versao, "par") != 0)) {
+    if (num_threads < 1 || repeticoes < 1 || (!modo_sequencial && strcmp(versao, "par") != 0)) {
         fprintf(stderr, "Parametros invalidos.\n");
         return 1;
     }
 
-    /* Leitura (fora da medicao). O ultimo argumento (1) forca 1 canal = escala de cinza. */
-    int canais;
-    in = stbi_load(arquivo, &W, &H, &canais, 1);
-    if (!in) {
-        fprintf(stderr, "Erro ao ler %s: %s\n", arquivo, stbi_failure_reason());
+    /* Leitura da imagem fora da medicao (1 canal = escala de cinza) */
+    int canais_originais;
+    imagem_entrada = stbi_load(caminho_arquivo, &largura, &altura, &canais_originais, 1);
+    if (!imagem_entrada) {
+        fprintf(stderr, "Erro ao ler %s: %s\n", caminho_arquivo, stbi_failure_reason());
         return 1;
     }
-    if (W < 3 || H < 3) {
+    if (largura < 3 || altura < 3) {
         fprintf(stderr, "Imagem pequena demais para o filtro 3x3.\n");
         return 1;
     }
-    if (nt > H - 2) nt = H - 2;   /* nao faz sentido ter mais threads que linhas */
+    if (num_threads > altura - 2) {
+        num_threads = altura - 2;
+    }
 
-    size_t bytes = (size_t)W * H;
-    out = malloc(bytes);
-    if (!out) {
+    size_t total_pixels = (size_t)largura * altura;
+    imagem_saida = malloc(total_pixels);
+    if (!imagem_saida) {
         fprintf(stderr, "Sem memoria.\n");
         return 1;
     }
 
-    /* nome do arquivo sem o caminho, para a coluna do CSV */
-    const char *base = strrchr(arquivo, '/');
-    base = base ? base + 1 : arquivo;
+    /* Extrai apenas o nome do arquivo para exibir na tabela */
+    const char *nome_arquivo = strrchr(caminho_arquivo, '/');
+    nome_arquivo = nome_arquivo ? nome_arquivo + 1 : caminho_arquivo;
 
-    for (int r = 1; r <= reps; r++) {
-        memcpy(out, in, bytes);   /* bordas = entrada; fora da medicao */
-        if (eh_seq) {
-            double tempo = rodar_seq();
-            printf("seq,%s,%d,%d,1,%d,%.6f\n", base, W, H, r, tempo);
-        } else {
-            double tempo = rodar_par(nt);
-            printf("par,%s,%d,%d,%d,%d,%.6f\n", base, W, H, nt, r, tempo);
+    for (int exec = 1; exec <= repeticoes; exec++) {
+        memcpy(imagem_saida, imagem_entrada, total_pixels);   /* copia bordas da imagem original */
+        double tempo_execucao = modo_sequencial ? executar_sequencial() : executar_paralelo(num_threads);
+        int threads_usadas = modo_sequencial ? 1 : num_threads;
+
+        printf("%s,%s,%d,%d,%d,%d,%.6f\n",
+               versao, nome_arquivo, largura, altura, threads_usadas, exec, tempo_execucao);
+    }
+
+    if (arquivo_saida) {
+        if (!stbi_write_png(arquivo_saida, largura, altura, 1, imagem_saida, largura)) {
+            fprintf(stderr, "Erro ao gravar %s\n", arquivo_saida);
         }
     }
 
-    if (saida) {   /* grava a ultima imagem filtrada (util para "prints" no relatorio) */
-        if (!stbi_write_png(saida, W, H, 1, out, W))
-            fprintf(stderr, "Erro ao gravar %s\n", saida);
-    }
-
-    stbi_image_free(in);
-    free(out);
+    stbi_image_free(imagem_entrada);
+    free(imagem_saida);
     return 0;
 }
