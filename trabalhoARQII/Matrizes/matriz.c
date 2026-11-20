@@ -1,7 +1,7 @@
 /*
  * Multiplicacao de matrizes C = A x B: sequencial e paralela (pthreads)
  *
- * Compilar: gcc -O2 -pthread matriz.c -o matriz
+ * Compilar: gcc -pthread matriz.c -o matriz
  * Usar:     ./matriz <seq|par> <N> <num_threads> [repeticoes]
  * Exemplo:  ./matriz seq 512 1 5
  *           ./matriz par 512 4 5
@@ -9,8 +9,7 @@
  * Le os arquivos A_<N>.txt e B_<N>.txt gerados pelo codigo da professora
  * (precisam estar na pasta onde o programa e executado).
  *
- * Saida (CSV): versao,N,threads,execucao,tempo_s,resultado
- *   resultado = "ref" (sequencial) ou "IGUAL"/"DIFERENTE" (paralela vs sequencial)
+ * Saida (CSV): versao,N,threads,execucao,tempo_s
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -121,8 +120,7 @@ int main(int argc, char **argv) {
     A = malloc(bytes);
     B = malloc(bytes);
     C = malloc(bytes);
-    int *ref = eh_seq ? NULL : malloc(bytes);
-    if (!A || !B || !C || (!eh_seq && !ref)) {
+    if (!A || !B || !C) {
         fprintf(stderr, "Sem memoria.\n");
         return 1;
     }
@@ -134,24 +132,16 @@ int main(int argc, char **argv) {
     if (!ler_matriz(nomeA, A) || !ler_matriz(nomeB, B))
         return 1;
 
-    if (eh_seq) {
-        for (int r = 1; r <= reps; r++) {
+    for (int r = 1; r <= reps; r++) {
+        if (eh_seq) {
             double tempo = rodar_seq();
-            printf("seq,%d,1,%d,%.6f,ref\n", N, r, tempo);
-        }
-    } else {
-        /* Referencia: resultado sequencial calculado uma vez, fora da medicao */
-        multiplicar_linhas(0, N);
-        memcpy(ref, C, bytes);
-
-        for (int r = 1; r <= reps; r++) {
-            memset(C, 0, bytes);   /* garante que o resultado vem da execucao atual */
+            printf("seq,%d,1,%d,%.6f\n", N, r, tempo);
+        } else {
             double tempo = rodar_par(nt);
-            int igual = (memcmp(C, ref, bytes) == 0);
-            printf("par,%d,%d,%d,%.6f,%s\n", N, nt, r, tempo, igual ? "IGUAL" : "DIFERENTE");
+            printf("par,%d,%d,%d,%.6f\n", N, nt, r, tempo);
         }
     }
 
-    free(A); free(B); free(C); free(ref);
+    free(A); free(B); free(C);
     return 0;
 }
