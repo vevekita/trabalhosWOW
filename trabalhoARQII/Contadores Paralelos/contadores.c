@@ -1,11 +1,11 @@
 /*
  * Contadores paralelos: sequencial, A (mutex) e B (contadores locais)
  *
- * Compilar: gcc -O2 -pthread contadores.c -o contadores
+ * Compilar: gcc -pthread contadores.c -o contadores
  * Usar:     ./contadores <seq|A|B> <num_threads> [repeticoes]
  * Exemplo:  ./contadores A 4 5
  *
- * Saida (CSV): versao,threads,execucao,tempo_s,total,correto
+ * Saida (CSV): versao,threads,execucao,tempo_s
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,13 +32,12 @@ static double agora(void) {
 }
 
 /* ---------- Sequencial ---------- */
-static double rodar_seq(long long *resultado) {
+static double rodar_seq(void) {
     double t0 = agora();
-    volatile long long c = 0;   /* volatile: impede o compilador de eliminar o laco */
+    long long c = 0;
     for (long long i = 0; i < TOTAL; i++)
         c++;
     double t1 = agora();
-    *resultado = c;
     return t1 - t0;
 }
 
@@ -58,7 +57,7 @@ static void *thread_a(void *p) {
 static void *thread_b(void *p) {
     Arg *a = (Arg *)p;
     long long inicio = a->inicio, fim = a->fim;
-    volatile long long c = 0;     /* contador local (pilha da thread) */
+    long long c = 0;              /* contador local (pilha da thread) */
     for (long long i = inicio; i < fim; i++)
         c++;
     a->local = c;                 /* escreve o resultado uma unica vez */
@@ -66,7 +65,7 @@ static void *thread_b(void *p) {
 }
 
 /* Executa a versao paralela. modo: 'A' ou 'B'. Retorna o tempo em segundos. */
-static double rodar_par(char modo, int nt, long long *resultado) {
+static double rodar_par(char modo, int nt) {
     pthread_t th[nt];
     Arg args[nt];
     long long bloco = TOTAL / nt;
@@ -93,7 +92,6 @@ static double rodar_par(char modo, int nt, long long *resultado) {
     }
 
     double t1 = agora();
-    *resultado = total;
     return t1 - t0;
 }
 
@@ -112,18 +110,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    int eh_seq = (strcmp(versao, "seq") == 0);
+
     for (int r = 1; r <= reps; r++) {
-        long long resultado = 0;
-        double tempo;
-
-        if (strcmp(versao, "seq") == 0)
-            tempo = rodar_seq(&resultado);
-        else
-            tempo = rodar_par(versao[0], nt, &resultado);
-
-        printf("%s,%d,%d,%.6f,%lld,%s\n",
-               versao, strcmp(versao, "seq") == 0 ? 1 : nt, r, tempo, resultado,
-               resultado == TOTAL ? "OK" : "ERRO");
+        double tempo = eh_seq ? rodar_seq() : rodar_par(versao[0], nt);
+        printf("%s,%d,%d,%.6f\n", versao, eh_seq ? 1 : nt, r, tempo);
     }
     return 0;
 }
