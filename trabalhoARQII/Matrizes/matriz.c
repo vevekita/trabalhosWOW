@@ -1,13 +1,10 @@
 /*
  * Multiplicacao de matrizes C = A x B: sequencial e paralela (pthreads)
  *
- * Compilar: gcc -pthread matriz.c -o matriz
+ * Compilar: gcc -O2 -pthread matriz.c -o matriz
  * Usar:     ./matriz <seq|par> <N> <num_threads> [repeticoes]
  * Exemplo:  ./matriz seq 512 1 5
  *           ./matriz par 512 4 5
- *
- * Le os arquivos A_<N>.txt e B_<N>.txt gerados pelo codigo da professora
- * (precisam estar na pasta onde o programa e executado).
  *
  * Saida (CSV): versao,N,threads,execucao,tempo_s
  */
@@ -17,85 +14,89 @@
 #include <pthread.h>
 #include <time.h>
 
-static int N;
-static int *A, *B, *C;   /* matrizes N x N armazenadas em vetor (linha a linha) */
+static int ordem_matriz;
+static int *matriz_a, *matriz_b, *matriz_c;   /* matrizes N x N armazenadas em vetor linear */
 
 typedef struct {
-    int linha_ini;   /* primeira linha de C desta thread */
-    int linha_fim;   /* ultima linha + 1 */
-} Arg;
+    int linha_inicio;   /* primeira linha de C desta thread */
+    int linha_fim;      /* ultima linha + 1 */
+} DadosThread;
 
-/* Tempo em segundos, com relogio monotonico */
-static double agora(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec + ts.tv_nsec / 1e9;
+/* Retorna o tempo atual em segundos */
+static double obter_tempo_atual(void) {
+    struct timespec relogio;
+    clock_gettime(CLOCK_MONOTONIC, &relogio);
+    return relogio.tv_sec + relogio.tv_nsec / 1e9;
 }
 
-/* Leitura de uma matriz de arquivo texto (nao entra na medicao) */
-static int ler_matriz(const char *nome, int *M) {
-    FILE *f = fopen(nome, "r");
-    if (!f) {
-        fprintf(stderr, "Erro ao abrir %s\n", nome);
+/* Leitura de uma matriz de arquivo texto (fora da medicao) */
+static int carregar_matriz(const char *nome_arquivo, int *matriz_destino) {
+    FILE *arquivo = fopen(nome_arquivo, "r");
+    if (!arquivo) {
+        fprintf(stderr, "Erro ao abrir %s\n", nome_arquivo);
         return 0;
     }
-    for (long i = 0; i < (long)N * N; i++) {
-        if (fscanf(f, "%d", &M[i]) != 1) {
-            fprintf(stderr, "Erro de leitura em %s (elemento %ld)\n", nome, i);
-            fclose(f);
+    long total_elementos = (long)ordem_matriz * ordem_matriz;
+    for (long idx = 0; idx < total_elementos; idx++) {
+        if (fscanf(arquivo, "%d", &matriz_destino[idx]) != 1) {
+            fprintf(stderr, "Erro de leitura em %s (elemento %ld)\n", nome_arquivo, idx);
+            fclose(arquivo);
             return 0;
         }
     }
-    fclose(f);
+    fclose(arquivo);
     return 1;
 }
 
-/* Calcula as linhas [ini, fim) de C. Serve para a versao sequencial (todas as
- * linhas) e para cada thread da versao paralela (so as suas linhas). */
-static void multiplicar_linhas(int ini, int fim) {
-    for (int i = ini; i < fim; i++) {
-        for (int j = 0; j < N; j++) {
-            int soma = 0;
-            for (int k = 0; k < N; k++)
-                soma += A[i * N + k] * B[k * N + j];
-            C[i * N + j] = soma;
+/* Calcula as linhas [linha_inicio, linha_fim) da matriz C */
+static void multiplicar_intervalo_linhas(int linha_inicio, int linha_fim) {
+    for (int linha = linha_inicio; linha < linha_fim; linha++) {
+        for (int coluna = 0; coluna < ordem_matriz; coluna++) {
+            int soma_produto = 0;
+            for (int k = 0; k < ordem_matriz; k++) {
+                soma_produto += matriz_a[linha * ordem_matriz + k] * matriz_b[k * ordem_matriz + coluna];
+            }
+            matriz_c[linha * ordem_matriz + coluna] = soma_produto;
         }
     }
 }
 
-static void *thread_mult(void *p) {
-    Arg *a = (Arg *)p;
-    multiplicar_linhas(a->linha_ini, a->linha_fim);
+static void *tarefa_multiplicacao(void *parametro) {
+    DadosThread *dados = (DadosThread *)parametro;
+    multiplicar_intervalo_linhas(dados->linha_inicio, dados->linha_fim);
     return NULL;
 }
 
-static double rodar_seq(void) {
-    double t0 = agora();
-    multiplicar_linhas(0, N);
-    double t1 = agora();
-    return t1 - t0;
+static double executar_sequencial(void) {
+    double tempo_inicio = obter_tempo_atual();
+    multiplicar_intervalo_linhas(0, ordem_matriz);
+    double tempo_fim = obter_tempo_atual();
+    return tempo_fim - tempo_inicio;
 }
 
-static double rodar_par(int nt) {
-    pthread_t th[nt];
-    Arg args[nt];
-    int base = N / nt, resto = N % nt;
-    int linha = 0;
+static double executar_paralelo(int num_threads) {
+    pthread_t threads[num_threads];
+    DadosThread dados_threads[num_threads];
+    int linhas_base = ordem_matriz / num_threads;
+    int linhas_extras = ordem_matriz % num_threads;
+    int linha_atual = 0;
 
-    double t0 = agora();   /* inclui criacao, distribuicao e join */
+    double tempo_inicio = obter_tempo_atual();
 
-    for (int t = 0; t < nt; t++) {
-        int qtd = base + (t < resto ? 1 : 0);   /* reparte tambem o resto */
-        args[t].linha_ini = linha;
-        args[t].linha_fim = linha + qtd;
-        linha += qtd;
-        pthread_create(&th[t], NULL, thread_mult, &args[t]);
+    for (int id = 0; id < num_threads; id++) {
+        int qtd_linhas = linhas_base + (id < linhas_extras ? 1 : 0);
+        dados_threads[id].linha_inicio = linha_atual;
+        dados_threads[id].linha_fim    = linha_atual + qtd_linhas;
+        linha_atual += qtd_linhas;
+        pthread_create(&threads[id], NULL, tarefa_multiplicacao, &dados_threads[id]);
     }
-    for (int t = 0; t < nt; t++)
-        pthread_join(th[t], NULL);
 
-    double t1 = agora();
-    return t1 - t0;
+    for (int id = 0; id < num_threads; id++) {
+        pthread_join(threads[id], NULL);
+    }
+
+    double tempo_fim = obter_tempo_atual();
+    return tempo_fim - tempo_inicio;
 }
 
 int main(int argc, char **argv) {
@@ -105,43 +106,47 @@ int main(int argc, char **argv) {
     }
 
     const char *versao = argv[1];
-    N = atoi(argv[2]);
-    int nt = atoi(argv[3]);
-    int reps = (argc >= 5) ? atoi(argv[4]) : 5;
-    int eh_seq = (strcmp(versao, "seq") == 0);
+    ordem_matriz = atoi(argv[2]);
+    int num_threads = atoi(argv[3]);
+    int repeticoes = (argc >= 5) ? atoi(argv[4]) : 5;
+    int modo_sequencial = (strcmp(versao, "seq") == 0);
 
-    if (N < 1 || nt < 1 || reps < 1 || (!eh_seq && strcmp(versao, "par") != 0)) {
+    if (ordem_matriz < 1 || num_threads < 1 || repeticoes < 1 || (!modo_sequencial && strcmp(versao, "par") != 0)) {
         fprintf(stderr, "Parametros invalidos.\n");
         return 1;
     }
-    if (nt > N) nt = N;   /* nao faz sentido ter mais threads que linhas */
+    if (num_threads > ordem_matriz) {
+        num_threads = ordem_matriz;
+    }
 
-    size_t bytes = (size_t)N * N * sizeof(int);
-    A = malloc(bytes);
-    B = malloc(bytes);
-    C = malloc(bytes);
-    if (!A || !B || !C) {
+    size_t tamanho_bytes = (size_t)ordem_matriz * ordem_matriz * sizeof(int);
+    matriz_a = malloc(tamanho_bytes);
+    matriz_b = malloc(tamanho_bytes);
+    matriz_c = malloc(tamanho_bytes);
+
+    if (!matriz_a || !matriz_b || !matriz_c) {
         fprintf(stderr, "Sem memoria.\n");
         return 1;
     }
-    memset(C, 0, bytes);   /* ja "toca" as paginas de C fora da medicao */
 
-    char nomeA[64], nomeB[64];
-    snprintf(nomeA, sizeof nomeA, "A_%d.txt", N);
-    snprintf(nomeB, sizeof nomeB, "B_%d.txt", N);
-    if (!ler_matriz(nomeA, A) || !ler_matriz(nomeB, B))
+    char arquivo_a[64], arquivo_b[64];
+    snprintf(arquivo_a, sizeof arquivo_a, "A_%d.txt", ordem_matriz);
+    snprintf(arquivo_b, sizeof arquivo_b, "B_%d.txt", ordem_matriz);
+    if (!carregar_matriz(arquivo_a, matriz_a) || !carregar_matriz(arquivo_b, matriz_b)) {
         return 1;
-
-    for (int r = 1; r <= reps; r++) {
-        if (eh_seq) {
-            double tempo = rodar_seq();
-            printf("seq,%d,1,%d,%.6f\n", N, r, tempo);
-        } else {
-            double tempo = rodar_par(nt);
-            printf("par,%d,%d,%d,%.6f\n", N, nt, r, tempo);
-        }
     }
 
-    free(A); free(B); free(C);
+    for (int exec = 1; exec <= repeticoes; exec++) {
+        memset(matriz_c, 0, tamanho_bytes);
+        double tempo_execucao = modo_sequencial ? executar_sequencial() : executar_paralelo(num_threads);
+        int threads_usadas = modo_sequencial ? 1 : num_threads;
+
+        printf("%s,%d,%d,%d,%.6f\n",
+               versao, ordem_matriz, threads_usadas, exec, tempo_execucao);
+    }
+
+    free(matriz_a);
+    free(matriz_b);
+    free(matriz_c);
     return 0;
 }
