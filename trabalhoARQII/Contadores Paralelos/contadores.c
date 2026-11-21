@@ -2,8 +2,9 @@
  * Contadores paralelos: sequencial, A (mutex) e B (contador local)
  *
  * Compilar: gcc -pthread contadores.c -o contadores
- * Usar: ./contadores <seq|A|B> <num_threads> [repeticoes]
+ * Usar: ./contadores <seq|A|B> <num_threads> [repetições]
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -79,8 +80,8 @@ static double executar_paralelo(char modo, int num_threads, long long *total_fin
     double tempo_inicio = obter_tempo_atual();
 
     for (int id = 0; id < num_threads; id++) {
-        dados_threads[id].indice_inicio   = (long long)id * tamanho_bloco;
-        dados_threads[id].indice_fim      = (id == num_threads - 1) ? TOTAL_INCREMENTOS : (long long)(id + 1) * tamanho_bloco;
+        dados_threads[id].indice_inicio = (long long)id * tamanho_bloco;
+        dados_threads[id].indice_fim = (id == num_threads - 1) ? TOTAL_INCREMENTOS : (long long)(id + 1) * tamanho_bloco;
         dados_threads[id].resultado_local = 0;
 
         void *(*funcao_thread)(void *) = (modo == 'A') ? tarefa_contador_mutex : tarefa_contador_local;
@@ -117,7 +118,7 @@ int main(int argc, char **argv) {
 
     int versao_valida = (strcmp(versao, "seq") == 0 || strcmp(versao, "A") == 0 || strcmp(versao, "B") == 0);
     if (num_threads < 1 || repeticoes < 1 || !versao_valida) {
-        fprintf(stderr, "Parâmetros invalidos.\n");
+        fprintf(stderr, "Parâmetros inválidos.\n");
         return 1;
     }
 
