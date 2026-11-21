@@ -1,11 +1,8 @@
 /*
- * Contadores paralelos: sequencial, A (mutex) e B (contadores locais)
+ * Contadores paralelos: sequencial, A (mutex) e B (contador local)
  *
  * Compilar: gcc -pthread contadores.c -o contadores
- * Usar:     ./contadores <seq|A|B> <num_threads> [repeticoes]
- * Exemplo:  ./contadores A 4 5
- *
- * Saida (CSV): versao,threads,execucao,tempo_s,total
+ * Usar: ./contadores <seq|A|B> <num_threads> [repeticoes]
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,15 +10,15 @@
 #include <pthread.h>
 #include <time.h>
 
-#define TOTAL_INCREMENTOS 100000000LL   /* 100 milhoes de incrementos */
+#define TOTAL_INCREMENTOS 100000000LL   /* 100 milhões de incrementos */
 
 static long long contador_compartilhado = 0;
 static pthread_mutex_t trava_contador = PTHREAD_MUTEX_INITIALIZER;
 
 typedef struct {
-    long long indice_inicio;    /* primeiro incremento desta thread */
-    long long indice_fim;       /* ultimo incremento + 1 */
-    long long resultado_local;  /* resultado parcial (versao B) */
+    long long indice_inicio;
+    long long indice_fim;
+    long long resultado_local;
 } DadosThread;
 
 /* Retorna o tempo atual em segundos */
@@ -31,7 +28,7 @@ static double obter_tempo_atual(void) {
     return relogio.tv_sec + relogio.tv_nsec / 1e9;
 }
 
-/* ---------- Versao Sequencial ---------- */
+/* Contador para execução sequencial */
 static double executar_sequencial(long long *total_final) {
     double tempo_inicio = obter_tempo_atual();
     long long contador_local = 0;
@@ -43,7 +40,7 @@ static double executar_sequencial(long long *total_final) {
     return tempo_fim - tempo_inicio;
 }
 
-/* ---------- Versao A: contador compartilhado protegido por mutex ---------- */
+/* Contador com mutex */
 static void *tarefa_contador_mutex(void *parametro) {
     DadosThread *dados = (DadosThread *)parametro;
     long long inicio = dados->indice_inicio;
@@ -57,7 +54,7 @@ static void *tarefa_contador_mutex(void *parametro) {
     return NULL;
 }
 
-/* ---------- Versao B: contador local por thread ---------- */
+/* Contador local */
 static void *tarefa_contador_local(void *parametro) {
     DadosThread *dados = (DadosThread *)parametro;
     long long inicio = dados->indice_inicio;
@@ -71,7 +68,7 @@ static void *tarefa_contador_local(void *parametro) {
     return NULL;
 }
 
-/* Executa a versao paralela ('A' ou 'B') e retorna o tempo total em segundos */
+/* Executa a versão paralela ('A' ou 'B') e retorna o tempo total em segundos */
 static double executar_paralelo(char modo, int num_threads, long long *total_final) {
     pthread_t threads[num_threads];
     DadosThread dados_threads[num_threads];
@@ -120,7 +117,7 @@ int main(int argc, char **argv) {
 
     int versao_valida = (strcmp(versao, "seq") == 0 || strcmp(versao, "A") == 0 || strcmp(versao, "B") == 0);
     if (num_threads < 1 || repeticoes < 1 || !versao_valida) {
-        fprintf(stderr, "Parametros invalidos.\n");
+        fprintf(stderr, "Parâmetros invalidos.\n");
         return 1;
     }
 
@@ -135,8 +132,7 @@ int main(int argc, char **argv) {
         }
 
         int threads_usadas = (strcmp(versao, "seq") == 0) ? 1 : num_threads;
-        printf("%s,%d,%d,%.6f,%lld\n",
-               versao, threads_usadas, exec, tempo_execucao, total_obtido);
+        printf("%s, %d, %d, %.6f, %lld\n", versao, threads_usadas, exec, tempo_execucao, total_obtido);
     }
     return 0;
 }
