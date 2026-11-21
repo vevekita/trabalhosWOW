@@ -1,12 +1,9 @@
 /*
- * Filtro de media 3x3 em imagem em escala de cinza: sequencial e paralelo (pthreads)
- *
- * Depende de stb_image.h e stb_image_write.h na mesma pasta.
- * Compilar: gcc -O2 -pthread filtro.c -o filtro -lm
- * Usar:     ./filtro <seq|par> <arquivo.png> <num_threads> [repeticoes] [saida.png]
- *
- * Saida (CSV): versao,arquivo,largura,altura,threads,execucao,tempo_s
+ * Filtro de média 3x3 em imagem em escala de cinza: sequencial e paralelo (pthreads)
+ * Compilar: gcc -pthread filtro.c -o filtro -lm
+ * Usar: ./filtro <seq|par> <arquivo.png> <num_threads> [repetições] [saída.png]
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,8 +20,8 @@ static int largura, altura;
 static unsigned char *imagem_entrada, *imagem_saida;
 
 typedef struct {
-    int linha_inicio;   /* primeira linha da imagem desta thread */
-    int linha_fim;      /* ultima linha + 1 */
+    int linha_inicio;
+    int linha_fim;
 } DadosThread;
 
 /* Retorna o tempo atual em segundos */
@@ -34,8 +31,6 @@ static double obter_tempo_atual(void) {
     return relogio.tv_sec + relogio.tv_nsec / 1e9;
 }
 
-/* Aplica o filtro de media 3x3 nas linhas [linha_inicio, linha_fim).
- * Pixels das bordas nao sao alterados. */
 static void aplicar_filtro_linhas(int linha_inicio, int linha_fim) {
     for (int linha = linha_inicio; linha < linha_fim; linha++) {
         for (int coluna = 1; coluna < largura - 1; coluna++) {
@@ -66,7 +61,7 @@ static double executar_sequencial(void) {
 static double executar_paralelo(int num_threads) {
     pthread_t threads[num_threads];
     DadosThread dados_threads[num_threads];
-    int linhas_internas = altura - 2;   /* exclui primeira e ultima linha (bordas) */
+    int linhas_internas = altura - 2; /* exclui primeira e última linha (bordas) */
     int linhas_base = linhas_internas / num_threads;
     int linhas_extras = linhas_internas % num_threads;
     int linha_atual = 1;
@@ -76,7 +71,7 @@ static double executar_paralelo(int num_threads) {
     for (int id = 0; id < num_threads; id++) {
         int qtd_linhas = linhas_base + (id < linhas_extras ? 1 : 0);
         dados_threads[id].linha_inicio = linha_atual;
-        dados_threads[id].linha_fim    = linha_atual + qtd_linhas;
+        dados_threads[id].linha_fim = linha_atual + qtd_linhas;
         linha_atual += qtd_linhas;
         pthread_create(&threads[id], NULL, tarefa_filtro, &dados_threads[id]);
     }
@@ -103,11 +98,11 @@ int main(int argc, char **argv) {
     int modo_sequencial = (strcmp(versao, "seq") == 0);
 
     if (num_threads < 1 || repeticoes < 1 || (!modo_sequencial && strcmp(versao, "par") != 0)) {
-        fprintf(stderr, "Parametros invalidos.\n");
+        fprintf(stderr, "Parâmetros inválidos.\n");
         return 1;
     }
 
-    /* Leitura da imagem fora da medicao (1 canal = escala de cinza) */
+    /* Leitura da imagem */
     int canais_originais;
     imagem_entrada = stbi_load(caminho_arquivo, &largura, &altura, &canais_originais, 1);
     if (!imagem_entrada) {
@@ -134,12 +129,11 @@ int main(int argc, char **argv) {
     nome_arquivo = nome_arquivo ? nome_arquivo + 1 : caminho_arquivo;
 
     for (int exec = 1; exec <= repeticoes; exec++) {
-        memcpy(imagem_saida, imagem_entrada, total_pixels);   /* copia bordas da imagem original */
+        memcpy(imagem_saida, imagem_entrada, total_pixels); /* copia as bordas da imagem original */
         double tempo_execucao = modo_sequencial ? executar_sequencial() : executar_paralelo(num_threads);
         int threads_usadas = modo_sequencial ? 1 : num_threads;
 
-        printf("%s,%s,%d,%d,%d,%d,%.6f\n",
-               versao, nome_arquivo, largura, altura, threads_usadas, exec, tempo_execucao);
+        printf("%s, %s, %d, %d, %d, %d, %.6f\n", versao, nome_arquivo, largura, altura, threads_usadas, exec, tempo_execucao);
     }
 
     if (arquivo_saida) {
