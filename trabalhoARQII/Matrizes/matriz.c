@@ -2,7 +2,7 @@
  * Multiplicação de matrizes C = A x B: sequencial e paralela (pthreads)
  *
  * Compilar: gcc -pthread matriz.c -o matriz
- * Usar: ./matriz <seq|par> <N> <num_threads> [repeticoes]
+ * Usar: ./matriz <seq|par> <N> <num_threads> [repetições]
  */
 
 #include <stdio.h>
