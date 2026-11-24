@@ -22,8 +22,8 @@
 //
 // Controles
 //
-// - Enter: começa a partida (na abertura), joga novamente (no resultado) ou insere um peça
-//   na posição escolhida.
+// - Enter: começa a partida (na abertura), joga novamente (no resultado), seleciona uma 
+//   peça para mover e finaliza movimento se apertar novamente.
 // - Setas: movem o cursor pelo tabuleiro.
 
 import gleam/int
@@ -249,7 +249,7 @@ pub fn peca_em_examples() {
   check.eq(peca_em([], Posicao(0, 1)), None)
 }
 
-/// Devolve True se a posição está dentro do tabuleiro.
+/// Devolve True se a posição *pos* está dentro do tabuleiro.
 pub fn dentro_do_tabuleiro(pos: Posicao) -> Bool {
   pos.linha >= 0
   && pos.linha < tamanho
@@ -264,7 +264,8 @@ pub fn dentro_do_tabuleiro_examples() {
   check.eq(dentro_do_tabuleiro(Posicao(3, 8)), False)
 }
 
-/// Devolve True se a posição está dentro do tabuleiro e sem peça.
+/// Devolve True se a posição *pos* está dentro do tabuleiro e sem peça na lista de peças 
+/// *pecas*.
 pub fn casa_livre(pecas: List(Peca), pos: Posicao) -> Bool {
   dentro_do_tabuleiro(pos) && peca_em(pecas, pos) == None
 }
@@ -506,7 +507,7 @@ pub fn desloca_ponteiro_examples() {
   check.eq(desloca_ponteiro(Posicao(4, 7), Direita), Posicao(4, 7))
 }
 
-/// Move o cursor normalmente ou pelas diagonais quando há uma peça selecionada.
+/// Move o cursor de jogador *cor* na direção *d* em *partida*.
 pub fn move_ponteiro(partida: Partida, cor: Cor, d: Direcao) -> Partida {
   let direcao_real = ajusta_direcao(cor, d)
 
@@ -565,9 +566,9 @@ pub fn move_ponteiro_examples() {
       Brancas,
       1800,
     )
-  check.eq(move_ponteiro(p, Pretas, Baixo), p)
+  check.eq(move_ponteiro(p, Pretas, Cima), p)
   check.eq(
-    move_ponteiro(p, Pretas, Cima),
+    move_ponteiro(p, Pretas, Baixo),
     Partida(
       jogadores: [
         Jogador(0, Brancas, Posicao(0, 0), None),
@@ -605,12 +606,13 @@ pub fn move_ponteiro_examples() {
   )
 }
 
-// ajusta a direção *d* de acordo com o jogador *cor* que está jogando
+// ajusta a direção *d* de acordo com o jogador *cor* que está jogando,
+// para estar de acordo com a posição do tabuleiro para cada player
 pub fn ajusta_direcao(cor: Cor, d: Direcao) -> Direcao {
   case cor {
-    Brancas -> d
+    Pretas -> d
 
-    Pretas ->
+    Brancas ->
       case d {
         Cima -> Baixo
         Baixo -> Cima
@@ -618,6 +620,17 @@ pub fn ajusta_direcao(cor: Cor, d: Direcao) -> Direcao {
         Direita -> Esquerda
       }
   }
+}
+
+pub fn ajusta_direcao_examples() {
+  check.eq(ajusta_direcao(Brancas, Cima), Baixo)
+  check.eq(ajusta_direcao(Brancas, Baixo), Cima)
+  check.eq(ajusta_direcao(Brancas, Esquerda), Direita)
+  check.eq(ajusta_direcao(Brancas, Direita), Esquerda)
+  check.eq(ajusta_direcao(Pretas, Cima), Cima)
+  check.eq(ajusta_direcao(Pretas, Baixo), Baixo)
+  check.eq(ajusta_direcao(Pretas, Esquerda), Esquerda)
+  check.eq(ajusta_direcao(Pretas, Direita), Direita)
 }
 
 /// Desloca o cursor diagonalmente, respeitando a direção da peça.
@@ -682,7 +695,39 @@ pub fn destino_valido(partida: Partida, peca: Peca, d: Direcao) -> Posicao {
   }
 }
 
-/// Confirma o movimento da peça selecionada.
+pub fn destino_valido_examples() {
+  let peca = Peca(Brancas, Posicao(2, 1))
+  let adversaria = Peca(Pretas, Posicao(3, 2))
+  let aliada = Peca(Brancas, Posicao(3, 2))
+  let p = nova_partida()
+  let partida = Partida(..p, pecas: [peca])
+  // Movimento simples
+  check.eq(destino_valido(partida, peca, Direita), Posicao(3, 2))
+  // Captura válida
+  let com_adversaria = Partida(..partida, pecas: [peca, adversaria])
+  check.eq(destino_valido(com_adversaria, peca, Direita), Posicao(4, 3))
+  // Casa ocupada por peça da mesma cor
+  let com_aliada = Partida(..partida, pecas: [peca, aliada])
+  check.eq(destino_valido(com_aliada, peca, Direita), Posicao(2, 1))
+  // Captura bloqueada
+  let bloqueada =
+    Partida(..partida, pecas: [
+      peca,
+      adversaria,
+      Peca(Brancas, Posicao(4, 3)),
+    ])
+  check.eq(destino_valido(bloqueada, peca, Direita), Posicao(2, 1))
+  // Peça na última linha
+  let ultima = Peca(Brancas, Posicao(7, 2))
+  let limite = Partida(..partida, pecas: [ultima])
+  check.eq(destino_valido(limite, ultima, Direita), Posicao(7, 2))
+  // Movimento das Pretas
+  let preta = Peca(Pretas, Posicao(5, 2))
+  let partida_pretas = Partida(..partida, pecas: [preta], vez: Pretas)
+  check.eq(destino_valido(partida_pretas, preta, Esquerda), Posicao(4, 1))
+}
+
+/// Confirma o movimento da peça selecionada pelo jogador *cor* em *partida*.
 pub fn confirma_movimento(partida: Partida, cor: Cor) -> Partida {
   case list.find(partida.jogadores, fn(j) { j.cor == cor }) {
     Error(_) -> partida
@@ -799,7 +844,8 @@ pub fn confirma_movimento_examples() {
   check.eq(confirma_movimento(bloqueada, Brancas), bloqueada)
 }
 
-/// Atualiza a posição da peça e remove a vítima, se houver.
+/// Atualiza a posição de *peça* para a posição *destino* e remove a *vítima*, se houver,
+/// em *partida*.
 pub fn finaliza_movimento(
   partida: Partida,
   peca: Peca,
@@ -882,8 +928,32 @@ pub fn cancela_selecao(partida: Partida, cor: Cor) -> Partida {
         False -> j
       }
     })
-
   Partida(..partida, jogadores: jogadores_atualizados)
+}
+
+pub fn cancela_selecao_examples() {
+  let p = nova_partida()
+  let partida =
+    Partida(..p, jogadores: [
+      Jogador(2, Brancas, Posicao(2, 1), Some(Posicao(2, 1))),
+      Jogador(1, Pretas, Posicao(5, 0), Some(Posicao(5, 0))),
+    ])
+  check.eq(
+    cancela_selecao(partida, Brancas),
+    Partida(..partida, jogadores: [
+      Jogador(2, Brancas, Posicao(2, 1), None),
+      Jogador(1, Pretas, Posicao(5, 0), Some(Posicao(5, 0))),
+    ]),
+  )
+  check.eq(
+    cancela_selecao(partida, Pretas),
+    Partida(..partida, jogadores: [
+      Jogador(2, Brancas, Posicao(2, 1), Some(Posicao(2, 1))),
+      Jogador(1, Pretas, Posicao(5, 0), None),
+    ]),
+  )
+  // Nenhuma peça selecionada
+  check.eq(cancela_selecao(p, Brancas), p)
 }
 
 /// Devolve True se algum dos *jogadores* está na casa *p*, False caso
@@ -1237,6 +1307,7 @@ fn ao_lado(esquerda: Image, direita: Image) -> Image {
   image.beside(esquerda, direita)
 }
 
+/// Empilha as imagens, com *cima* em cima e *baixo* em baixo
 fn empilhar(cima: Image, baixo: Image) -> Image {
   image.above(cima, baixo)
 }
@@ -1250,12 +1321,26 @@ pub fn empilha(imagens: List(Image)) -> Image {
   list.fold(imagens, image.empty, image.above)
 }
 
+pub fn empilha_examples() {
+  let a = image.rectangle(40, 40, fill.white)
+  let b = image.rectangle(40, 40, fill.black)
+
+  check.eq(empilha([]), image.empty)
+  check.eq(empilha([a]), image.above(image.empty, a))
+  check.eq(empilha([a, b]), image.above(image.above(image.empty, a), b))
+}
+
 /// Devolve a cor do jogador *numero*.
 pub fn cor(jogador: Cor) -> Color {
   case jogador {
     Pretas -> color.red
     Brancas -> color.blue
   }
+}
+
+pub fn cor_examples() {
+  check.eq(cor(Brancas), color.blue)
+  check.eq(cor(Pretas), color.red)
 }
 
 // ----------------------------------------------------------------------
@@ -1268,6 +1353,25 @@ pub fn desenhar_peca(dono: Cor) -> Image {
     Brancas -> imagem_peca_brancas()
     Pretas -> imagem_peca_pretas()
   }
+}
+
+pub fn desenhar_peca_examples() {
+  let raio = lado_casa * 2 / 5
+
+  check.eq(
+    desenhar_peca(Brancas),
+    image.overlay(
+      image.circle(raio, stroke.black),
+      image.circle(raio, fill.white),
+    ),
+  )
+  check.eq(
+    desenhar_peca(Pretas),
+    image.overlay(
+      image.circle(raio, stroke.white),
+      image.circle(raio, fill.black),
+    ),
+  )
 }
 
 /// Desenha uma casa com a peça que está nela (se houver).
@@ -1298,7 +1402,47 @@ pub fn desenhar_casa(
   }
 }
 
-// Desenha o cursor
+pub fn desenhar_casa_examples() {
+  let cursor = Posicao(7, 7)
+  let pos = Posicao(0, 1)
+  let peca = Peca(Brancas, pos)
+
+  // Casa clara vazia
+  check.eq(desenhar_casa(Posicao(0, 0), [], cursor, None), fundo_claro())
+  // Casa escura vazia
+  check.eq(desenhar_casa(pos, [], cursor, None), fundo_escuro())
+  // Casa com peça branca
+  check.eq(
+    desenhar_casa(pos, [peca], cursor, None),
+    sobrepor(desenhar_peca(Brancas), fundo_escuro()),
+  )
+  // Casa com cursor
+  check.eq(
+    desenhar_casa(pos, [], pos, None),
+    sobrepor(desenhar_cursor(1), fundo_escuro()),
+  )
+  // Casa com peça selecionada
+  check.eq(
+    desenhar_casa(pos, [peca], cursor, Some(pos)),
+    sobrepor(
+      desenhar_cursor(2),
+      sobrepor(desenhar_peca(Brancas), fundo_escuro()),
+    ),
+  )
+  // Cursor sobre a peça selecionada
+  check.eq(
+    desenhar_casa(pos, [peca], pos, Some(pos)),
+    sobrepor(
+      desenhar_cursor(1),
+      sobrepor(
+        desenhar_cursor(2),
+        sobrepor(desenhar_peca(Brancas), fundo_escuro()),
+      ),
+    ),
+  )
+}
+
+// Desenha o cursor do jogador *cor*
 pub fn desenhar_cursor(cor: Int) -> Image {
   case cor {
     1 ->
@@ -1328,20 +1472,53 @@ pub fn desenhar_cursor(cor: Int) -> Image {
   }
 }
 
+pub fn desenhar_cursor_examples() {
+  check.eq(
+    desenhar_cursor(1),
+    sobrepor(
+      image.rectangle(lado_casa - 4, lado_casa - 4, stroke.red),
+      sobrepor(
+        image.rectangle(lado_casa - 2, lado_casa - 2, stroke.red),
+        image.rectangle(lado_casa, lado_casa, stroke.red),
+      ),
+    ),
+  )
+  check.eq(
+    desenhar_cursor(2),
+    sobrepor(
+      image.rectangle(lado_casa - 4, lado_casa - 4, stroke.green),
+      sobrepor(
+        image.rectangle(lado_casa - 2, lado_casa - 2, stroke.green),
+        image.rectangle(lado_casa, lado_casa, stroke.green),
+      ),
+    ),
+  )
+  check.eq(
+    desenhar_cursor(0),
+    sobrepor(
+      image.rectangle(lado_casa, lado_casa, stroke.red),
+      sobrepor(
+        image.rectangle(lado_casa, lado_casa, stroke.red),
+        image.rectangle(lado_casa, lado_casa, stroke.red),
+      ),
+    ),
+  )
+}
+
 /// Índices de linha ou coluna na ordem em que o jogador os vê: as Brancas
 /// veem o tabuleiro como ele é; as Pretas o veem girado em 180 graus, então
 /// a ordem é invertida (tanto nas linhas quanto nas colunas).
 pub fn ordem_de_visao(jogador: Cor) -> List(Int) {
   let normal = sequencia(0, tamanho - 1)
   case jogador {
-    Brancas -> normal
-    Pretas -> list.reverse(normal)
+    Pretas -> normal
+    Brancas -> list.reverse(normal)
   }
 }
 
 pub fn ordem_de_visao_examples() {
-  check.eq(ordem_de_visao(Brancas), [0, 1, 2, 3, 4, 5, 6, 7])
-  check.eq(ordem_de_visao(Pretas), [7, 6, 5, 4, 3, 2, 1, 0])
+  check.eq(ordem_de_visao(Brancas), [7, 6, 5, 4, 3, 2, 1, 0])
+  check.eq(ordem_de_visao(Pretas), [0, 1, 2, 3, 4, 5, 6, 7])
 }
 
 /// Desenha uma linha do tabuleiro, percorrendo as colunas na ordem dada.
@@ -1357,6 +1534,25 @@ pub fn desenhar_linha(
     desenhar_casa(Posicao(lin, col), pecas, cursor, selecionada)
   })
   |> list.fold(imagem_vazia(), ao_lado)
+}
+
+pub fn desenhar_linha_examples() {
+  let cursor = Posicao(7, 7)
+
+  check.eq(desenhar_linha(0, [], [], cursor, None), imagem_vazia())
+  check.eq(
+    desenhar_linha(0, [0], [], cursor, None),
+    ao_lado(imagem_vazia(), fundo_claro()),
+  )
+  check.eq(
+    desenhar_linha(0, [0, 1], [], cursor, None),
+    ao_lado(ao_lado(imagem_vazia(), fundo_claro()), fundo_escuro()),
+  )
+  // Ordem invertida
+  check.eq(
+    desenhar_linha(0, [1, 0], [], cursor, None),
+    ao_lado(ao_lado(imagem_vazia(), fundo_escuro()), fundo_claro()),
+  )
 }
 
 /// Desenha o tabuleiro inteiro do ponto de vista de `jogador`.
@@ -1375,6 +1571,31 @@ pub fn desenhar_tabuleiro(partida: Partida, jogador: Cor) -> Image {
   }
 }
 
+pub fn desenhar_tabuleiro_examples() {
+  let partida = nova_partida()
+  let ordem_brancas = [7, 6, 5, 4, 3, 2, 1, 0]
+  let ordem_pretas = [0, 1, 2, 3, 4, 5, 6, 7]
+  let esperado_brancas =
+    ordem_brancas
+    |> list.map(fn(lin) {
+      desenhar_linha(lin, ordem_brancas, partida.pecas, Posicao(0, 0), None)
+    })
+    |> list.fold(imagem_vazia(), empilhar)
+  let esperado_pretas =
+    ordem_pretas
+    |> list.map(fn(lin) {
+      desenhar_linha(lin, ordem_pretas, partida.pecas, Posicao(7, 7), None)
+    })
+    |> list.fold(imagem_vazia(), empilhar)
+
+  check.eq(desenhar_tabuleiro(partida, Brancas), esperado_brancas)
+  check.eq(desenhar_tabuleiro(partida, Pretas), esperado_pretas)
+
+  let sem_jogadores = Partida(..partida, jogadores: [])
+
+  check.eq(desenhar_tabuleiro(sem_jogadores, Brancas), imagem_vazia())
+}
+
 /// Desenha a tela do *estado* para o jogador *jogador*.
 pub fn tela(estado: Estado, jogador: Cor) -> Image {
   let conteudo = case estado {
@@ -1383,6 +1604,25 @@ pub fn tela(estado: Estado, jogador: Cor) -> Image {
     Resultado(jogadores, _) -> tela_resultado(jogadores, jogador)
   }
   image.overlay(conteudo, image.rectangle(largura, altura, fill.white))
+}
+
+pub fn tela_examples() {
+  let partida = nova_partida()
+  let fundo = image.rectangle(largura, altura, fill.white)
+
+  check.eq(
+    tela(Abertura, Brancas),
+    image.overlay(tela_abertura(Brancas), fundo),
+  )
+  check.eq(tela(Abertura, Pretas), image.overlay(tela_abertura(Pretas), fundo))
+  check.eq(
+    tela(EmPartida(partida), Brancas),
+    image.overlay(tela_partida(partida, Brancas), fundo),
+  )
+  check.eq(
+    tela(Resultado(partida.jogadores, Empate), Pretas),
+    image.overlay(tela_resultado(partida.jogadores, Pretas), fundo),
+  )
 }
 
 /// Desenha a tela de abertura para o jogador *jogador*.
@@ -1405,10 +1645,62 @@ pub fn tela_abertura(jogador: Cor) -> Image {
   ])
 }
 
+pub fn tela_abertura_examples() {
+  check.eq(
+    tela_abertura(Brancas),
+    empilha([
+      texto("Damas :D", 32),
+      texto(" ", 16),
+      texto("Pegue mais peças que o adversário em 180 segundos.", 16),
+      texto("Use as setas para mover o seu cursor.", 16),
+      texto(" ", 16),
+      image.beside(
+        texto("Você jogará com as brancas ", 20),
+        image.square(lado_casa / 2, style.fill(color.blue)),
+      ),
+      texto(" ", 16),
+      texto("Pressione Enter para começar", 20),
+    ]),
+  )
+
+  check.eq(
+    tela_abertura(Pretas),
+    empilha([
+      texto("Damas :D", 32),
+      texto(" ", 16),
+      texto("Pegue mais peças que o adversário em 180 segundos.", 16),
+      texto("Use as setas para mover o seu cursor.", 16),
+      texto(" ", 16),
+      image.beside(
+        texto("Você jogará com as pretas", 20),
+        image.square(lado_casa / 2, style.fill(color.red)),
+      ),
+      texto(" ", 16),
+      texto("Pressione Enter para começar", 20),
+    ]),
+  )
+}
+
 /// Desenha a tela da *partida* para o jogador *jogador*: o cabeçalho com os
 /// pontos, o tempo e os jogadores.
 pub fn tela_partida(partida: Partida, jogador: Cor) -> Image {
   image.above(cabecalho(partida, jogador), desenhar_tabuleiro(partida, jogador))
+}
+
+pub fn tela_partida_examples() {
+  let partida = nova_partida()
+
+  check.eq(
+    tela_partida(partida, Brancas),
+    image.above(
+      cabecalho(partida, Brancas),
+      desenhar_tabuleiro(partida, Brancas),
+    ),
+  )
+  check.eq(
+    tela_partida(partida, Pretas),
+    image.above(cabecalho(partida, Pretas), desenhar_tabuleiro(partida, Pretas)),
+  )
 }
 
 /// Desenha o cabeçalho da *partida* para o jogador *jogador*: os pontos do
@@ -1447,6 +1739,45 @@ pub fn cabecalho(partida: Partida, jogador: Cor) -> Image {
   ])
 }
 
+pub fn cabecalho_examples() {
+  let p = nova_partida()
+  let partida =
+    Partida(
+      ..p,
+      jogadores: [
+        Jogador(3, Brancas, Posicao(0, 0), None),
+        Jogador(2, Pretas, Posicao(7, 7), None),
+      ],
+      vez: Brancas,
+      tiques_restantes: 1200,
+    )
+
+  check.eq(
+    cabecalho(partida, Brancas),
+    empilha([
+      image.text("Você: 3", 28, style.fill(color.blue)),
+      image.beside(
+        image.empty,
+        image.text("  Adversário: 2", 16, style.fill(color.blue)),
+      ),
+      texto("Tempo: 120 s", 16),
+      image.text("Vez: Brancas", 24, style.fill(color.blue)),
+    ]),
+  )
+  check.eq(
+    cabecalho(partida, Pretas),
+    empilha([
+      image.text("Você: 2", 28, style.fill(color.red)),
+      image.beside(
+        image.empty,
+        image.text("  Adversário: 3", 16, style.fill(color.red)),
+      ),
+      texto("Tempo: 120 s", 16),
+      image.text("Vez: Brancas", 24, style.fill(color.red)),
+    ]),
+  )
+}
+
 /// Devolve a quantidade de segundos que faltam para a partida terminar
 /// quando já se passaram *tiques* tiques, arredondada para cima.
 pub fn segundos_restantes(tiques_restantes: Int) -> Int {
@@ -1483,9 +1814,82 @@ pub fn tela_resultado(jogadores: List(Jogador), jogador: Cor) -> Image {
   )
 }
 
+pub fn tela_resultado_examples() {
+  let pos = Posicao(0, 0)
+  let jogadores = [
+    Jogador(5, Brancas, pos, None),
+    Jogador(3, Pretas, pos, None),
+  ]
+  let placar = [
+    image.text("Jogador Brancas: 5 peças coletadas", 20, style.fill(color.blue)),
+    image.text("Jogador Pretas: 3 peças coletadas", 20, style.fill(color.red)),
+  ]
+
+  // Vitória
+  check.eq(
+    tela_resultado(jogadores, Brancas),
+    empilha(
+      list.flatten([
+        [texto("Voce Venceu!", 32), texto(" ", 16)],
+        placar,
+        [
+          texto(" ", 16),
+          texto("Pressione Enter para jogar novamente", 20),
+        ],
+      ]),
+    ),
+  )
+
+  // Derrota
+  check.eq(
+    tela_resultado(jogadores, Pretas),
+    empilha(
+      list.flatten([
+        [texto("Voce Perdeu!", 32), texto(" ", 16)],
+        placar,
+        [
+          texto(" ", 16),
+          texto("Pressione Enter para jogar novamente", 20),
+        ],
+      ]),
+    ),
+  )
+
+  // Empate
+  let empatados = [
+    Jogador(0, Brancas, pos, None),
+    Jogador(0, Pretas, pos, None),
+  ]
+
+  check.eq(
+    tela_resultado(empatados, Brancas),
+    empilha([
+      texto("Empate!", 32),
+      texto(" ", 16),
+      image.text(
+        "Jogador Brancas: 0 peças coletadas",
+        20,
+        style.fill(color.blue),
+      ),
+      image.text("Jogador Pretas: 0 peças coletadas", 20, style.fill(color.red)),
+      texto(" ", 16),
+      texto("Pressione Enter para jogar novamente", 20),
+    ]),
+  )
+}
+
 /// Produz uma imagem com o texto *s* em preto, com tamanho *tamanho_fonte*.
 pub fn texto(s: String, tamanho_fonte: Int) -> Image {
   image.text(s, tamanho_fonte, fill.black)
+}
+
+pub fn texto_examples() {
+  check.eq(texto("Damas :D", 32), image.text("Damas :D", 32, fill.black))
+  check.eq(
+    texto("Tempo: 180 s", 16),
+    image.text("Tempo: 180 s", 16, fill.black),
+  )
+  check.eq(texto("", 20), image.text("", 20, fill.black))
 }
 
 /// Devolve a cor *cor* em string
@@ -1494,6 +1898,11 @@ pub fn cor_str(cor: Cor) {
     Pretas -> "Pretas"
     Brancas -> "Brancas"
   }
+}
+
+pub fn cor_str_examples() {
+  check.eq(cor_str(Brancas), "Brancas")
+  check.eq(cor_str(Pretas), "Pretas")
 }
 
 // ----------------------------------------------------------------------
