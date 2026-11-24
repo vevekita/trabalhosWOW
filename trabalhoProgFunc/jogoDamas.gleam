@@ -142,7 +142,7 @@ pub fn smain() {
 
 /// Cria o estado inicial com o gerador de *env*, as imagens das frutas e a
 /// quantidade de *jogadores*.
-fn inicio(env: Env, jogadores: List(mworld.Player)) -> Estado {
+fn inicio(_env: Env, _jogadores: List(mworld.Player)) -> Estado {
   Abertura
 }
 
@@ -221,8 +221,8 @@ pub fn pecas_nas_linhas_examples() {
 /// Posição inicial: Pretas nas linhas 0 a 2 (topo), Brancas nas linhas 5 a 7.
 pub fn pecas_iniciais() -> List(Peca) {
   list.append(
-    pecas_nas_linhas(Pretas, [0, 1, 2]),
-    pecas_nas_linhas(Brancas, [5, 6, 7]),
+    pecas_nas_linhas(Brancas, [0, 1, 2]),
+    pecas_nas_linhas(Pretas, [7, 6, 5]),
   )
 }
 
@@ -243,8 +243,8 @@ pub fn peca_em(pecas: List(Peca), pos: Posicao) -> Option(Peca) {
 
 pub fn peca_em_examples() {
   let pecas = pecas_iniciais()
-  check.eq(peca_em(pecas, Posicao(0, 1)), Some(Peca(Pretas, Posicao(0, 1))))
-  check.eq(peca_em(pecas, Posicao(7, 0)), Some(Peca(Brancas, Posicao(7, 0))))
+  check.eq(peca_em(pecas, Posicao(0, 1)), Some(Peca(Brancas, Posicao(0, 1))))
+  check.eq(peca_em(pecas, Posicao(7, 0)), Some(Peca(Pretas, Posicao(7, 0))))
   check.eq(peca_em(pecas, Posicao(3, 2)), None)
   check.eq(peca_em([], Posicao(0, 1)), None)
 }
@@ -282,34 +282,9 @@ pub fn nova_partida() -> Partida {
   Partida(
     jogadores: [
       Jogador(0, Brancas, Posicao(0, 0), None),
-      Jogador(0, Pretas, Posicao(0, 0), None),
+      Jogador(0, Pretas, Posicao(7, 7), None),
     ],
-    pecas: [
-      Peca(Brancas, Posicao(0, 1)),
-      Peca(Brancas, Posicao(0, 3)),
-      Peca(Brancas, Posicao(0, 5)),
-      Peca(Brancas, Posicao(0, 7)),
-      Peca(Brancas, Posicao(1, 0)),
-      Peca(Brancas, Posicao(1, 2)),
-      Peca(Brancas, Posicao(1, 4)),
-      Peca(Brancas, Posicao(1, 6)),
-      Peca(Brancas, Posicao(2, 1)),
-      Peca(Brancas, Posicao(2, 3)),
-      Peca(Brancas, Posicao(2, 5)),
-      Peca(Brancas, Posicao(2, 7)),
-      Peca(Pretas, Posicao(7, 0)),
-      Peca(Pretas, Posicao(7, 2)),
-      Peca(Pretas, Posicao(7, 4)),
-      Peca(Pretas, Posicao(7, 6)),
-      Peca(Pretas, Posicao(6, 1)),
-      Peca(Pretas, Posicao(6, 3)),
-      Peca(Pretas, Posicao(6, 5)),
-      Peca(Pretas, Posicao(6, 7)),
-      Peca(Pretas, Posicao(5, 0)),
-      Peca(Pretas, Posicao(5, 2)),
-      Peca(Pretas, Posicao(5, 4)),
-      Peca(Pretas, Posicao(5, 6)),
-    ],
+    pecas: pecas_iniciais(),
     vez: Brancas,
     tiques_restantes: duracao,
   )
@@ -321,7 +296,7 @@ pub fn nova_partida_examples() {
     Partida(
       [
         Jogador(0, Brancas, Posicao(0, 0), None),
-        Jogador(0, Pretas, Posicao(0, 0), None),
+        Jogador(0, Pretas, Posicao(7, 7), None),
       ],
       [
         Peca(Brancas, Posicao(0, 1)),
@@ -355,7 +330,7 @@ pub fn nova_partida_examples() {
   )
   check.eq(nova_partida().jogadores, [
     Jogador(0, Brancas, Posicao(0, 0), None),
-    Jogador(0, Pretas, Posicao(0, 0), None),
+    Jogador(0, Pretas, Posicao(7, 7), None),
   ])
 }
 
@@ -369,53 +344,50 @@ pub fn nova_partida_examples() {
 pub fn trata_tecla(estado: Estado, jogador: Cor, tecla: key.Event) -> Estado {
   case estado, tecla {
     Abertura, key.Enter -> EmPartida(nova_partida())
-    Resultado(jogadores, resultado), key.Enter -> EmPartida(nova_partida())
-    EmPartida(partida), key.Enter ->
-      case list.find(partida.jogadores, fn(j) { j.cor == jogador }) {
-        Error(_) -> estado
+    Resultado(_, _), key.Enter -> EmPartida(nova_partida())
+    EmPartida(partida), _ -> {
+      case partida.vez == jogador {
+        False -> estado
+        True ->
+          case list.find(partida.jogadores, fn(j) { j.cor == jogador }) {
+            Error(_) -> estado
+            Ok(j) ->
+              case tecla, j.selecionada {
+                key.Enter, None -> EmPartida(seleciona_peca(partida))
+                key.Enter, Some(origem) ->
+                  case j.cursor == origem {
+                    True -> EmPartida(cancela_selecao(partida, jogador))
+                    False -> EmPartida(confirma_movimento(partida, jogador))
+                  }
+                _, None ->
+                  case direcao(tecla) {
+                    Some(d) -> EmPartida(move_ponteiro(partida, jogador, d))
+                    None -> estado
+                  }
+                _, Some(_) ->
+                  case direcao_peca_selecionada(tecla) {
+                    Some(d) -> EmPartida(move_ponteiro(partida, jogador, d))
+                    None -> estado
+                  }
+              }
+          }
+      }
+    }
 
-        Ok(j) ->
-          case j.selecionada {
-            None -> EmPartida(seleciona_peca(partida))
-            Some(_) -> EmPartida(confirma_movimento(partida, jogador))
-          }
-      }
-    EmPartida(partida), _ ->
-      case list.find(partida.jogadores, fn(j) { j.cor == jogador }) {
-        Error(_) -> estado
-        Ok(j) ->
-          case j.selecionada {
-            None ->
-              case direcao(tecla) {
-                Some(d) -> EmPartida(move_ponteiro(partida, jogador, d))
-                None -> estado
-              }
-            Some(_) ->
-              case direcao_peca_selecionada(tecla) {
-                Some(d) -> EmPartida(move_ponteiro(partida, jogador, d))
-                None -> estado
-              }
-          }
-      }
     _, _ -> estado
   }
 }
 
 pub fn trata_tecla_examples() {
-  let p = nova_partida()
   let fim = [
     Jogador(1, Brancas, Posicao(3, 4), None),
     Jogador(2, Pretas, Posicao(7, 1), None),
-  ]
-  let jogadores = [
-    Jogador(0, Brancas, Posicao(0, 0), None),
-    Jogador(0, Pretas, Posicao(0, 0), None),
   ]
   let partida =
     Partida(
       [
         Jogador(0, Brancas, Posicao(0, 0), None),
-        Jogador(0, Pretas, Posicao(0, 0), None),
+        Jogador(0, Pretas, Posicao(7, 7), None),
       ],
       [
         Peca(Brancas, Posicao(0, 1)),
@@ -511,43 +483,46 @@ pub fn direcao_peca_selecionada_examples() {
 /// grade, devolve *p*.
 pub fn desloca_ponteiro(p: Posicao, d: Direcao) -> Posicao {
   let destino = case d {
-    Cima -> Posicao(p.linha + 1, p.coluna)
-    Baixo -> Posicao(p.linha - 1, p.coluna)
+    Cima -> Posicao(p.linha - 1, p.coluna)
+    Baixo -> Posicao(p.linha + 1, p.coluna)
     Esquerda -> Posicao(p.linha, p.coluna - 1)
     Direita -> Posicao(p.linha, p.coluna + 1)
   }
-  Posicao(
-    int.clamp(destino.linha, 0, tamanho - 1),
-    int.clamp(destino.coluna, 0, tamanho - 1),
-  )
+  case dentro_do_tabuleiro(destino) {
+    True -> destino
+    False -> p
+  }
 }
 
 pub fn desloca_ponteiro_examples() {
-  check.eq(desloca_ponteiro(Posicao(4, 5), Cima), Posicao(5, 5))
-  check.eq(desloca_ponteiro(Posicao(4, 5), Baixo), Posicao(3, 5))
+  check.eq(desloca_ponteiro(Posicao(4, 5), Cima), Posicao(3, 5))
+  check.eq(desloca_ponteiro(Posicao(4, 5), Baixo), Posicao(5, 5))
   check.eq(desloca_ponteiro(Posicao(4, 5), Esquerda), Posicao(4, 4))
   check.eq(desloca_ponteiro(Posicao(4, 5), Direita), Posicao(4, 6))
   // bordas
-  check.eq(desloca_ponteiro(Posicao(7, 5), Cima), Posicao(7, 5))
-  check.eq(desloca_ponteiro(Posicao(0, 5), Baixo), Posicao(0, 5))
+  check.eq(desloca_ponteiro(Posicao(7, 5), Baixo), Posicao(7, 5))
+  check.eq(desloca_ponteiro(Posicao(0, 5), Cima), Posicao(0, 5))
   check.eq(desloca_ponteiro(Posicao(4, 0), Esquerda), Posicao(4, 0))
   check.eq(desloca_ponteiro(Posicao(4, 7), Direita), Posicao(4, 7))
 }
 
 /// Move o cursor normalmente ou pelas diagonais quando há uma peça selecionada.
 pub fn move_ponteiro(partida: Partida, cor: Cor, d: Direcao) -> Partida {
+  let direcao_real = ajusta_direcao(cor, d)
+
   let jogadores_atualizados =
     list.map(partida.jogadores, fn(j) {
       case j.cor == cor {
+        False -> j
         True -> {
           let destino = case j.selecionada {
-            None -> desloca_ponteiro(j.cursor, d)
-            Some(_) -> desloca_ponteiro_diagonal(j.cursor, cor, d)
+            None -> desloca_ponteiro(j.cursor, direcao_real)
+            Some(origem) ->
+              destino_valido(partida, Peca(cor, origem), direcao_real)
           }
 
           Jogador(..j, cursor: destino)
         }
-        False -> j
       }
     })
 
@@ -630,20 +605,24 @@ pub fn move_ponteiro_examples() {
   )
 }
 
+// ajusta a direção *d* de acordo com o jogador *cor* que está jogando
+pub fn ajusta_direcao(cor: Cor, d: Direcao) -> Direcao {
+  case cor {
+    Brancas -> d
+
+    Pretas ->
+      case d {
+        Cima -> Baixo
+        Baixo -> Cima
+        Esquerda -> Direita
+        Direita -> Esquerda
+      }
+  }
+}
+
 /// Desloca o cursor diagonalmente, respeitando a direção da peça.
 pub fn desloca_ponteiro_diagonal(p: Posicao, cor: Cor, d: Direcao) -> Posicao {
-  let linha = case cor {
-    Brancas -> p.linha + 1
-    Pretas -> p.linha - 1
-  }
-
-  let coluna = case d {
-    Esquerda -> p.coluna - 1
-    Direita -> p.coluna + 1
-    _ -> p.coluna
-  }
-
-  Posicao(int.clamp(linha, 0, tamanho - 1), int.clamp(coluna, 0, tamanho - 1))
+  desloca_peca_selecionada(Peca(cor, p), d)
 }
 
 pub fn desloca_ponteiro_diagonal_examples() {
@@ -667,6 +646,40 @@ pub fn desloca_ponteiro_diagonal_examples() {
     desloca_ponteiro_diagonal(Posicao(7, 7), Brancas, Direita),
     Posicao(7, 7),
   )
+}
+
+// Verifica se o destino que *peca* quer ir na direção *d*
+// é um movimento válido. Se for válido, retorna a nova posição da *peca*,
+// caso contrário, retorna a posição atual dela
+pub fn destino_valido(partida: Partida, peca: Peca, d: Direcao) -> Posicao {
+  let diagonal = desloca_peca_selecionada(peca, d)
+
+  case diagonal == peca.posicao {
+    True -> peca.posicao
+
+    False ->
+      case peca_em(partida.pecas, diagonal) {
+        None -> diagonal
+
+        Some(vitima) ->
+          case vitima.jogador == peca.jogador {
+            True -> peca.posicao
+
+            False -> {
+              let salto =
+                Posicao(
+                  diagonal.linha * 2 - peca.posicao.linha,
+                  diagonal.coluna * 2 - peca.posicao.coluna,
+                )
+
+              case casa_livre(partida.pecas, salto) {
+                True -> salto
+                False -> peca.posicao
+              }
+            }
+          }
+      }
+  }
 }
 
 /// Confirma o movimento da peça selecionada.
@@ -699,12 +712,16 @@ pub fn confirma_movimento(partida: Partida, cor: Cor) -> Partida {
                 int.absolute_value(destino.coluna - origem.coluna)
 
               let movimento_simples =
-                diferenca_linha == delta_linha
+                cor == partida.vez
+                && diferenca_linha == delta_linha
                 && diferenca_coluna == 1
-                && !ocupada(partida.pecas, destino)
+                && casa_livre(partida.pecas, destino)
 
               let movimento_captura =
-                diferenca_linha == delta_linha * 2 && diferenca_coluna == 2
+                cor == partida.vez
+                && diferenca_linha == delta_linha * 2
+                && diferenca_coluna == 2
+                && casa_livre(partida.pecas, destino)
 
               case movimento_simples {
                 True -> finaliza_movimento(partida, peca, destino, None)
@@ -807,11 +824,21 @@ pub fn finaliza_movimento(
   let jogadores_atualizados =
     list.map(partida.jogadores, fn(j) {
       case j.cor == partida.vez {
-        True -> Jogador(..j, cursor: destino, selecionada: None)
+        True -> {
+          let pontos = case vitima {
+            Some(_) -> 1
+            None -> 0
+          }
+          Jogador(
+            ..j,
+            contador: j.contador + pontos,
+            cursor: destino,
+            selecionada: None,
+          )
+        }
         False -> j
       }
     })
-
   Partida(
     ..partida,
     pecas: pecas_atualizadas,
@@ -844,6 +871,19 @@ pub fn finaliza_movimento_examples() {
   check.eq(simples.vez, Pretas)
   check.eq(com_captura.pecas, [Peca(Brancas, Posicao(4, 3))])
   check.eq(com_captura.vez, Pretas)
+}
+
+/// Cancela a seleção de uma peça pelo jogador *cor*
+pub fn cancela_selecao(partida: Partida, cor: Cor) -> Partida {
+  let jogadores_atualizados =
+    list.map(partida.jogadores, fn(j) {
+      case j.cor == cor {
+        True -> Jogador(..j, selecionada: None)
+        False -> j
+      }
+    })
+
+  Partida(..partida, jogadores: jogadores_atualizados)
 }
 
 /// Devolve True se algum dos *jogadores* está na casa *p*, False caso
@@ -968,40 +1008,24 @@ pub fn move_peca_selecionada(
   d: Direcao,
 ) -> Partida {
   let destino = desloca_peca_selecionada(peca, d)
-  case ocupada(partida.pecas, destino) {
-    False -> {
-      let pecas_atualizadas =
-        list.map(partida.pecas, fn(p) {
-          case p == peca {
-            True -> Peca(..p, posicao: destino)
-            False -> p
-          }
-        })
-      let jogadores_atualizados =
-        list.map(partida.jogadores, fn(j) {
-          case j.cor == peca.jogador {
-            True -> Jogador(..j, cursor: destino, selecionada: None)
-            False -> j
-          }
-        })
-      Partida(
-        ..partida,
-        pecas: pecas_atualizadas,
-        jogadores: jogadores_atualizados,
-      )
-    }
 
-    True -> {
-      case list.find(partida.pecas, fn(p) { p.posicao == destino }) {
-        Error(_) -> partida
+  case
+    peca.jogador != partida.vez
+    || peca_em(partida.pecas, peca.posicao) != Some(peca)
+    || destino == peca.posicao
+  {
+    True -> partida
 
-        Ok(vitima) ->
+    False ->
+      case peca_em(partida.pecas, destino) {
+        None -> finaliza_movimento(partida, peca, destino, None)
+
+        Some(vitima) ->
           case vitima.jogador == peca.jogador {
             True -> partida
             False -> captura(peca, vitima, partida)
           }
       }
-    }
   }
 }
 
@@ -1059,21 +1083,12 @@ pub fn captura(atacante: Peca, vitima: Peca, partida: Partida) -> Partida {
     && destino.coluna >= 0
     && destino.coluna < tamanho
     && !ocupada(partida.pecas, destino)
+    && atacante.jogador == partida.vez
+    && peca_em(partida.pecas, atacante.posicao) == Some(atacante)
+    && peca_em(partida.pecas, vitima.posicao) == Some(vitima)
 
   case captura_valida {
-    True -> {
-      let pecas_atualizadas =
-        partida.pecas
-        |> list.filter(fn(p) { p != vitima })
-        |> list.map(fn(p) {
-          case p == atacante {
-            True -> Peca(atacante.jogador, destino)
-            False -> p
-          }
-        })
-
-      Partida(..partida, pecas: pecas_atualizadas)
-    }
+    True -> finaliza_movimento(partida, atacante, destino, Some(vitima))
     False -> partida
   }
 }
@@ -1240,7 +1255,6 @@ pub fn cor(jogador: Cor) -> Color {
   case jogador {
     Pretas -> color.red
     Brancas -> color.blue
-    _ -> color.purple
   }
 }
 
@@ -1257,14 +1271,60 @@ pub fn desenhar_peca(dono: Cor) -> Image {
 }
 
 /// Desenha uma casa com a peça que está nela (se houver).
-pub fn desenhar_casa(pos: Posicao, pecas: List(Peca)) -> Image {
+pub fn desenhar_casa(
+  pos: Posicao,
+  pecas: List(Peca),
+  cursor: Posicao,
+  selecionada: Option(Posicao),
+) -> Image {
   let fundo = case casa_escura(pos) {
     True -> fundo_escuro()
     False -> fundo_claro()
   }
+
   let com_peca = case peca_em(pecas, pos) {
     Some(peca) -> sobrepor(desenhar_peca(peca.jogador), fundo)
     None -> fundo
+  }
+
+  let com_selecao = case selecionada == Some(pos) {
+    True -> sobrepor(desenhar_cursor(2), com_peca)
+    False -> com_peca
+  }
+
+  case pos == cursor {
+    True -> sobrepor(desenhar_cursor(1), com_selecao)
+    False -> com_selecao
+  }
+}
+
+// Desenha o cursor
+pub fn desenhar_cursor(cor: Int) -> Image {
+  case cor {
+    1 ->
+      sobrepor(
+        image.rectangle(lado_casa - 4, lado_casa - 4, stroke.red),
+        sobrepor(
+          image.rectangle(lado_casa - 2, lado_casa - 2, stroke.red),
+          image.rectangle(lado_casa, lado_casa, stroke.red),
+        ),
+      )
+    2 ->
+      sobrepor(
+        image.rectangle(lado_casa - 4, lado_casa - 4, stroke.green),
+        sobrepor(
+          image.rectangle(lado_casa - 2, lado_casa - 2, stroke.green),
+          image.rectangle(lado_casa, lado_casa, stroke.green),
+        ),
+      )
+    _ ->
+      sobrepor(
+        image.rectangle(lado_casa, lado_casa, stroke.red),
+        sobrepor(
+          image.rectangle(lado_casa, lado_casa, stroke.red),
+          image.rectangle(lado_casa, lado_casa, stroke.red),
+        ),
+      )
   }
 }
 
@@ -1289,18 +1349,30 @@ pub fn desenhar_linha(
   lin: Int,
   colunas: List(Int),
   pecas: List(Peca),
+  cursor: Posicao,
+  selecionada: Option(Posicao),
 ) -> Image {
   colunas
-  |> list.map(fn(col) { desenhar_casa(Posicao(lin, col), pecas) })
+  |> list.map(fn(col) {
+    desenhar_casa(Posicao(lin, col), pecas, cursor, selecionada)
+  })
   |> list.fold(imagem_vazia(), ao_lado)
 }
 
 /// Desenha o tabuleiro inteiro do ponto de vista de `jogador`.
-pub fn desenhar_tabuleiro(pecas: List(Peca), jogador: Cor) -> Image {
+pub fn desenhar_tabuleiro(partida: Partida, jogador: Cor) -> Image {
   let ordem = ordem_de_visao(jogador)
-  ordem
-  |> list.map(fn(lin) { desenhar_linha(lin, ordem, pecas) })
-  |> list.fold(imagem_vazia(), empilhar)
+
+  case list.find(partida.jogadores, fn(j) { j.cor == jogador }) {
+    Error(_) -> imagem_vazia()
+
+    Ok(j) ->
+      ordem
+      |> list.map(fn(lin) {
+        desenhar_linha(lin, ordem, partida.pecas, j.cursor, j.selecionada)
+      })
+      |> list.fold(imagem_vazia(), empilhar)
+  }
 }
 
 /// Desenha a tela do *estado* para o jogador *jogador*.
@@ -1308,7 +1380,7 @@ pub fn tela(estado: Estado, jogador: Cor) -> Image {
   let conteudo = case estado {
     Abertura -> tela_abertura(jogador)
     EmPartida(partida) -> tela_partida(partida, jogador)
-    Resultado(jogadores, resultado) -> tela_resultado(jogadores, jogador)
+    Resultado(jogadores, _) -> tela_resultado(jogadores, jogador)
   }
   image.overlay(conteudo, image.rectangle(largura, altura, fill.white))
 }
@@ -1336,10 +1408,7 @@ pub fn tela_abertura(jogador: Cor) -> Image {
 /// Desenha a tela da *partida* para o jogador *jogador*: o cabeçalho com os
 /// pontos, o tempo e os jogadores.
 pub fn tela_partida(partida: Partida, jogador: Cor) -> Image {
-  image.above(
-    cabecalho(partida, jogador),
-    desenhar_tabuleiro(partida.pecas, jogador),
-  )
+  image.above(cabecalho(partida, jogador), desenhar_tabuleiro(partida, jogador))
 }
 
 /// Desenha o cabeçalho da *partida* para o jogador *jogador*: os pontos do
@@ -1371,6 +1440,10 @@ pub fn cabecalho(partida: Partida, jogador: Cor) -> Image {
         <> " s",
       16,
     ),
+    image.text("Vez: " <> cor_str(partida.vez), 24, case jogador {
+      Brancas -> style.fill(cor(jogador))
+      Pretas -> style.fill(cor(jogador))
+    }),
   ])
 }
 
@@ -1381,10 +1454,10 @@ pub fn segundos_restantes(tiques_restantes: Int) -> Int {
 }
 
 pub fn segundos_restantes_examples() {
-  check.eq(segundos_restantes(0), 60)
-  check.eq(segundos_restantes(1), 60)
-  check.eq(segundos_restantes(10), 59)
-  check.eq(segundos_restantes(599), 1)
+  check.eq(segundos_restantes(0), 0)
+  check.eq(segundos_restantes(1), 1)
+  check.eq(segundos_restantes(10), 1)
+  check.eq(segundos_restantes(599), 60)
 }
 
 /// Desenha a tela de resultado dos *jogadores* para o jogador *jogador*.
@@ -1393,12 +1466,12 @@ pub fn tela_resultado(jogadores: List(Jogador), jogador: Cor) -> Image {
     list.map(jogadores, fn(j) {
       image.text(
         "Jogador "
-          <> cor_str(jogador)
+          <> cor_str(j.cor)
           <> ": "
           <> int.to_string(j.contador)
           <> " peças coletadas",
         20,
-        style.fill(cor(jogador)),
+        style.fill(cor(j.cor)),
       )
     })
   empilha(
@@ -1477,6 +1550,6 @@ pub fn mensagem_resultado(jogadores: List(Jogador), jogador: Cor) -> String {
 pub fn mensagem_resultado_examples() {
   let p = Posicao(0, 0)
   let js = [Jogador(1, Brancas, p, None), Jogador(2, Pretas, p, None)]
-  check.eq(mensagem_resultado(js, Pretas), "Voce Venceu")
+  check.eq(mensagem_resultado(js, Pretas), "Voce Venceu!")
   check.eq(mensagem_resultado(js, Brancas), "Voce Perdeu!")
 }
