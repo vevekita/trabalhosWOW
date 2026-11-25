@@ -60,39 +60,37 @@ CREATE TABLE cliente(
 );
 
 CREATE TABLE endereco(
-    id_endereco INTEGER NOT NULL PRIMARY KEY,
-    idCliente   INTEGER NOT NULL,
-    numero      VARCHAR(10) NOT NULL,
-    cidade      VARCHAR(50) NOT NULL,
-    estado      CHAR(2) NOT NULL,
-    cep         CHAR(8) NOT NULL,
+    idCliente INTEGER NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    cidade VARCHAR(50) NOT NULL,
+    estado CHAR(2) NOT NULL,
+    cep CHAR(8) NOT NULL,
     FOREIGN KEY (idCliente) REFERENCES cliente(id_cliente)
 );
 
 CREATE TABLE pedido(
-    id_pedido     INTEGER NOT NULL PRIMARY KEY,
-    idCliente     INTEGER NOT NULL,
-    idEndereco    INTEGER NOT NULL,
-    data_pedido   DATE NOT NULL,
+    id_pedido INTEGER NOT NULL PRIMARY KEY,
+    idCliente INTEGER NOT NULL,
+    data_pedido DATE NOT NULL,
     status_pedido ENUM('recebido', 'em-producao', 'enviado') NOT NULL,
-    valor_total   DECIMAL(10,2) NOT NULL,
+    valor_total DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (idCliente)  REFERENCES cliente(id_cliente),
     FOREIGN KEY (idEndereco) REFERENCES endereco(id_endereco)
 );
 
 CREATE TABLE pagamento(
-    id_pagamento      INTEGER NOT NULL PRIMARY KEY,
-    idPedido          INTEGER NOT NULL,
-    forma_pagamento   ENUM('cartao', 'pix', 'boleto') NOT NULL,
-    codigo_transacao  VARCHAR(30) NOT NULL,
-    status_pagamento  ENUM('pendente', 'confirmado', 'recusado') NOT NULL,
+    id_pagamento INTEGER NOT NULL PRIMARY KEY,
+    idPedido INTEGER NOT NULL,
+    forma_pagamento ENUM('cartao', 'pix', 'boleto') NOT NULL,
+    codigo_transacao VARCHAR(30) NOT NULL,
+    status_pagamento ENUM('pendente', 'confirmado', 'recusado') NOT NULL,
     UNIQUE (idPedido),
     FOREIGN KEY (idPedido) REFERENCES pedido(id_pedido)
 );
  
 CREATE TABLE contem(
-    idPedido   INTEGER NOT NULL,
-    idCard     INTEGER NOT NULL,
+    idPedido INTEGER NOT NULL,
+    idCard INTEGER NOT NULL,
     quantidade INTEGER NOT NULL,
     PRIMARY KEY (idPedido, idCard),
     FOREIGN KEY (idPedido) REFERENCES pedido(id_pedido),
@@ -100,23 +98,23 @@ CREATE TABLE contem(
 );
 
 INSERT INTO piloto (id_piloto, nome_piloto, nacionalidade, data_nasc, num_carro) VALUES
-(1, 'Max Verstappen',    'Holandês',   '1997-09-30', 1),
-(2, 'Lando Norris',      'Britânico',   '1999-11-13', 4),
-(3, 'Charles Leclerc',   'Monegasco',   '1997-10-16', 16),
-(4, 'Lewis Hamilton',    'Britânico',   '1985-01-07', 44),
-(5, 'Oscar Piastri',     'Australiano', '2001-04-06', 81),
-(6, 'George Russell',    'Britânico',   '1998-02-15', 63),
-(7, 'Fernando Alonso',   'Espanhol',   '1981-07-29', 14),
-(8, 'Gabriel Bortoleto', 'Brasileiro',  '2004-10-14', 5),
-(9, 'Kimi Antonelli',    'Italiano',    '2006-08-25', 12);
+(1, 'Max Verstappen', 'Holandês', '1997-09-30', 1),
+(2, 'Lando Norris', 'Britânico', '1999-11-13', 4),
+(3, 'Charles Leclerc', 'Monegasco', '1997-10-16', 16),
+(4, 'Lewis Hamilton', 'Britânico', '1985-01-07', 44),
+(5, 'Oscar Piastri', 'Australiano', '2001-04-06', 81),
+(6, 'George Russell', 'Britânico', '1998-02-15', 63),
+(7, 'Fernando Alonso', 'Espanhol', '1981-07-29', 14),
+(8, 'Gabriel Bortoleto', 'Brasileiro', '2004-10-14', 5),
+(9, 'Kimi Antonelli', 'Italiano', '2006-08-25', 12);
  
 INSERT INTO equipe (id_equipe, nome_equipe, pais_origem, chefe_equipe) VALUES
-(1, 'Red Bull Racing', 'Áustria',      'Laurent Mekies'),
-(2, 'McLaren',         'Reino Unido',  'Andrea Stella'),
-(3, 'Ferrari',         'Itália',       'Frédéric Vasseur'),
-(4, 'Mercedes',        'Alemanha',     'Toto Wolff'),
-(5, 'Aston Martin',    'Reino Unido',  'Mike Krack'),
-(6, 'Williams',        'Reino Unido',  'James Vowles');
+(1, 'Red Bull Racing', 'Áustria', 'Laurent Mekies'),
+(2, 'McLaren', 'Reino Unido', 'Andrea Stella'),
+(3, 'Ferrari', 'Itália', 'Frédéric Vasseur'),
+(4, 'Mercedes', 'Alemanha', 'Toto Wolff'),
+(5, 'Aston Martin', 'Reino Unido', 'Mike Krack'),
+(6, 'Williams', 'Reino Unido', 'James Vowles');
 
 INSERT INTO contrato (idPiloto, idEquipe) VALUES
 (1, 1),
@@ -132,71 +130,71 @@ INSERT INTO contrato (idPiloto, idEquipe) VALUES
 (9, 4);
  
 INSERT INTO colecao (id_colecao, nome_colecao, ano_lancamento, tipo_acabamento) VALUES
-(1, 'Grid 2023',        2023, 'fosco'),
-(2, 'Campeões',         2024, 'foil'),
-(3, 'Novos Talentos',   2025, 'rainbow'),
-(4, 'Lendas Douradas',  2025, 'gold'),
-(5, 'Temporada 2026',   2026, 'foil');
+(1, 'Grid 2023', 2023, 'fosco'),
+(2, 'Campeões', 2024, 'foil'),
+(3, 'Novos Talentos', 2025, 'rainbow'),
+(4, 'Lendas Douradas', 2025, 'gold'),
+(5, 'Temporada 2026', 2026, 'foil');
  
 INSERT INTO lote (id_lote, idColecao, data_fabricacao, qtd_impressa, custo_producao) VALUES
 (1, 1, '2023-03-10', 5000, 12000.00),
-(2, 1, '2023-09-15', 3000,  7500.00),
+(2, 1, '2023-09-15', 3000, 7500.00),
 (3, 2, '2024-04-20', 4000, 15000.00),
 (4, 3, '2025-02-12', 2500, 11000.00),
-(5, 4, '2025-06-30', 1000,  9000.00);
+(5, 4, '2025-06-30', 1000, 9000.00);
  
 INSERT INTO card (id_card, idColecao, idPiloto, nivel_raridade, tiragem_maxima, preco_base) VALUES
-( 1, 1, 1, 'comum',      2000,   5.00),
-( 2, 1, 2, 'comum',      2000,   5.00),
-( 3, 1, 3, 'raro',        800,  15.00),
-( 4, 2, 1, 'super-raro',  300,  80.00),
-( 5, 2, 4, 'raro',        600,  20.00),
-( 6, 3, 5, 'comum',      1500,   6.00),
-( 7, 3, 8, 'especial',    100, 150.00),
-( 8, 3, 9, 'raro',        500,  18.00),
-( 9, 4, 4, 'especial',     50, 300.00),
-(10, 4, 7, 'super-raro',  150, 120.00),
-(11, 2, 2, 'raro',        700,  22.00),
-(12, 1, 6, 'comum',      2000,   5.00),
-(13, 5, 3, 'comum',      3000,   5.50),
-(14, 5, 2, 'raro',       1000,  25.00);
+( 1, 1, 1, 'comum', 2000, 5.00),
+( 2, 1, 2, 'comum', 2000, 5.00),
+( 3, 1, 3, 'raro', 800, 15.00),
+( 4, 2, 1, 'super-raro', 300, 80.00),
+( 5, 2, 4, 'raro', 600, 20.00),
+( 6, 3, 5, 'comum', 1500, 6.00),
+( 7, 3, 8, 'especial', 100, 150.00),
+( 8, 3, 9, 'raro', 500, 18.00),
+( 9, 4, 4, 'especial', 50, 300.00),
+(10, 4, 7, 'super-raro', 150, 120.00),
+(11, 2, 2, 'raro', 700, 22.00),
+(12, 1, 6, 'comum', 2000, 5.00),
+(13, 5, 3, 'comum', 3000, 5.50),
+(14, 5, 2, 'raro', 1000, 25.00);
  
 INSERT INTO cliente (id_cliente, cpf, nome_cliente, email_cliente, telefone) VALUES
-(1, '11122233344', 'Ana Souza',    'ana.souza@email.com',    '44999990001'),
-(2, '22233344455', 'Bruno Lima',   'bruno.lima@email.com',   '44999990002'),
+(1, '11122233344', 'Ana Souza', 'ana.souza@email.com', '44999990001'),
+(2, '22233344455', 'Bruno Lima', 'bruno.lima@email.com', '44999990002'),
 (3, '33344455566', 'Carla Mendes', 'carla.mendes@email.com', '11999990003'),
-(4, '44455566677', 'Diego Alves',  'diego.alves@email.com',  '44999990004'),
-(5, '55566677788', 'Elisa Costa',  'elisa.costa@email.com',  '43999990005'),
+(4, '44455566677', 'Diego Alves', 'diego.alves@email.com', '44999990004'),
+(5, '55566677788', 'Elisa Costa', 'elisa.costa@email.com', '43999990005'),
 (6, '66677788899', 'Felipe Rocha', 'felipe.rocha@email.com', '21999990006');
  
-INSERT INTO endereco (id_endereco, idCliente, numero, cidade, estado, cep) VALUES
-(1, 1, '120', 'Maringá',        'PR', '87020000'),
-(2, 1, '45',  'Londrina',       'PR', '86010000'),
-(3, 2, '300', 'Curitiba',       'PR', '80010000'),
-(4, 3, '88',  'São Paulo',      'SP', '01001000'),
-(5, 4, '15',  'Maringá',        'PR', '87013000'),
-(6, 6, '77',  'Rio de Janeiro', 'RJ', '20040000'),
-(7, 5, '210', 'Arapongas',      'PR', '86700000');
+INSERT INTO endereco (idCliente, numero, cidade, estado, cep) VALUES
+(1, '120', 'Maringá', 'PR', '87020000'),
+(1, '45', 'Londrina', 'PR', '86010000'),
+(2, '300', 'Curitiba', 'PR', '80010000'),
+(3, '88', 'São Paulo', 'SP', '01001000'),
+(4, '15', 'Maringá', 'PR', '87013000'),
+(6, '77', 'Rio de Janeiro', 'RJ', '20040000'),
+(5, '210', 'Arapongas', 'PR', '86700000');
  
-INSERT INTO pedido (id_pedido, idCliente, idEndereco, data_pedido, status_pedido, valor_total) VALUES
-(1, 1, 1, '2026-01-10', 'enviado',      30.00),
-(2, 1, 2, '2026-03-05', 'enviado',     120.00),
-(3, 2, 3, '2026-03-20', 'enviado',      25.00),
-(4, 3, 4, '2026-05-02', 'em-producao', 450.00),
-(5, 4, 5, '2026-06-11', 'recebido',     60.00),
-(6, 2, 3, '2026-08-14', 'enviado',     222.00),
-(7, 6, 6, '2026-09-01', 'recebido',     35.00),
-(8, 1, 1, '2026-10-02', 'em-producao', 270.00);
+INSERT INTO pedido (id_pedido, idCliente, data_pedido, status_pedido, valor_total) VALUES
+(1, 1, '2026-01-10', 'enviado', 30.00),
+(2, 1, '2026-03-05', 'enviado', 120.00),
+(3, 2, '2026-03-20', 'enviado', 25.00),
+(4, 3, '2026-05-02', 'em-producao', 450.00),
+(5, 4, '2026-06-11', 'recebido', 60.00),
+(6, 2, '2026-08-14', 'enviado', 222.00),
+(7, 6, '2026-09-01', 'recebido', 35.00),
+(8, 1, '2026-10-02', 'em-producao', 270.00);
  
 INSERT INTO pagamento (id_pagamento, idPedido, forma_pagamento, codigo_transacao, status_pagamento) VALUES
-(1, 1, 'pix',    'TX0001', 'confirmado'),
+(1, 1, 'pix', 'TX0001', 'confirmado'),
 (2, 2, 'cartao', 'TX0002', 'confirmado'),
 (3, 3, 'boleto', 'TX0003', 'confirmado'),
 (4, 4, 'cartao', 'TX0004', 'confirmado'),
-(5, 5, 'pix',    'TX0005', 'pendente'),
+(5, 5, 'pix', 'TX0005', 'pendente'),
 (6, 6, 'cartao', 'TX0006', 'confirmado'),
 (7, 7, 'boleto', 'TX0007', 'pendente'),
-(8, 8, 'pix',    'TX0008', 'confirmado');
+(8, 8, 'pix', 'TX0008', 'confirmado');
  
 INSERT INTO contem (idPedido, idCard, quantidade) VALUES
 (1, 1, 3), (1, 3, 1),
