@@ -207,3 +207,65 @@ INSERT INTO contem (idPedido, idCard, quantidade) VALUES
 (6, 4, 1), (6, 10, 1), (6, 11, 1),
 (7, 3, 1), (7, 5, 1),
 (8, 7, 1), (8, 10, 1);
+
+-- Consultas
+--1: projeção. Exibe os dados dos pedidos em ordem de id do cliente.
+SELECT idCliente, id_pedido, status_pedido, valor_total
+FROM pedido
+ORDER BY idCliente;
+
+--2: seleção e projeção. Exibe os cards e seus dados de uma determinada coleção, ordenados pelo nível de raridade.
+SELECT id_card, nivel_raridade, tiragem_maxima, preco_base
+FROM card 
+WHERE id_colecao = 3
+ORDER BY nivel_raridade;
+
+--3: UNION entre 2 relações. 
+SELECT 
+FROM
+UNION
+SELECT
+FROM
+ORDER BY
+
+--4: EXCEPT entre 2 relações
+
+--5: INTERSECT entre 2 relações
+
+--6: subconsulta, retorna 1 valor
+
+--7: subconsultas, retorna conjunto de valores
+
+    --7.a. IN ou NOT IN
+
+    --7.b. ANY
+
+    --7.c. EXIST ou NOT EXIST
+
+    --7.d. ALL
+
+--8: subconsulta, retorna 2 colunas
+
+--9: junção externa à direita
+
+--10: junção externa à esquerda
+
+--11: 1 o mais funções de agregação
+
+--12: função de agregação com GROUP BY
+
+--13: 2 funções de agregação com GROUP BY
+
+--14: função agregada com GROUP BY e HAVING
+
+--15: junção interna (2 relações)
+
+--16: junção interna (3 relações). Exibe todos os cards do piloto Gabriel Bortoleto e seus dados.
+SELECT c.id_card, c.nivel_raridade, c.tiragem_maxima, c.preco_base
+FROM card c
+INNER JOIN piloto p ON c.idPiloto = p.id_piloto
+INNER JOIN colecao cl ON c.idColecao = cl.id_colecao
+WHERE p.nome_piloto = 'Gabriel Bortoleto';
+
+--17: junção interna (4 relações)
+
