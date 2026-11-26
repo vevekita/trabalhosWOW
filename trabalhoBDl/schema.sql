@@ -264,7 +264,13 @@ WHERE idCliente = (
 
 -- 7: subconsultas, retorna conjunto de valores
 
-    -- 7.a. IN ou NOT IN
+    --7.a. IN ou NOT IN. Exibe clientes que ainda não fizeram nenhum pedido.
+SELECT id_cliente, nome_cliente, email_cliente, telefone
+FROM cliente
+WHERE id_cliente NOT IN (
+    SELECT idCliente
+    FROM pedido
+);
 
     -- 7.b. ANY
 
