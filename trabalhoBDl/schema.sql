@@ -297,17 +297,18 @@ WHERE (idPiloto, nivel_raridade) IN (
     SELECT idPiloto, nivel_raridade
     FROM card
     WHERE preco_base > 10.00
-)
+);
 
 --9: junção externa à direita. Exibe todas as equipes e os IDs de seus pilotos contratados, incluindo equipes sem pilotos (Williams)
 SELECT ct.idPiloto, e.id_equipe, e.nome_equipe, e.pais_origem, e.chefe_equipe
-FROM piloto p
-LEFT JOIN card c ON p.id_piloto = c.idPiloto;
+FROM contrato ct
+RIGHT JOIN equipe e ON ct.idEquipe = e.id_equipe;
 
 --10: junção externa à esquerda. Exibe todos os pilotos e seus cards cadastrados, inclusive os pilotos sem cards atualmente
 SELECT p.id_piloto, p.nome_piloto, p.num_carro, c.id_card, c.nivel_raridade, c.preco_base
 FROM piloto p
 LEFT JOIN card c ON p.id_piloto = c.idPiloto;
+
 -- 11: uma ou mais funções de agregação: Exibe a quantidade de pagamentos que estão com o status 'confirmado'. 
 SELECT COUNT(*)
 FROM pagamento
