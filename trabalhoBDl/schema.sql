@@ -349,4 +349,9 @@ JOIN piloto p ON c.idPiloto = p.id_piloto
 JOIN colecao cl ON c.idColecao = cl.id_colecao
 WHERE p.nome_piloto = 'Gabriel Bortoleto';
 
--- 17: junção interna (4 relações)
+-- 17: junção interna (4 relações). Exibe o nome do cliente, a data do pedido, a quanntidade comprada e os dados de cada card vendido.
+SELECT c.nome_cliente, p.id_pedido, p.data_pedido, ct.quantidade, cd.id_card, cd.nivel_raridade, cd.preco_base
+FROM cliente c
+JOIN pedido p ON c.id_cliente = p.idCliente
+JOIN contem ct ON p.id_pedido = ct.idPedido
+JOIN card cd ON ct.idCard = cd.id_card;
