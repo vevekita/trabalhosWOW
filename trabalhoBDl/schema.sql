@@ -208,7 +208,7 @@ INSERT INTO contem (idPedido, idCard, quantidade) VALUES
 
 -- Consultas
 --1: projeção. Exibe os dados dos pedidos em ordem de id do cliente.
-SELECT idCliente, id_pedido, status_pedido, valor_total
+SELECT idCliente, status_pedido, valor_total
 FROM pedido
 ORDER BY idCliente;
 
