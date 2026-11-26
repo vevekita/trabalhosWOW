@@ -276,8 +276,15 @@ WHERE id_cliente NOT IN (
 
     -- 7.c. EXIST ou NOT EXIST
 
-    -- 7.d. ALL
-
+    --7.d. ALL. Exibe os cards com preço base menor que os preços de todos os cards lendários.
+SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
+FROM card
+WHERE preco_base < ALL (
+    SELECT preco_base
+    FROM card
+    WHERE nivel_raridade = 'lendario'
+)
+	
 -- 8: subconsulta, retorna 2 colunas
 
 -- 9: junção externa à direita
