@@ -239,7 +239,12 @@ SELECT data_fabricacao, custo_producao
 FROM lote
 ORDER BY data_pedido;
 
--- 4: EXCEPT entre 2 relações
+--4: EXCEPT entre 2 relações. Exibe pilotos que ainda não possuem nenhum card lançado
+SELECT id_piloto
+FROM card piloto
+EXCEPT
+SELECT idPiloto
+FROM card;
 
 -- 5: INTERSECT entre 2 relações
 
