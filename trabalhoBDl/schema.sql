@@ -264,6 +264,8 @@ WHERE idCliente = (
 
 -- 7: subconsultas, retorna conjunto de valores
 
+--7: subconsultas, retorna conjunto de valores
+
     --7.a. IN ou NOT IN. Exibe clientes que ainda não fizeram nenhum pedido.
 SELECT id_cliente, nome_cliente, email_cliente, telefone
 FROM cliente
@@ -278,7 +280,7 @@ FROM card
 WHERE preco_base < ANY (
     SELECT preco_base
     FROM card
-    WHERE nivel_raridade = 'lendario'
+    WHERE nivel_raridade = 'especial'
 );
 
     --7.c. EXISTS ou NOT EXISTS. Exibe cards e dados desses cards, que ainda não chegaram a ser vendidos
@@ -297,8 +299,15 @@ WHERE preco_base > ALL (
     SELECT preco_base FROM card
     WHERE idPiloto = 1
 );
-	
--- 8: subconsulta, retorna 2 colunas
+
+--8: subconsulta, retorna 2 colunas. Exibe os cards que possuem a mesma combinação de piloto e raridade dos cards com preço acima de 10.00
+SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
+FROM card
+WHERE (idPiloto, nivel_raridade) IN (
+    SELECT idPiloto, nivel_raridade
+    FROM card
+    WHERE preco_base > 10.00
+)
 
 -- 9: junção externa à direita
 
