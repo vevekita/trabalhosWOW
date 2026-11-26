@@ -246,7 +246,12 @@ EXCEPT
 SELECT idPiloto
 FROM card;
 
--- 5: INTERSECT entre 2 relações
+--5: INTERSECT entre 2 relações. Exibe os clientes cadastrados que já compraram da loja pelo menos uma vez anteriormente
+SELECT id_cliente
+FROM cliente
+INTERSECT
+SELECT idCliente
+FROM pedido;
 
 -- 6: subconsulta, retorna 1 valor
 
