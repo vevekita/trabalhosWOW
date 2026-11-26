@@ -272,18 +272,31 @@ WHERE id_cliente NOT IN (
     FROM pedido
 );
 
-    -- 7.b. ANY
-
-    -- 7.c. EXIST ou NOT EXIST
-
-    --7.d. ALL. Exibe os cards com preço base menor que os preços de todos os cards lendários.
+    --7.b. ANY.  Exibe os cards com preço-base menor que o maior preço entre todos os cards lendários.
 SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
 FROM card
-WHERE preco_base < ALL (
+WHERE preco_base < ANY (
     SELECT preco_base
     FROM card
     WHERE nivel_raridade = 'lendario'
-)
+);
+
+    --7.c. EXISTS ou NOT EXISTS. Exibe cards e dados desses cards, que ainda não chegaram a ser vendidos
+SELECT cd.id_card, cd.idPiloto, cd.idColecao, cd.nivel_raridade, cd.preco_base
+FROM card cd
+WHERE NOT EXISTS (
+    SELECT *
+    FROM contem ct
+    WHERE ct.idCart = cd.id_card
+);
+
+    --7.d. ALL. Compara cards de qualquer piloto que custam mais caro que os cards do piloto de id=1 ("Max Verstappen")
+SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
+FROM card
+WHERE preco_base > ALL (
+    SELECT preco_base FROM card
+    WHERE idPiloto = 1
+);
 	
 -- 8: subconsulta, retorna 2 colunas
 
