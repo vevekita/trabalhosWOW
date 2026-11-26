@@ -253,7 +253,14 @@ INTERSECT
 SELECT idCliente
 FROM pedido;
 
--- 6: subconsulta, retorna 1 valor
+--6: subconsulta, retorna 1 valor. Localiza todas as compras de um comprador de CPF 44455566677 (cliente Diego)
+SELECT id_pedido, data_pedido, status_pedido, valor_total
+FROM pedido
+WHERE idCliente = (
+    SELECT id_cliente
+    FROM cliente
+    WHERE cpf = '44455566677'
+);
 
 -- 7: subconsultas, retorna conjunto de valores
 
