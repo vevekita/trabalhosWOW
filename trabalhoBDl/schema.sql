@@ -231,13 +231,13 @@ FROM card
 WHERE id_colecao = 3
 ORDER BY nivel_raridade;
 
--- 3: UNION entre 2 relações. 
-SELECT 
-FROM
+--3: UNION entre 2 relações. União das tabelas de lote e de pedido, no sentido de fluxo de caixa(afim de analisar o movimento de compra e fabricação)
+SELECT data_pedido, valor_total
+FROM pedido
 UNION
-SELECT
-FROM
-ORDER BY
+SELECT data_fabricacao, custo_producao
+FROM lote
+ORDER BY data_pedido;
 
 -- 4: EXCEPT entre 2 relações
 
