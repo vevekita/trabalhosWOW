@@ -88,8 +88,8 @@ CREATE TABLE pagamento (
 );
  
 CREATE TABLE contem (
-    idPedido INTEGER NOT NULL PRIMARY KEY,
-    idCard INTEGER NOT NULL PRIMARY KEY,
+    idPedido INTEGER NOT NULL,
+    idCard INTEGER NOT NULL,
     quantidade INTEGER NOT NULL,
     FOREIGN KEY (idPedido) REFERENCES pedido(id_pedido),
     FOREIGN KEY (idCard) REFERENCES card(id_card)
@@ -106,7 +106,7 @@ INSERT INTO piloto (id_piloto, nome_piloto, nacionalidade, data_nasc, num_carro)
 (8, 'Gabriel Bortoleto', 'Brasileiro', '2004-10-14', 5),
 (9, 'Kimi Antonelli', 'Italiano', '2006-08-25', 12),
 (10, 'Rafael Camara', 'Brasileiro', '2005-05-05', 51);
- 
+
 INSERT INTO equipe (id_equipe, nome_equipe, pais_origem, chefe_equipe) VALUES
 (1, 'Red Bull Racing', 'Áustria', 'Laurent Mekies'),
 (2, 'McLaren', 'Reino Unido', 'Andrea Stella'),
@@ -114,7 +114,7 @@ INSERT INTO equipe (id_equipe, nome_equipe, pais_origem, chefe_equipe) VALUES
 (4, 'Mercedes', 'Alemanha', 'Toto Wolff'),
 (5, 'Aston Martin', 'Reino Unido', 'Mike Krack'),
 (6, 'Williams', 'Reino Unido', 'James Vowles'),
-(7, 'Haas', 'Estados Unidos', 'Ayao Komatsu')
+(7, 'Haas', 'Estados Unidos', 'Ayao Komatsu'),
 (8, 'Audi', 'Alemanha', 'Mattia Binotto');
 
 INSERT INTO contrato (idPiloto, idEquipe) VALUES
@@ -135,7 +135,7 @@ INSERT INTO contrato (idPiloto, idEquipe) VALUES
 INSERT INTO colecao (id_colecao, nome_colecao, ano_lancamento, tipo_acabamento) VALUES
 (1, 'Grid 2023', 2023, 'fosco'),
 (2, 'Campeões', 2024, 'foil'),
-(3, 'Novos Talentos', 2025, 'rainbow'),
+(3, 'Rookies 2025', 2025, 'rainbow'),
 (4, 'Lendas Douradas', 2025, 'gold'),
 (5, 'Temporada 2026', 2026, 'foil');
  
@@ -169,7 +169,7 @@ INSERT INTO cliente (id_cliente, cpf, nome_cliente, email_cliente, telefone) VAL
 (4, '44455566677', 'Diego Alves', 'diego.alves@email.com', '44999990004'),
 (5, '55566677788', 'Elisa Costa', 'elisa.costa@email.com', '43999990005'),
 (6, '66677788899', 'Felipe Rocha', 'felipe.rocha@email.com', '21999990006');
- 
+
 INSERT INTO endereco (idCliente, numero, cidade, estado, cep) VALUES
 (1, '120', 'Maringá', 'PR', '87020000'),
 (1, '45', 'Londrina', 'PR', '86010000'),
@@ -220,40 +220,33 @@ INSERT INTO contem (idPedido, idCard, quantidade) VALUES
 (8, 10, 1);
 
 -- Consultas
--- 1: projeção. Exibe os dados dos pedidos em ordem de id do cliente.
-SELECT idCliente, status_pedido, valor_total
-FROM pedido
-ORDER BY idCliente;
+-- 1: projeção: Exibe o nome_piloto, nacionalidade e num_carro da tabela de piloto.
+SELECT nome_piloto, nacionalidade, num_carro
+FROM piloto;
 
--- 2: seleção e projeção. Exibe os cards e seus dados de uma determinada coleção, ordenados pelo nível de raridade.
+-- 2: seleção e projeção: Exibe os cards e seus dados (id_card, nivel_raridade, tiragem_maxima e preco_base) 
+-- de uma determinada coleção onde o nivel_raridade é 'super-raro'.
 SELECT id_card, nivel_raridade, tiragem_maxima, preco_base
 FROM card 
-WHERE id_colecao = 3
-ORDER BY nivel_raridade;
+WHERE nivel_raridade = 'super-raro';
 
---3: UNION entre 2 relações. União das tabelas de lote e de pedido, no sentido de fluxo de caixa(afim de analisar o movimento de compra e fabricação)
-SELECT data_pedido, valor_total
-FROM pedido
+-- 3: UNION entre 2 relações: União das tabelas de lote e de pedido, 
+-- no sentido de fluxo de caixa (a fim de analisar o movimento de compra e fabricação).
+SELECT data_pedido, valor_total FROM pedido
 UNION
-SELECT data_fabricacao, custo_producao
-FROM lote
-ORDER BY data_pedido;
+SELECT data_fabricacao, custo_producao FROM lote;
 
---4: EXCEPT entre 2 relações. Exibe pilotos que ainda não possuem nenhum card lançado
-SELECT id_piloto
-FROM card piloto
+-- 4: EXCEPT entre 2 relações: Exibe o id dos pilotos que ainda não possuem nenhum card lançado.
+SELECT id_piloto FROM piloto
 EXCEPT
-SELECT idPiloto
-FROM card;
+SELECT idPiloto FROM card;
 
---5: INTERSECT entre 2 relações. Exibe os clientes cadastrados que já compraram da loja pelo menos uma vez anteriormente
-SELECT id_cliente
-FROM cliente
+-- 5: INTERSECT entre 2 relações: Exibe o id dos clientes cadastrados que já compraram pelo menos uma vez.
+SELECT id_cliente FROM cliente
 INTERSECT
-SELECT idCliente
-FROM pedido;
+SELECT idCliente FROM pedido;
 
---6: subconsulta, retorna 1 valor. Localiza todas as compras de um comprador de CPF 44455566677 (cliente Diego)
+-- 6: subconsulta, retorna 1 valor. Localiza todas as compras de um comprador de CPF 44455566677 (cliente Diego)
 SELECT id_pedido, data_pedido, status_pedido, valor_total
 FROM pedido
 WHERE idCliente = (
@@ -263,10 +256,7 @@ WHERE idCliente = (
 );
 
 -- 7: subconsultas, retorna conjunto de valores
-
---7: subconsultas, retorna conjunto de valores
-
-    --7.a. IN ou NOT IN. Exibe clientes que ainda não fizeram nenhum pedido.
+    -- 7.a. IN ou NOT IN. Exibe clientes que ainda não fizeram nenhum pedido.
 SELECT id_cliente, nome_cliente, email_cliente, telefone
 FROM cliente
 WHERE id_cliente NOT IN (
@@ -274,25 +264,25 @@ WHERE id_cliente NOT IN (
     FROM pedido
 );
 
-    --7.b. ANY.  Exibe os cards com preço-base menor que o maior preço entre todos os cards lendários.
+    -- 7.b. ANY.  Exibe os cards com preço-base menor que o maior preço entre todos os cards raros.
 SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
 FROM card
 WHERE preco_base < ANY (
     SELECT preco_base
     FROM card
-    WHERE nivel_raridade = 'especial'
+    WHERE nivel_raridade = 'raro'
 );
 
-    --7.c. EXISTS ou NOT EXISTS. Exibe cards e dados desses cards, que ainda não chegaram a ser vendidos
+    -- 7.c. EXISTS ou NOT EXISTS. Exibe cards e dados desses cards, que ainda não chegaram a ser vendidos
 SELECT cd.id_card, cd.idPiloto, cd.idColecao, cd.nivel_raridade, cd.preco_base
 FROM card cd
 WHERE NOT EXISTS (
     SELECT *
     FROM contem ct
-    WHERE ct.idCart = cd.id_card
+    WHERE ct.idCard = cd.id_card
 );
 
-    --7.d. ALL. Compara cards de qualquer piloto que custam mais caro que os cards do piloto de id=1 ("Max Verstappen")
+    -- 7.d. ALL. Compara cards de qualquer piloto que custam mais caro que os cards do piloto de id=1 ("Max Verstappen")
 SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
 FROM card
 WHERE preco_base > ALL (
@@ -300,7 +290,7 @@ WHERE preco_base > ALL (
     WHERE idPiloto = 1
 );
 
---8: subconsulta, retorna 2 colunas. Exibe os cards que possuem a mesma combinação de piloto e raridade dos cards com preço acima de 10.00
+-- 8: subconsulta, retorna 2 colunas. Exibe os cards que possuem a mesma combinação de piloto e raridade dos cards com preço acima de 10.00
 SELECT id_card, idPiloto, idColecao, nivel_raridade, preco_base
 FROM card
 WHERE (idPiloto, nivel_raridade) IN (
@@ -313,21 +303,44 @@ WHERE (idPiloto, nivel_raridade) IN (
 
 -- 10: junção externa à esquerda
 
--- 11: 1 o mais funções de agregação
+-- 11: uma ou mais funções de agregação: Exibe a quantidade de pagamentos que estão com o status 'confirmado'. 
+SELECT COUNT(*)
+FROM pagamento
+WHERE status_pagamento = 'confirmado';
 
--- 12: função de agregação com GROUP BY
+-- 12: função de agregação com GROUP BY: combina a tabela por idCliente e status_pedido. 
+-- Faz a soma dos valores totais pertencentes aquele grupo.
+SELECT idCliente, status_pedido, SUM(valor_total)
+FROM pedido
+GROUP BY idCliente, status_pedido;
 
--- 13: 2 funções de agregação com GROUP BY
+-- 13: 2 funções de agregação com GROUP BY: 
+-- Exibe a quantidade de cards que um cliente comprou e o valor total que ele gastou.
+SELECT idCliente, COUNT(*), SUM(valor_total)
+FROM pedido
+GROUP BY idCliente;
 
--- 14: função agregada com GROUP BY e HAVING
+-- 14: função agregada com GROUP BY e HAVING: 
+-- Exibe o nome do piloto que já fez contrato com mais de uma equipe durante a carreira.
+SELECT p.nome_piloto, COUNT(*)
+FROM contrato c
+JOIN piloto p ON c.idPiloto =  p.id_piloto
+GROUP BY nome_piloto
+HAVING COUNT(*) > 1;
 
--- 15: junção interna (2 relações)
+-- 15: junção interna (2 relações): 
+-- Exibe o número, o id do cliente e o status de um determinado pedido se o status do pagamento for 'pendente'.
+SELECT id_pedido, idCliente, status_pedido
+FROM pedido
+JOIN pagamento
+ON id_pedido = idPedido
+WHERE status_pagamento = 'pendente';
 
 -- 16: junção interna (3 relações). Exibe todos os cards do piloto Gabriel Bortoleto e seus dados.
-SELECT c.id_card, c.nivel_raridade, c.tiragem_maxima, c.preco_base
+SELECT c.id_card, c.nivel_raridade, c.tiragem_maxima, c.preco_base, cl.nome_colecao
 FROM card c
-INNER JOIN piloto p ON c.idPiloto = p.id_piloto
-INNER JOIN colecao cl ON c.idColecao = cl.id_colecao
+JOIN piloto p ON c.idPiloto = p.id_piloto
+JOIN colecao cl ON c.idColecao = cl.id_colecao
 WHERE p.nome_piloto = 'Gabriel Bortoleto';
 
 -- 17: junção interna (4 relações)
